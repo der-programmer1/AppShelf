@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "boards": 2,
+  "parts": 6,
+  "offcut_mm": 582,
+  "cutting_loss_mm": 18,
+  "process_restart": "passed",
+  "input_method": "actual UI touch on explicit example then calculate"
+}

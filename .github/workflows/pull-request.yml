@@ -33,3 +33,45 @@ jobs:
           CI: "true"
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: npm run build
+
+  leistenplan:
+    name: LeistenPlan Android tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: projects/LeistenPlan
+    steps:
+      - name: Checkout proposed changes
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install pinned platform and build tools
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          subprocess.run(['sdkmanager', 'platforms;android-36', 'build-tools;36.0.0'], input='y\n' * 100, text=True, check=True)
+          PY
+      - name: Unit tests, lint and build
+        run: ./gradlew --no-daemon --max-workers=2 :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+      - name: Enable hardware acceleration on the ephemeral runner
+        run: sudo chmod 666 /dev/kvm
+      - name: Android core flow, recreation and reset tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: default
+          profile: pixel_2
+          working-directory: projects/LeistenPlan
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          script: ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest
+      - name: Verify complete source handoff
+        run: python3 scripts/package.py --check

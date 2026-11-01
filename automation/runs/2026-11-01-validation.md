@@ -1,3 +1,5 @@
+> Zwischenstand der ersten Prüfung. Nach dem Nutzerauftrag, weiterzusuchen, wird dieser Lauf mit [LeistenPlan](2026-11-01-product.md) fortgesetzt. Die nachfolgende damalige Entscheidung „keine neue App“ ist nicht das Endergebnis der Work Session.
+
 # Nightly 2026-11-01: Nachprüfung in der vorbereiteten Cloud-Umgebung
 
 ## Ergebnis und Umfang

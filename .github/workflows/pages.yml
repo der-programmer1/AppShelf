@@ -68,7 +68,3 @@ jobs:
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-Skills
-
-Medium

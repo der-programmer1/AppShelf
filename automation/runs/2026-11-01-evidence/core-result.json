@@ -1,0 +1,8 @@
+{
+  "status": "failed",
+  "steps": [
+    "Über-Navigation per echtem Touch erfolgreich",
+    "Offline-Testlabor-Dialog geöffnet"
+  ],
+  "error": "Offline-Testlabor zeigt keine auswählbare Probe „Beiger Stoff“. Sichtbare Texte: ['', '', '', '', '', '', 'Offline-Testlabor', '', '', '', '', 'Lokale Beispielbilder zum Prüfen von Pipette, Farben verschieben, Zoom und Whiteboard-Erkennung.', '', '', 'ABBRECHEN']"
+}

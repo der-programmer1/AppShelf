@@ -1,0 +1,5 @@
+<resources>
+    <item name="stock" type="id"/><item name="kerf" type="id"/><item name="pieces" type="id"/>
+    <item name="calculate" type="id"/><item name="status" type="id"/><item name="result" type="id"/>
+    <item name="reset" type="id"/><item name="share" type="id"/><item name="example" type="id"/>
+</resources>

@@ -1,0 +1,19 @@
+{
+  "name": "LeistenPlan",
+  "slug": "leistenplan",
+  "projectType": "app",
+  "version": "1.0.0",
+  "description": "Offline-Zuschnittplan für gleich lange Leisten: Abschnitte und Mengen verteilen, Schnittverlust und Restlängen nachvollziehen.",
+  "category": "Werkstatt",
+  "tags": [
+    "offline",
+    "Zuschnitt",
+    "Heimwerken"
+  ],
+  "platform": [
+    "Android"
+  ],
+  "status": "published",
+  "updatedAt": "2026-11-01T22:51:51.612615+00:00",
+  "notes": "Unabhängiges persönliches Projekt, keine offizielle Store-App. Installierbarer Testbuild. Verteilungsvorschlag ohne Optimalitätsgarantie; keine Maschinensteuerung."
+}

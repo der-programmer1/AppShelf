@@ -18,14 +18,14 @@ Finde ein echtes, häufiges Alltagsproblem und löse es mit einer kleinen, verst
 - Wenn kein vollständiger Android-Build möglich ist, keine APK vortäuschen: dokumentiere den Blocker und veröffentliche nichts.
 
 2. PROBLEMRECHERCHE
-- Recherchiere mindestens fünf unterschiedliche Alltagsprobleme aus öffentlich zugänglichen, aktuellen Quellen.
+- Recherchiere mindestens zehn unterschiedliche Alltagsprobleme aus öffentlich zugänglichen, aktuellen Quellen.
 - Nutze Suchdaten, Nutzerberichte, Foren, öffentliche Diskussionen, Statistiken und bestehende Lösungen.
 - Erfinde keine Zahlen. Trenne belegte Fakten, Beobachtungen und eigene Einschätzungen.
 - Bewerte jede Idee mit 0 bis 5 Punkten für:
   Häufigkeit, betroffene Personen, konkreten Nutzen, technische Machbarkeit,
   Offline-/Privatsphäre-Eignung und Abstand zu guten bestehenden Lösungen.
 - Verwerfe Ideen mit fehlenden Belegen, hohem Sicherheitsrisiko oder nur künstlichem Mehrwert.
-- Wähle genau eine Idee nur dann, wenn sie insgesamt überzeugend ist. Sonst nichts Neues bauen.
+- Wähle genau eine überzeugende, realistisch fertigstellbare Idee. Wenn die ersten zehn Kandidaten nicht genügen, recherchiere weitere Probleme und Lösungen, statt den Lauf allein deswegen zu beenden. Ziel ist eine zusätzliche fertige App pro Nacht; keine ungeprüften oder erfundenen Ergebnisse veröffentlichen.
 
 3. PRODUKTENTSCHEIDUNG
 Erstelle vor dem Bauen eine kurze interne Entscheidung mit:
@@ -80,7 +80,7 @@ Prüfe außerdem:
 - Arbeite auf codex/nightly-YYYY-MM-DD.
 - Erstelle einen Pull Request mit Problembeleg, Entscheidung, Änderungen und Testergebnis.
 - Wenn alle Prüfungen grün sind, darf der Pull Request automatisch gemergt werden.
-- Bei jedem Fehler nichts veröffentlichen. Dokumentiere die konkrete Ursache im Pull Request.
+- Offene kritische Fehler verhindern eine Veröffentlichung. Dokumentiere Ursache und Korrektur im Pull Request. Ein fehlgeschlagener Zwischenversuch sperrt einen später funktionierenden Build nicht: Nach der Korrektur müssen die betroffenen und abschließend alle Pflichtprüfungen für den finalen Stand erfolgreich sein.
 - Nach dem Merge übernimmt .github/workflows/pages.yml Releases und GitHub-Pages-Deployment.
 
 8. MARKETING NUR VORBEREITEN
@@ -107,4 +107,4 @@ Berichte knapp:
 
 ## Erwarteter Lauf
 
-Ein Lauf ist absichtlich begrenzt: recherchieren, eine Idee auswählen, bauen, prüfen und höchstens einen AppShelf-Eintrag veröffentlichen. Wenn Recherche, Android-Build oder Qualitätsprüfung nicht ausreichen, bleibt der Lauf ohne Veröffentlichung.
+Ein Lauf ist absichtlich begrenzt: recherchieren, eine Idee auswählen, bauen, prüfen und höchstens einen AppShelf-Eintrag veröffentlichen. Wenn die erste Recherche nicht reicht, wird sie erweitert. Build- und Testfehler werden untersucht und nach Korrektur erneut geprüft. Nur offene kritische Fehler oder fehlende Pflichtnachweise verhindern die Veröffentlichung; sie werden konkret dokumentiert.

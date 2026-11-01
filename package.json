@@ -1,9 +1,0 @@
-{
-  "name": "appshelf-github-pages",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "node scripts/build-catalog.mjs --out dist",
-    "test": "node scripts/test-catalog.mjs"
-  }
-}

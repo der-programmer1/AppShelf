@@ -1,0 +1,35 @@
+name: Validate AppShelf pull request
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appshelf-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  catalogue:
+    name: Catalogue tests and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proposed changes
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Validate manifests, archives and generated pages
+        run: npm test
+      - name: Build catalogue without publishing
+        env:
+          CI: "true"
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npm run build

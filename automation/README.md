@@ -22,7 +22,7 @@ APK-/Quellcode-Handoff, Tests und die Vorbereitung von Marketingmaterial.
 4. Für Android-Projekte sind APK, Quellcode-ZIP, README und Vorschau Pflicht.
 5. Führe App-Tests, `npm test` und anschließend `npm run build` aus.
 6. Erstelle einen Pull Request und aktiviere Auto-Merge nur, wenn alle Pflichtprüfungen grün sind.
-7. Bei einem Fehler nichts veröffentlichen, sondern den Fehler im Pull Request dokumentieren.
+7. Offene kritische Fehler blockieren die Veröffentlichung. Behobene Zwischenfehler dokumentieren und die betroffenen sowie abschließend alle Pflichtprüfungen erneut erfolgreich ausführen; danach ist eine Veröffentlichung erlaubt.
 
 Keine Zugangsdaten, persönlichen Daten, erfundenen Rechtsangaben oder offiziellen Store-Versprechen in Projekte einbauen. AppShelf bleibt eine unabhängige Sammlung eigener Projekte.
 

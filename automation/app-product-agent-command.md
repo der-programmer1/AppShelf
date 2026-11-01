@@ -80,7 +80,7 @@ Prüfe außerdem:
 - Arbeite auf codex/nightly-YYYY-MM-DD.
 - Erstelle einen Pull Request mit Problembeleg, Entscheidung, Änderungen und Testergebnis.
 - Wenn alle Prüfungen grün sind, darf der Pull Request automatisch gemergt werden.
-- Bei jedem Fehler nichts veröffentlichen. Dokumentiere die konkrete Ursache im Pull Request.
+- Offene kritische Fehler verhindern eine Veröffentlichung. Dokumentiere Ursache und Korrektur im Pull Request. Ein fehlgeschlagener Zwischenversuch sperrt einen später funktionierenden Build nicht: Nach der Korrektur müssen die betroffenen und abschließend alle Pflichtprüfungen für den finalen Stand erfolgreich sein.
 - Nach dem Merge übernimmt .github/workflows/pages.yml Releases und GitHub-Pages-Deployment.
 
 8. MARKETING NUR VORBEREITEN

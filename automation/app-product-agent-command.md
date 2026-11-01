@@ -41,6 +41,8 @@ Bevorzuge lokale Speicherung, Offline-Betrieb, wenige Berechtigungen und eine kl
 
 4. VOLLSTÄNDIG BAUEN
 - Baue die Kernfunktion wirklich funktionsfähig, nicht als Klickattrappe.
+- Erkläre beim App-Start in Alltagssprache, für wen die App ist, welches Problem sie löst und konkrete Anwendungsfälle. Biete ein nachvollziehbares, tatsächlich funktionierendes Beispiel an, wenn es hilft.
+- AppShelf-Beschreibung und Nutzer-README müssen dieselben Anwendungsfälle und die ersten Schritte erklären, bevor technische Fachbegriffe vorausgesetzt werden.
 - Behandle leere Zustände, Fehler, Laden, Zurück-Navigation und Wiederöffnen.
 - Schreibe passende Unit- und/oder Integrationstests.
 - Erzeuge eine installierbare Android-APK.

@@ -16,6 +16,8 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
 
 @RunWith(AndroidJUnit4.class)
 public final class MainActivityTest {
@@ -25,6 +27,25 @@ public final class MainActivityTest {
         long deadline=System.currentTimeMillis()+30000;AtomicBoolean ready=new AtomicBoolean(false);
         while(System.currentTimeMillis()<deadline) { scenario.onActivity(a->ready.set(((android.view.ViewGroup)a.findViewById(R.id.result)).getChildCount()>0));if(ready.get())return;Thread.sleep(100); }
         fail("No calculated result within 30 seconds");
+    }
+    @Test public void firstLaunchExplainsUseAndRunsTheGuidedExample() throws Exception {
+        try(ActivityScenario<MainActivity> s=ActivityScenario.launch(MainActivity.class)) {
+            onView(withId(R.id.intro)).check(matches(isDisplayed()));
+            s.onActivity(a->assertTrue(((TextView)a.findViewById(R.id.intro)).getText().toString().contains("lange Holzleisten")));
+            onView(withId(R.id.try_example)).perform(scrollTo(),click());awaitPlan(s);
+            s.onActivity(a->assertEquals("2 Leisten · 6 Abschnitte",((TextView)((android.view.ViewGroup)a.findViewById(R.id.result)).getChildAt(0)).getText().toString()));
+        }
+    }
+    @Test public void guidedExampleAsksBeforeReplacingAnExistingProject() throws Exception {
+        try(ActivityScenario<MainActivity> s=ActivityScenario.launch(MainActivity.class)) {
+            enter(s,"500\n497");awaitPlan(s);
+            onView(withId(R.id.try_example)).perform(scrollTo(),click());
+            onView(withText("Abbrechen")).perform(click());
+            s.onActivity(a->assertEquals("500\n497",((EditText)a.findViewById(R.id.pieces)).getText().toString()));
+            onView(withId(R.id.try_example)).perform(scrollTo(),click());
+            onView(withId(android.R.id.button1)).perform(click());awaitPlan(s);
+            s.onActivity(a->assertEquals("2 Leisten · 6 Abschnitte",((TextView)((android.view.ViewGroup)a.findViewById(R.id.result)).getChildAt(0)).getText().toString()));
+        }
     }
     @Test public void emptyInputShowsARealError() { try(ActivityScenario<MainActivity> s=ActivityScenario.launch(MainActivity.class)) { enter(s,"");s.onActivity(a->{assertTrue(((TextView)a.findViewById(R.id.status)).getText().toString().contains("mindestens einen Abschnitt"));assertEquals(0,((android.view.ViewGroup)a.findViewById(R.id.result)).getChildCount());}); } }
     @Test public void exactBoundaryPlanSurvivesRotationAndRelaunch() throws Exception {

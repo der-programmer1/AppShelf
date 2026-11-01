@@ -1,8 +1,29 @@
 # LeistenPlan
 
-Du brauchst mehrere Abschnitte aus gleich langen Leisten? LeistenPlan erstellt
-auf deinem Android-Gerät einen Verteilungsvorschlag und zeigt für jede Leiste
-die Abschnittslängen, den Schnittverlust und das verbleibende Reststück.
+Du baust ein Regal, teilst eine Schublade ein oder bastelst mit Rundstäben?
+Oft hast du lange Leisten gekauft und brauchst daraus mehrere kurze Stücke.
+LeistenPlan zeigt dir einen Vorschlag, welche Stücke auf welche ganze Leiste
+passen, wie viele Leisten dabei verwendet werden und welche Reste übrig bleiben.
+
+## Drei konkrete Anwendungen
+
+- **Regal bauen:** Die Auflageleisten unter den Regalböden brauchen verschiedene
+  Längen. Trage alle Stücke ein und sieh ihre Verteilung auf die gekauften Leisten.
+- **Schublade unterteilen:** Du benötigst mehrere kurze Trennleisten. Lass dir
+  anzeigen, welche Stücke du aus den gleich langen Rohleisten erhalten kannst.
+- **Mit Rundstäben basteln:** Du brauchst viele gleich lange Stäbchen. Mengen
+  wie `250 x 8` ersparen das wiederholte Eingeben derselben Länge.
+
+Verwende pro Projekt Leisten derselben Rohlänge und desselben Querschnitts.
+Die App plant nur Längen; Platten, Winkel- oder Gehrungsschnitte sind nicht enthalten.
+
+## Ein Beispiel zum sofortigen Verstehen
+
+Du hast **2,5 Meter lange Leisten** und brauchst je zwei Stücke mit **120 cm,
+60 cm und 40 cm**. Mit 3 mm Schnittbreite zeigt das Regal-Beispiel **zwei Leisten**,
+582 mm Rest und 18 mm Schnittverlust. Tippe beim App-Start auf
+**Regal-Beispiel ausprobieren**, um genau diesen Plan zu sehen. Die Werte sind
+gekennzeichnete Beispiele und müssen für dein eigenes Material angepasst werden.
 
 ## So funktioniert es
 
@@ -32,7 +53,7 @@ entfernt werden. Beim Deinstallieren gehen die lokal gespeicherten Angaben verlo
 
 ## Android installieren
 
-Android 8.0 oder neuer ist erforderlich. Lade `LeistenPlan-1.0.0.apk` herunter,
+Android 8.0 oder neuer ist erforderlich. Lade `LeistenPlan-1.0.1.apk` herunter,
 öffne sie auf deinem Android-Gerät und bestätige die Installation. Android kann
 bei einer APK außerhalb des Play Stores nach einer einmaligen Erlaubnis für diese
 Installationsquelle fragen. Es handelt sich um einen installierbaren unabhängigen
@@ -55,5 +76,5 @@ keinen Schnitt. Die Bilanz ist immer: Abschnitte + Schnittverlust + Rest = Rohl�
 ## Quellcode und Projekt
 
 Der vollständige Quellcode einschließlich Tests und Build-Anleitung liegt in
-`LeistenPlan-1.0.0-source.zip`. LeistenPlan ist ein persönliches, unabhängiges
+`LeistenPlan-1.0.1-source.zip`. LeistenPlan ist ein persönliches, unabhängiges
 AppShelf-Projekt und keine offizielle Store-App.

@@ -41,8 +41,9 @@ public final class MainActivity extends Activity {
     private SharedPreferences preferences;
     private EditText stock, kerf, parts;
     private TextView status, empty;
-    private LinearLayout result, loading;
-    private Button calculate, example, reset, share;
+    private LinearLayout result, loading, form;
+    private ScrollView rootScroll;
+    private Button calculate, example, reset, share, tryExample, startProject;
     private CuttingPlanner.Plan plan;
     private boolean busy, binding, storageReadable = true;
 
@@ -63,11 +64,12 @@ public final class MainActivity extends Activity {
             status.setText("Das gespeicherte Projekt ist nicht lesbar. Bitte mit „Neues Projekt“ ausdrücklich zurücksetzen.");
         }
         binding = false;
-        if (restorePlan && storageReadable) main.post(this::calculate);
+        if (restorePlan && storageReadable) main.post(() -> calculate(false));
     }
 
     private void buildUi() {
         ScrollView scroll = new ScrollView(this);
+        rootScroll = scroll;
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(Color.rgb(244, 244, 235));
         LinearLayout page = column();
@@ -79,10 +81,15 @@ public final class MainActivity extends Activity {
         scroll.addView(page, new ScrollView.LayoutParams(-1, -2));
         TextView brand = text("LeistenPlan", 30, INK); brand.setTypeface(null, Typeface.BOLD); page.addView(brand);
         TextView badge = text("OFFLINE · OHNE BERECHTIGUNGEN", 11, GREEN); badge.setPadding(0, dp(6), 0, dp(18)); page.addView(badge);
-        TextView heading = text("Deine Längen.\nEin klarer Plan.", 26, INK); heading.setTypeface(null, Typeface.BOLD); page.addView(heading);
-        TextView intro = text("Verteile Abschnitte auf gleich lange Leisten – mit Schnittverlust und Restlängen.", 15, MUTED); intro.setPadding(0, dp(10), 0, dp(18)); page.addView(intro);
+        TextView heading = text("Welche Stücke passen\nauf deine Leisten?", 26, INK); heading.setTypeface(null, Typeface.BOLD); page.addView(heading);
+        TextView intro = text("Du hast lange Holzleisten und brauchst mehrere kurze Stücke? LeistenPlan zeigt dir, welche Teile auf welche Leiste passen und was übrig bleibt.", 15, MUTED); intro.setId(R.id.intro); intro.setPadding(0, dp(10), 0, dp(10)); page.addView(intro);
+        TextView cases = text("Zum Beispiel:\n• Auflageleisten für ein Regal zuschneiden\n• Schubladenteiler aufteilen\n• Rundstäbe für ein Bastelprojekt planen", 14, INK); cases.setPadding(0, 0, 0, dp(10)); page.addView(cases);
+        TextView story = text("Probier es aus: Aus 2,5-m-Leisten sollen je zwei Stücke mit 120, 60 und 40 cm entstehen. Das Beispiel zeigt dir die Verteilung und die Reste.", 13, MUTED); page.addView(story);
+        tryExample = button("Regal-Beispiel ausprobieren", R.id.try_example, true); tryExample.setOnClickListener(v -> chooseExample(true)); page.addView(tryExample, fullButton());
+        startProject = button("Eigene Maße eingeben", R.id.start_project, false); startProject.setOnClickListener(v -> rootScroll.smoothScrollTo(0, form.getTop())); page.addView(startProject, fullButton());
+        TextView steps = text("Dein Projekt: 1. Ganze Leistenlänge eintragen. 2. Gewünschte Teile ergänzen. 3. Plan berechnen.", 13, MUTED); steps.setPadding(0, dp(16), 0, dp(14)); page.addView(steps);
 
-        LinearLayout form = column();
+        form = column();
         form.setBackground(background(Color.WHITE, 18, Color.rgb(218, 225, 212)));
         form.setPadding(dp(16), dp(16), dp(16), dp(16)); page.addView(form);
         LinearLayout row = new LinearLayout(this);
@@ -90,12 +97,12 @@ public final class MainActivity extends Activity {
         row.addView(left, new LinearLayout.LayoutParams(0, -2, 1));
         LinearLayout.LayoutParams rightParams = new LinearLayout.LayoutParams(0, -2, 1); rightParams.leftMargin = dp(12); row.addView(right, rightParams);
         stock = input(R.id.stock, false, 30); kerf = input(R.id.kerf, false, 30);
-        labelled(left, "Rohlänge (mm)", stock); labelled(right, "Schnittbreite (mm)", kerf); form.addView(row);
-        TextView units = text("Millimeter, höchstens eine Nachkommastelle. Rohlänge und Schnittbreite für dein Material anpassen.", 12, MUTED); units.setPadding(0, dp(7), 0, dp(14)); form.addView(units);
+        labelled(left, "Ganze Leiste (mm)", stock); labelled(right, "Schnittbreite (mm)", kerf); form.addView(row);
+        TextView units = text("2500 mm = 2,5 m · 600 mm = 60 cm. Schnittbreite ist der Materialverlust durch das Sägeblatt. Werte für dein Material anpassen; höchstens eine Nachkommastelle.", 12, MUTED); units.setPadding(0, dp(7), 0, dp(14)); form.addView(units);
         parts = input(R.id.pieces, true, 4000); parts.setMinLines(4); parts.setHint("600 x 2\n400 x 3\n250,5");
         labelled(form, "Abschnitte (mm) · eine Länge je Zeile", parts);
         TextView format = text("Optional: Länge x Anzahl. Bis zu 20 Zeilen und insgesamt 100 Abschnitte.", 12, MUTED); format.setPadding(0, dp(6), 0, dp(8)); form.addView(format);
-        example = button("Beispiel laden", R.id.example, false); example.setOnClickListener(v -> loadExample()); form.addView(example, fullButton());
+        example = button("Beispiel laden", R.id.example, false); example.setOnClickListener(v -> chooseExample(false)); form.addView(example, fullButton());
         calculate = button("Plan berechnen", R.id.calculate, true); calculate.setOnClickListener(v -> calculate()); form.addView(calculate, fullButton());
         loading = new LinearLayout(this); loading.setGravity(Gravity.CENTER_VERTICAL); loading.setPadding(0, dp(12), 0, dp(4));
         ProgressBar progress = new ProgressBar(this); loading.addView(progress, new LinearLayout.LayoutParams(dp(24), dp(24)));
@@ -130,7 +137,9 @@ public final class MainActivity extends Activity {
         return input;
     }
 
-    private void calculate() {
+    private void calculate() { calculate(true); }
+
+    private void calculate(boolean revealResult) {
         if (busy) return;
         if (!storageReadable) { status.setText("Bitte das nicht lesbare Projekt zuerst mit „Neues Projekt“ zurücksetzen."); return; }
         final String stockValue = stock.getText().toString(), kerfValue = kerf.getText().toString(), partsValue = parts.getText().toString();
@@ -144,7 +153,7 @@ public final class MainActivity extends Activity {
             try {
                 if (!preferences.edit().putString("stock", stockValue).putString("kerf", kerfValue).putString("parts", partsValue).putBoolean("show_plan", true).commit()) throw new IllegalStateException("Das Projekt konnte nicht lokal gespeichert werden. Bitte freien Speicher prüfen und erneut versuchen.");
                 CuttingPlanner.Plan calculated = CuttingPlanner.plan(request);
-                main.post(() -> { if (!isDestroyed() && !isFinishing()) { setBusy(false); showPlan(calculated); } });
+                main.post(() -> { if (!isDestroyed() && !isFinishing()) { setBusy(false); showPlan(calculated, revealResult); } });
             } catch (RuntimeException ex) {
                 main.post(() -> { if (!isDestroyed() && !isFinishing()) { setBusy(false); status.setText(ex.getMessage() == null ? "Die Berechnung ist fehlgeschlagen. Bitte erneut versuchen." : ex.getMessage()); } });
             }
@@ -154,11 +163,11 @@ public final class MainActivity extends Activity {
     private void setBusy(boolean value) {
         busy = value; loading.setVisibility(value ? View.VISIBLE : View.GONE);
         stock.setEnabled(!value); kerf.setEnabled(!value); parts.setEnabled(!value);
-        calculate.setEnabled(!value); example.setEnabled(!value); reset.setEnabled(!value); share.setEnabled(!value);
+        calculate.setEnabled(!value); example.setEnabled(!value); reset.setEnabled(!value); share.setEnabled(!value); tryExample.setEnabled(!value); startProject.setEnabled(!value);
     }
     private void clearResult() { plan = null; result.removeAllViews(); share.setVisibility(View.GONE); empty.setVisibility(View.VISIBLE); }
 
-    private void showPlan(CuttingPlanner.Plan value) {
+    private void showPlan(CuttingPlanner.Plan value, boolean revealResult) {
         plan = value; empty.setVisibility(View.GONE); result.removeAllViews();
         TextView heading = text(value.summary(), 24, INK); heading.setTypeface(null, Typeface.BOLD); heading.setPadding(0, dp(22), 0, dp(10)); result.addView(heading);
         TextView totals = text("Rest gesamt: " + CuttingPlanner.format(value.offcut) + " mm\nSchnittverlust: " + CuttingPlanner.format(value.loss) + " mm", 16, INK); totals.setPadding(0, 0, 0, dp(14)); result.addView(totals);
@@ -173,6 +182,15 @@ public final class MainActivity extends Activity {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2); params.bottomMargin = dp(12); result.addView(card, params);
         }
         share.setVisibility(View.VISIBLE);
+        if (revealResult) result.post(() -> { if (!isDestroyed() && plan == value) rootScroll.smoothScrollTo(0, result.getTop()); });
+    }
+
+    private void chooseExample(boolean calculateNow) {
+        if (busy || !storageReadable) return;
+        Runnable load = () -> { loadExample(); if (calculateNow) calculate(); else rootScroll.smoothScrollTo(0, form.getTop()); };
+        if (parts.getText().toString().trim().isEmpty()) load.run();
+        else new AlertDialog.Builder(this).setTitle("Eingaben durch Beispiel ersetzen?").setMessage("Das Regal-Beispiel ersetzt deine aktuellen Maße. Du kannst den Vorgang abbrechen.")
+                .setNegativeButton("Abbrechen", null).setPositiveButton("Beispiel laden", (dialog, which) -> load.run()).show();
     }
 
     private void loadExample() {

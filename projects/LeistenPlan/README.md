@@ -17,7 +17,7 @@ to your SDK. The generated Gradle 9.6.0 wrapper verifies the distribution SHA-25
 
 Unit tests include material and multiset conservation across 300 deterministic
 randomized cases. Android tests cover validation, a kerf-sensitive exact-fit case,
-activity recreation, relaunch, and confirmed/cancelled project reset. Unit tests
+activity recreation, relaunch, and confirmed/cancelled project reset, plus the visible first-launch explanation and guided shelf example. Unit tests
 and instrumentation are separate; an unexecuted device suite is not a passing run.
 
 ## Model and limits

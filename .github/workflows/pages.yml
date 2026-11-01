@@ -63,19 +63,4 @@ jobs:
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
-Danach committen. Anschließend unter Settings → Pages als Quelle GitHub Actions auswählen.
 
-
-Fork
-
-Copy
-
-Type a message... (@ for files, / for skills and commands)
-
-+
-
-GPT-5.6-luna
-
-Skills
-
-Extra high

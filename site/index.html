@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Eine sortierte Sammlung eigener Apps, APKs und Quellarchive.">
+    <title>AppShelf — Meine Apps</title>
+    <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/style.css">
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="AppShelf Startseite">
+          <span class="brand-mark">✦</span>
+          <span>App<span class="brand-accent">Shelf</span></span>
+        </a>
+        <div class="topbar-meta"><span class="status-dot"></span> Eigenes App-Archiv</div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">DEIN DIGITALER WERKSTATT-SCHRANK</p>
+            <h1>Viele Ideen.<br><em>Ein klarer Ort.</em></h1>
+            <p class="hero-lede">Apps, Web-Apps, Spiele und Tools – sortiert, beschrieben und mit jedem Download griffbereit.</p>
+            <p class="project-note">Ein persönliches, unabhängiges Archiv eigener Projekte – keine offizielle Store-Plattform.</p>
+          </div>
+          <div class="hero-orbit" aria-hidden="true">
+            <span class="orbit-line orbit-line-one"></span>
+            <span class="orbit-line orbit-line-two"></span>
+            <span class="orbit-card orbit-card-main">APK<br><strong>bereit</strong></span>
+            <span class="orbit-card orbit-card-small">01<br><strong>Idee</strong></span>
+          </div>
+        </section>
+
+        <section class="stats-row" aria-label="Katalogübersicht">
+          <div><strong id="stat-projects">—</strong><span>Projekte</span></div>
+          <div><strong id="stat-categories">—</strong><span>Kategorien</span></div>
+          <div><strong id="stat-updated">—</strong><span>Letztes Update</span></div>
+        </section>
+
+        <section class="catalog-section" aria-labelledby="catalog-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">DIE SAMMLUNG</p>
+              <h2 id="catalog-title">Alle Projekte</h2>
+            </div>
+            <p id="catalog-count" class="result-count">Katalog wird geladen …</p>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-field">
+              <span aria-hidden="true">⌕</span>
+              <input id="search-input" type="search" placeholder="Apps, Tags oder Probleme suchen …" autocomplete="off">
+            </label>
+            <label class="select-field">
+              <span class="sr-only">Projektart</span>
+              <select id="project-type-select"><option value="all">Alle Projektarten</option></select>
+            </label>
+            <label class="select-field">
+              <span class="sr-only">Kategorie</span>
+              <select id="category-select"><option value="all">Alle Kategorien</option></select>
+            </label>
+            <label class="select-field">
+              <span class="sr-only">Sortierung</span>
+              <select id="sort-select">
+                <option value="recent">Zuletzt aktualisiert</option>
+                <option value="name">Name A–Z</option>
+                <option value="category">Kategorie</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="app-grid" class="app-grid" aria-live="polite"></div>
+          <div id="empty-state" class="empty-state" hidden>
+            <span class="empty-icon">⌁</span>
+              <h3>Kein passendes Projekt gefunden</h3>
+            <p>Versuche einen anderen Suchbegriff oder setze die Filter zurück.</p>
+            <button id="reset-filters" class="button button-secondary">Filter zurücksetzen</button>
+          </div>
+          <div id="load-error" class="load-error" hidden>
+            <h3>Katalog konnte nicht geladen werden</h3>
+            <p>Prüfe, ob der GitHub-Pages-Build erfolgreich durchgelaufen ist.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>AppShelf · eigene, unabhängige Projekte</span>
+        <span>GitHub Pages · statisch · versioniert</span>
+      </footer>
+    </div>
+    <script src="assets/app.js" defer></script>
+  </body>
+</html>

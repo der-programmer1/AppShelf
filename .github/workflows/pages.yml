@@ -1,0 +1,81 @@
+name: Build and publish AppShelf
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/inbox/**"
+      - "site/**"
+      - "scripts/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  releases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Publish app files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/publish-releases.mjs
+
+  pages:
+    needs: releases
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build catalogue
+        env:
+          CI: "true"
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/build-catalog.mjs --out dist
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+Danach committen. Anschließend unter Settings → Pages als Quelle GitHub Actions auswählen.
+
+
+Fork
+
+Copy
+
+Type a message... (@ for files, / for skills and commands)
+
++
+
+GPT-5.6-luna
+
+Skills
+
+Extra high

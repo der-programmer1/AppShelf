@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Example Workbench preview</title>
+  <desc id="desc">A warm abstract preview card for the AppShelf example entry.</desc>
+  <rect width="1200" height="760" rx="36" fill="#17231e"/>
+  <circle cx="1000" cy="130" r="250" fill="#d8f27d" opacity=".88"/>
+  <rect x="92" y="104" width="650" height="500" rx="30" fill="#f4f1e8"/>
+  <text x="140" y="190" font-family="Arial, sans-serif" font-size="24" letter-spacing="5" fill="#63726a">EXAMPLE WORKBENCH</text>
+  <text x="140" y="275" font-family="Arial, sans-serif" font-size="68" font-weight="700" fill="#17231e">Klarer denken.</text>
+  <text x="140" y="350" font-family="Arial, sans-serif" font-size="68" font-weight="700" fill="#17231e">Besser bauen.</text>
+  <rect x="140" y="420" width="420" height="54" rx="27" fill="#d8f27d"/>
+  <text x="182" y="456" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#17231e">Preview entry</text>
+  <rect x="850" y="390" width="230" height="18" rx="9" fill="#17231e" opacity=".7"/>
+  <rect x="850" y="430" width="170" height="18" rx="9" fill="#17231e" opacity=".45"/>
+</svg>

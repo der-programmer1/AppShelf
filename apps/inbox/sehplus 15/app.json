@@ -1,0 +1,11 @@
+{
+  "name": "SehPlus",
+  "slug": "sehplus",
+  "version": "1.6.2",
+  "description": "Offline-first Alltagshilfe für Menschen mit Rot-Grün-Schwäche oder erschwerter Farbdifferenzierung – mit Kamera, Farbfiltern, Pipette, Testlabor und lokaler PWA.",
+  "category": "Barrierefreiheit",
+  "tags": ["Farben", "Kamera", "Pipette", "Offline", "PWA"],
+  "platform": ["Android", "Web/PWA"],
+  "status": "published",
+  "notes": "Die vollständige aktuelle Quelle ist als ZIP enthalten. Eine fertige APK lag in der letzten SehPlus-Quelle nicht vor. Vor dem öffentlichen Launch müssen die im Projekt dokumentierten Rechts- und Kontaktdaten eingesetzt und getestet werden."
+}

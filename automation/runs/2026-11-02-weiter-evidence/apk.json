@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "package": "de.appshelf.weiter",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "minSdk": 26,
+  "targetSdk": 36,
+  "debuggable": false,
+  "signatureVerified": true,
+  "permissions": [
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.RECEIVE_BOOT_COMPLETED",
+    "android.permission.RECORD_AUDIO",
+    "de.appshelf.weiter.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "size": 11466905,
+  "sha256": "700c3f05b446b58b017a5d90391778695e1b1be8469c0698cdd589365d39f639"
+}

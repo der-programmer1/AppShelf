@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "taskCount": 3,
+  "allNextStepsInToday": true,
+  "microphoneDenialKeptText": true,
+  "attachments": [
+    {
+      "mime": "audio/mp4",
+      "bytes": 72063,
+      "sha256": "dd11cd9c07f371e6f901a5130805507d6090b8ac2b5bb8b4790d93544fba824c",
+      "durationSeconds": 8.7307
+    },
+    {
+      "mime": "image/jpeg",
+      "bytes": 1730,
+      "sha256": "4ba5e7cbf0bdfdd4b64223d28309ed78a0aa8399124b6b8750153ea924c05989"
+    }
+  ],
+  "exportViaAndroidDocumentPicker": true,
+  "invalidImportLeftAllDataUnchanged": true,
+  "restorationPreservedAllFieldsAndAttachments": true,
+  "wifiSetting": "0",
+  "mobileDataSetting": "0",
+  "offlineRadioCheck": true,
+  "darkModeVisuallyChecked": true,
+  "device": "Android 11 / API 30 AOSP emulator",
+  "rawBackupCommitted": false
+}

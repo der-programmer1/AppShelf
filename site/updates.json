@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "date": "2026-11-02",
+      "category": "Verbesserung",
+      "title": "AppShelf-Fortschritte an einem Ort",
+      "summary": "Die Startseite zeigt die neueste Änderung. Unter Fortschritt & Neuigkeiten findest du die vollständige Änderungshistorie.",
+      "details": "Die Fortschrittsseite erklärt abgeschlossene Änderungen mit Datum, Nutzen und einem passenden Link. Sie ist ohne JavaScript lesbar und bietet einen direkten Rückweg zur Sammlung. Dieser öffentliche Changelog benötigt weder Anmeldung noch E-Mail-Adresse und sammelt keine Nutzerdaten.",
+      "app": "AppShelf",
+      "appSlug": "appshelf",
+      "version": "1.0.0",
+      "href": "updates/",
+      "linkLabel": "Fortschritte ansehen"
+    }
+  ]
+}

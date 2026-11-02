@@ -2,6 +2,7 @@ import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promi
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
+import { loadUpdates, renderUpdates } from "./updates.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(root, "site");
@@ -154,6 +155,9 @@ async function copyLocalAssets(apps) {
 }
 
 const appPageTemplate = await readFile(path.join(siteDir, "app.html"), "utf8");
+// Validate before replacing the previous output, including direct Pages builds.
+const updates = await loadUpdates(path.join(siteDir, "updates.json"));
+const generatedAt = new Date().toISOString();
 await rm(outDir, { recursive: true, force: true });
 await mkdir(outDir, { recursive: true });
 await cp(siteDir, outDir, { recursive: true });
@@ -172,7 +176,18 @@ for (const app of apps) {
   await writeFile(path.join(pageDir, "index.html"), appPageTemplate.replaceAll("__APP_SLUG__", app.slug), "utf8");
 }
 const publicApps = apps.map(({ demoSourceDir, ...app }) => app);
-const catalog = { schemaVersion: 2, generatedAt: new Date().toISOString(), count: publicApps.length, apps: publicApps };
+for (const update of updates.entries) {
+  if (update.href !== "updates/" && !publicApps.some((app) => app.slug === update.appSlug)) throw new Error(`Updates link points to an unpublished app: ${update.appSlug}`);
+}
+const indexPath = path.join(outDir, "index.html");
+const updatesPath = path.join(outDir, "updates", "index.html");
+const homeTemplate = await readFile(indexPath, "utf8");
+const updatesTemplate = await readFile(updatesPath, "utf8");
+if (!homeTemplate.includes("<!-- LATEST_UPDATE -->") || !updatesTemplate.includes("<!-- UPDATES_HISTORY -->")) throw new Error("Updates render markers are missing");
+await writeFile(indexPath, homeTemplate.replace("<!-- LATEST_UPDATE -->", renderUpdates(updates.entries, { latest: true })), "utf8");
+await writeFile(updatesPath, updatesTemplate.replace("<!-- UPDATES_HISTORY -->", renderUpdates(updates.entries)), "utf8");
+await writeFile(path.join(outDir, "updates.json"), JSON.stringify({ ...updates, generatedAt }, null, 2), "utf8");
+const catalog = { schemaVersion: 2, generatedAt, count: publicApps.length, apps: publicApps };
 await writeFile(path.join(outDir, "catalog.json"), JSON.stringify(catalog, null, 2), "utf8");
 await writeFile(path.join(outDir, "build-report.json"), JSON.stringify({ generatedAt: catalog.generatedAt, apps: publicApps.map((app) => ({ slug: app.slug, projectType: app.projectType, files: app.files.length, screenshots: app.screenshots.length, demo: Boolean(app.demoHref) })) }, null, 2), "utf8");
 console.log(`AppShelf catalog built: ${publicApps.length} published project(s) -> ${outDir}`);

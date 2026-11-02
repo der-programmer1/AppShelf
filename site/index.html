@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="assets/style.css">
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Zum Inhalt</a>
     <div class="site-shell">
       <header class="topbar">
         <a class="brand" href="./" aria-label="AppShelf Startseite">
@@ -18,7 +19,7 @@
         <div class="topbar-meta"><span class="status-dot"></span> Eigenes App-Archiv</div>
       </header>
 
-      <main>
+      <main id="main-content">
         <section class="hero">
           <div class="hero-copy">
             <p class="eyebrow">DEIN DIGITALER WERKSTATT-SCHRANK</p>
@@ -38,6 +39,14 @@
           <div><strong id="stat-projects">—</strong><span>Projekte</span></div>
           <div><strong id="stat-categories">—</strong><span>Kategorien</span></div>
           <div><strong id="stat-updated">—</strong><span>Letztes Update</span></div>
+        </section>
+
+        <section class="updates-preview" aria-labelledby="updates-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">DAS VERÄNDERT SICH</p><h2 id="updates-title">Fortschritt &amp; Neuigkeiten</h2></div>
+            <a class="updates-nav" href="updates/">Alle Neuigkeiten →</a>
+          </div>
+          <!-- LATEST_UPDATE -->
         </section>
 
         <section class="catalog-section" aria-labelledby="catalog-title">
@@ -88,7 +97,7 @@
 
       <footer class="footer">
         <span>AppShelf · eigene, unabhängige Projekte</span>
-        <span>GitHub Pages · statisch · versioniert</span>
+        <a class="updates-nav" href="updates/">Fortschritt &amp; Neuigkeiten</a>
       </footer>
     </div>
     <script src="assets/app.js" defer></script>

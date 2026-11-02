@@ -75,6 +75,31 @@ The build copies each app preview into the Pages artifact and creates an SVG
 QR code for the app detail page. In GitHub Actions, the QR target is derived
 automatically from `GITHUB_REPOSITORY`.
 
+## Fortschritt & Neuigkeiten
+
+The homepage shows the latest completed change. The full, newest-first history is
+available at `updates/`. Both views are rendered during the build and can be read
+without JavaScript. This is a public changelog, not an email newsletter: it has no
+signup, tracking or data collection.
+
+Edit `site/updates.json` in the same PR as a visitor-visible change. Its root is
+`{ "schemaVersion": 1, "entries": [...] }`. Each entry requires `date` (a real
+`YYYY-MM-DD` date), `category`, `title`, `summary`, `details`, `app`, `appSlug`,
+`version`, `href` and `linkLabel`. Supported categories are `Neue App`,
+`Verbesserung`, `Web-Version`, `Qualität` and `Wartung`. Use a local
+`apps/<appSlug>/` detail-page link or `updates/` for an AppShelf-wide change.
+Keep newest dates first and do not duplicate an existing change. Do not add
+speculative announcements, failed builds, personal data or internal file paths.
+An entry prepared in an open PR becomes public only after merge and deployment.
+
+`npm test` validates the feed and tests invalid JSON, dates, order, duplicates,
+links, escaped text and generated output. Direct `npm run build` / Pages builds
+also reject an invalid feed. The build writes `dist/updates.json` with an
+automatic `generatedAt` timestamp matching `catalog.json`; do not add that
+timestamp to the source. No Android app version changes when only the changelog
+is updated. To roll back the feature, revert its complete PR rather than removing
+only the JSON file required by the build.
+
 ## GitHub Pages setup
 
 1. Put the contents of this ZIP into a GitHub repository.

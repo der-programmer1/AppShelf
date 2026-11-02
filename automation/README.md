@@ -19,7 +19,7 @@ APK-/Quellcode-Handoff, Tests und die Vorbereitung von Marketingmaterial.
 1. Recherchiere mindestens zehn Alltagsprobleme. Wenn darunter keine überzeugende Idee ist, erweitere die Recherche, bis eine sinnvoll umsetzbare Idee gefunden ist; Ziel ist eine zusätzliche fertige App pro Nacht. Veröffentliche weiterhin nur tatsächlich funktionsfähige und vollständig geprüfte Ergebnisse.
 2. Erstelle einen vollständigen, verständlichen Eintrag unter `apps/inbox/<slug>/`.
 3. Verwende `projectType` mit einem dieser Werte: `app`, `web-app`, `game` oder `tool`.
-4. Für Android-Projekte sind APK, Quellcode-ZIP, README und Vorschau Pflicht.
+4. Für Android-Projekte sind APK, Quellcode-ZIP, README und Vorschau Pflicht. App-Start und AppShelf-Beschreibung erklären zuerst das Problem, die Zielgruppe und konkrete Anwendungsfälle in Alltagssprache; ein funktionierendes Beispiel erleichtert den Einstieg.
 5. Führe App-Tests, `npm test` und anschließend `npm run build` aus.
 6. Erstelle einen Pull Request und aktiviere Auto-Merge nur, wenn alle Pflichtprüfungen grün sind.
 7. Offene kritische Fehler blockieren die Veröffentlichung. Behobene Zwischenfehler dokumentieren und die betroffenen sowie abschließend alle Pflichtprüfungen erneut erfolgreich ausführen; danach ist eine Veröffentlichung erlaubt.

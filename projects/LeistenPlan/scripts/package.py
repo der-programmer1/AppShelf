@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build/check the source handoff from reviewable Git source files, excluding outputs."""
 import argparse
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -9,8 +10,9 @@ import zipfile
 project=Path(__file__).resolve().parents[1]
 repo=project.parents[1]
 target=repo/'apps/inbox/leistenplan'
-archive=target/'LeistenPlan-1.0.0-source.zip'
-apk=target/'LeistenPlan-1.0.0.apk'
+version=re.search(r"versionName '([^']+)'", (project/'app/build.gradle').read_text()).group(1)
+archive=target/f'LeistenPlan-{version}-source.zip'
+apk=target/f'LeistenPlan-{version}.apk'
 args=argparse.ArgumentParser()
 args.add_argument('--check',action='store_true')
 options=args.parse_args()

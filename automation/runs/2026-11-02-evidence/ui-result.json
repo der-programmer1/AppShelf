@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "version": "1.0.1",
+  "use_cases": [
+    "Regal-Auflagen",
+    "Schubladenteiler",
+    "Bastelstäbe"
+  ],
+  "in_place_update_from": "1.0.0",
+  "project_preserved": true,
+  "guided_example": "passed",
+  "manual_selector_correction": "Native alert button is rendered as BEISPIEL LADEN; resumed confirmed dialog with its actual visible label."
+}

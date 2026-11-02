@@ -2,4 +2,5 @@
     <item name="stock" type="id"/><item name="kerf" type="id"/><item name="pieces" type="id"/>
     <item name="calculate" type="id"/><item name="status" type="id"/><item name="result" type="id"/>
     <item name="reset" type="id"/><item name="share" type="id"/><item name="example" type="id"/>
+    <item name="intro" type="id"/><item name="try_example" type="id"/><item name="start_project" type="id"/>
 </resources>

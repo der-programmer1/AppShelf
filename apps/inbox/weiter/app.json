@@ -1,0 +1,19 @@
+{
+  "name": "Weiter",
+  "slug": "weiter",
+  "projectType": "app",
+  "version": "1.0.0",
+  "description": "Aus einem Gedanken wird der nächste machbare Schritt. Halte zum Beispiel eine Retoure, einen Einkauf oder einen Anruf fest, kläre die nächste kleine Handlung und behalte heute bis zu drei Schritte im Blick – lokal und ohne Benutzerkonto.",
+  "category": "Alltag",
+  "tags": [
+    "offline",
+    "Aufgaben",
+    "Fokus"
+  ],
+  "platform": [
+    "Android"
+  ],
+  "status": "published",
+  "updatedAt": "2026-11-02",
+  "notes": "Unabhängiges persönliches Projekt, keine offizielle Store-App. Die APK wird außerhalb des Play Stores verteilt. Inbox, nächste Schritte, Parkplatz, Fokus-Timer und lokale JSON-Sicherung benötigen kein Backend. Foto und Sprachnotiz sind optional; Erinnerungen benötigen erlaubte Benachrichtigungen und können durch Android verzögert werden."
+}

@@ -1,0 +1,11 @@
+.env
+.env.*
+*.pem
+*.key
+*.keystore
+*.jks
+node_modules
+.git
+test
+__pycache__
+*.log

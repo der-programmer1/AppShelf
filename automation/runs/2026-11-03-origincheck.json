@@ -1,0 +1,128 @@
+{
+  "project": "OriginCheck",
+  "version": "0.1.0",
+  "date": "2026-11-03T09:54:34.089017+00:00",
+  "branch": "codex/origincheck-2026-11-03",
+  "baseCommit": "2c13f755ec900992e0318c5e2bbe4c0c8e9d7aed",
+  "android": {
+    "unit": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "actualSignaturesAndFileLimits",
+        "allTrustBandsAndUnknownBand",
+        "fourVerdictsMapToGermanLabels",
+        "httpsRequiredForBackend",
+        "inconclusiveIsAValidProviderResult",
+        "providerErrorsNeverBecomeResults",
+        "publicLinkSyntaxAndSocialFallback",
+        "resultRetainsSignalsAndLimitations",
+        "sixDistinctFrameTimesAndDurationLimit",
+        "unknownVerdictRejected"
+      ]
+    },
+    "emulator": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "actualImagePrecheckDeletesTemporaryOriginalAndExplicitClearDeletesPreparedFile",
+        "actualVideoDecodesSixFramesAtDifferentTimes",
+        "emptyNoBackendAndSocialLinkNeverProduceFakeResults",
+        "historyRequiresExplicitSaveAndDeletionRemovesTheActualLocalFile",
+        "shareIntentImportsImageWithoutUploadAndConsentIsInitiallyOff"
+      ]
+    }
+  },
+  "apk": {
+    "status": "passed",
+    "package": "de.appshelf.origincheck",
+    "version": "0.1.0",
+    "versionCode": 1,
+    "minSdk": 26,
+    "targetSdk": 36,
+    "signatureVerified": true,
+    "permissions": [
+      "android.permission.ACCESS_NETWORK_STATE",
+      "android.permission.INTERNET",
+      "de.appshelf.origincheck.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+    ],
+    "debuggable": true,
+    "size": 10398226,
+    "sha256": "d0054f84420f700ea68dca01787fc6740d473f939199913fc883cb108136e58e"
+  },
+  "releaseBuild": {
+    "status": "passed",
+    "package": "de.appshelf.origincheck",
+    "version": "0.1.0",
+    "versionCode": 1,
+    "minSdk": 26,
+    "targetSdk": 36,
+    "signatureVerified": true,
+    "permissions": [
+      "android.permission.ACCESS_NETWORK_STATE",
+      "android.permission.INTERNET",
+      "de.appshelf.origincheck.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+    ],
+    "debuggable": false,
+    "size": 7254814,
+    "sha256": "8e05ff6390ccf060a4d9d1af401cc5fea99eb01c7d511b3270a5770635098bbc"
+  },
+  "browser": {
+    "passed": 16,
+    "checks": [
+      "chromium: empty state and no backend produce no verdict",
+      "chromium: real image selection is local and requires consent",
+      "chromium: missing key shows 503 without media upload or fake result",
+      "chromium: six real video frames form a JPEG contact sheet",
+      "chromium: provider errors and unknown verdicts never become results",
+      "chromium: inconclusive contract is safely rendered and saved only on request",
+      "chromium: unsupported social link has explicit file fallback",
+      "chromium: installable shell reloads offline on phone and tablet widths",
+      "webkit: empty state and no backend produce no verdict",
+      "webkit: real image selection is local and requires consent",
+      "webkit: missing key shows 503 without media upload or fake result",
+      "webkit: six real video frames form a JPEG contact sheet",
+      "webkit: provider errors and unknown verdicts never become results",
+      "webkit: inconclusive contract is safely rendered and saved only on request",
+      "webkit: unsupported social link has explicit file fallback",
+      "webkit: installable shell reloads offline on phone and tablet widths"
+    ],
+    "engines": [
+      "Chromium",
+      "Linux WebKit"
+    ],
+    "physicalSafari": false,
+    "liveProvider": false
+  },
+  "backendTests": 21,
+  "webUnitTests": 11,
+  "lint": {
+    "errors": 0,
+    "warnings": 17
+  },
+  "catalog": {
+    "tests": "passed",
+    "build": "passed",
+    "publishedEntries": 4,
+    "pwaFilesCopied": 10
+  },
+  "backendReachability": {
+    "localHttps": true,
+    "healthStatus": 503,
+    "preflightStatus": 204,
+    "publicDeployment": false
+  },
+  "liveOpenAIAnalysis": false,
+  "physicalAndroidTest": false,
+  "physicalSafariTest": false,
+  "autoMergeEnabled": false,
+  "sourceZip": {
+    "file": "apps/inbox/origincheck/OriginCheck-0.1.0-source.zip",
+    "size": 217655,
+    "sha256": "26049dba168cdb58a8331983541a09f4cbda9395c5262c7a549ce323c995501e"
+  }
+}

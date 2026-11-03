@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {readFile,readdir} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+
+const repo=fileURLToPath(new URL('../../../',import.meta.url));
+const catalog=JSON.parse(await readFile(path.join(repo,'dist/catalog.json'),'utf8'));
+const app=catalog.apps.find(a=>a.slug==='origincheck');
+assert.ok(app,'OriginCheck must appear in the built catalogue');
+assert.equal(app.projectType,'app');assert.equal(app.version,'0.1.0');assert.equal(app.status,'published');
+assert.deepEqual(app.platform,['Android','Web/PWA','Backend']);
+assert.equal(app.demoHref,'apps/origincheck/demo/');
+assert.ok(app.files.some(f=>f.filename==='OriginCheck-0.1.0-debug.apk'));
+assert.ok(app.files.some(f=>f.filename==='OriginCheck-0.1.0-source.zip'));
+assert.ok(app.screenshots.length>=1);
+const source=path.join(repo,'apps/inbox/origincheck/demo');
+const expected=await readdir(source);
+for(const file of expected)assert.deepEqual(await readFile(path.join(repo,'dist',app.demoHref,file)),await readFile(path.join(source,file)),`Missing or modified demo file ${file}`);
+assert.ok(expected.includes('manifest.webmanifest')&&expected.includes('sw.js')&&expected.includes('index.html'));
+const page=await readFile(path.join(repo,'dist/apps/origincheck/index.html'),'utf8');
+assert.ok(page.includes('origincheck'));
+const detailScript=await readFile(path.join(repo,'dist/assets/app-page.js'),'utf8');
+assert.ok(detailScript.includes('demoHref'),'AppShelf detail UI must expose the demo link');
+console.log(`PASS: OriginCheck indexed with APK, source ZIP, screenshots and all ${expected.length} exact PWA files, including webmanifest.`);

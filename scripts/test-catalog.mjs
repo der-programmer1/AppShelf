@@ -24,8 +24,12 @@ if (!first.files.every((file) => validDownloadHref(file.href))) throw new Error(
 if (!first.qrCode?.href.startsWith("media/") || !first.qrCode.target.startsWith("http")) throw new Error("QR metadata is incomplete");
 const page = await readFile(path.join(root, "dist-test", "apps", first.slug, "index.html"), "utf8");
 if (!page.includes(first.slug)) throw new Error("Detail page did not receive its slug");
-const screenshot = await readFile(path.join(root, "dist-test", "media", first.slug, first.screenshots[0].filename), "utf8");
-if (!screenshot.includes("<svg")) throw new Error("Screenshot asset was not copied into the build");
+const screenshot = await readFile(path.join(root, "dist-test", "media", first.slug, first.screenshots[0].filename));
+const isScreenshot = screenshot.toString("utf8").includes("<svg")
+  || screenshot.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+  || screenshot.subarray(0, 3).equals(Buffer.from([255, 216, 255]))
+  || (screenshot.toString("ascii", 0, 4) === "RIFF" && screenshot.toString("ascii", 8, 12) === "WEBP");
+if (!isScreenshot) throw new Error("Screenshot asset was not copied into the build");
 const qr = await readFile(path.join(root, "dist-test", "media", first.slug, "qr-app-page.svg"), "utf8");
 if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset was not generated into the build");
 await rm(path.join(root, "dist-test"), { recursive: true, force: true });

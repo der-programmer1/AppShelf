@@ -1,0 +1,110 @@
+name: Validate OriginCheck
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: origincheck-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  services:
+    name: OriginCheck backend and browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: projects/OriginCheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.0
+          cache: npm
+          cache-dependency-path: |
+            projects/OriginCheck/package-lock.json
+            projects/OriginCheck/backend/package-lock.json
+      - name: Install locked dependencies without scripts
+        run: |
+          npm ci --ignore-scripts
+          npm ci --ignore-scripts --prefix backend
+      - name: Backend contracts and web rules without a live provider
+        run: |
+          npm test --prefix backend
+          node --check backend/server.js
+          npm test
+          node --check web/app.js
+          node --check ../../apps/inbox/origincheck/demo/app.js
+      - name: Install real browser engines
+        run: npx playwright install --with-deps chromium webkit
+      - name: Real file selection, six video frames, safe results and offline PWA
+        run: npm run test:browser
+      - name: Verify complete source handoff and matching published PWA
+        run: python3 scripts/package.py --check
+      - name: Verify OriginCheck detail demo and all copied PWA files
+        run: |
+          npm ci --ignore-scripts --prefix ../..
+          npm run build --prefix ../..
+          node scripts/check-catalog.mjs
+  android:
+    name: OriginCheck Android tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: projects/OriginCheck/android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Install checksum-verified Android command line tools
+        run: |
+          task_sdk_root="$RUNNER_TEMP/origincheck-sdk"
+          task_sdk_unpack="$RUNNER_TEMP/origincheck-cli-unpack"
+          mkdir -p "$task_sdk_root/cmdline-tools" "$task_sdk_unpack"
+          curl --fail --silent --show-error --location --retry 2 https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip -o "$RUNNER_TEMP/origincheck-android-cli.zip"
+          printf '%s  %s\n' e025545c62a8e64c7559119566a569fb1dec5f60 "$RUNNER_TEMP/origincheck-android-cli.zip" | sha1sum --check --strict
+          unzip -q "$RUNNER_TEMP/origincheck-android-cli.zip" -d "$task_sdk_unpack"
+          mv "$task_sdk_unpack/cmdline-tools" "$task_sdk_root/cmdline-tools/latest"
+          echo "ANDROID_HOME=$task_sdk_root" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$task_sdk_root" >> "$GITHUB_ENV"
+          echo "$task_sdk_root/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$task_sdk_root/platform-tools" >> "$GITHUB_PATH"
+          echo "$task_sdk_root/emulator" >> "$GITHUB_PATH"
+      - name: Install pinned SDK and emulator
+        run: |
+          android sdk install 'platform-tools@37.0.1'
+          android sdk install 'platforms/android-36@2.0.0'
+          android sdk install 'build-tools/36.0.0@36.0.0'
+          android sdk install 'emulator@37.2.13'
+          android sdk install 'system-images/android-30/default/x86_64@11.0.0'
+      - name: Android unit tests, lint and debug/release builds
+        run: ./gradlew --no-daemon --max-workers=2 testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - name: Verify genuine local builds and distributed APK
+        run: |
+          python3 ../scripts/verify-apk.py app/build/outputs/apk/debug/app-debug.apk
+          python3 ../scripts/verify-apk.py app/build/outputs/apk/release/app-release.apk
+          python3 ../scripts/verify-apk.py ../../../apps/inbox/origincheck/OriginCheck-0.1.0-debug.apk
+      - name: Enable ephemeral emulator acceleration
+        run: sudo chmod 666 /dev/kvm
+      - name: Actual image/video preparation, share, consent and local deletion
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: default
+          profile: pixel_2
+          working-directory: projects/OriginCheck/android
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          script: ./gradlew --no-daemon --max-workers=2 connectedDebugAndroidTest
+      - name: Reject empty, failed or skipped Android test runs
+        run: python3 ../scripts/check-test-results.py

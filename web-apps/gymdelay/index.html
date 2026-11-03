@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#101c2c" />
+    <meta
+      name="description"
+      content="Trainingsmusik lokal pausieren und nach deiner Vorbereitung wieder starten. Ohne Konto und ohne Upload."
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="gymdelay.css" />
+    <title>GymDelay · Bereit machen. Musik an.</title>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <a href="./" class="brand"><img src="icon.svg" alt="" />GymDelay</a
+        ><a href="../">AppShelf</a>
+      </header>
+      <main>
+        <section class="hero">
+          <p class="eyebrow">Dein Moment vor dem Satz</p>
+          <h1>Bereit machen.<br />Musik an.</h1>
+          <p class="muted">
+            Song auswählen, Countdown starten, Position einnehmen. GymDelay
+            pausiert deinen Song und setzt ihn anschließend an derselben Stelle
+            fort.
+          </p>
+        </section>
+        <div class="notice">
+          <strong>Im Browser mit deiner eigenen Audiodatei.</strong> Safari kann
+          Spotify, Apple Music oder andere Apps nicht pausieren und starten. Der
+          Web-Player steuert ausschließlich die hier gewählte, ungeschützte
+          Datei. Für externe Musik-Apps benötigst du die Android-App.
+        </div>
+        <section class="card" aria-labelledby="playerTitle">
+          <div class="eyebrow">Deine Musik · nur auf diesem Gerät</div>
+          <h2 id="playerTitle">Wähle deinen Trainingssong</h2>
+          <label class="file-button"
+            >Audiodatei auswählen<input
+              id="audioFile"
+              type="file"
+              accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac"
+          /></label>
+          <p class="muted">
+            MP3, M4A, WAV oder ein anderes vom Browser unterstütztes Format ·
+            bis 100 MB · kein Upload.
+          </p>
+          <p id="trackName">Noch keine Datei ausgewählt</p>
+          <audio
+            id="player"
+            controls
+            preload="metadata"
+            aria-label="Lokaler Musikplayer"
+          ></audio>
+          <p id="mediaState" role="status"></p>
+        </section>
+        <section class="card countdown" aria-labelledby="countdownTitle">
+          <div class="eyebrow">Zeit zum Vorbereiten</div>
+          <h2 id="countdownTitle">Dein Start in Ruhe</h2>
+          <div
+            id="presets"
+            class="row"
+            role="group"
+            aria-label="Countdown-Dauer"
+          ></div>
+          <p id="countdown" class="timer-digits" role="timer" aria-live="off">
+            30
+          </p>
+          <p id="countdownState">Sekunden bis zur Musik</p>
+          <progress
+            id="progress"
+            max="30"
+            value="0"
+            aria-label="Countdown-Fortschritt"
+          ></progress>
+          <div class="row actions">
+            <button id="start" class="primary" disabled>
+              Musik pausieren &amp; Countdown starten</button
+            ><button id="cancel" disabled>Abbrechen</button
+            ><button id="resume" hidden class="primary">
+              Musik jetzt fortsetzen
+            </button>
+          </div>
+          <p id="status" class="status" role="status"></p>
+          <p class="muted">
+            Beim Abbrechen bleibt die Musik pausiert. Wählst du einen anderen
+            Song, wird der alte Countdown beendet.
+          </p>
+        </section>
+        <details>
+          <summary>So funktioniert GymDelay</summary>
+          <ol>
+            <li>Wähle eine lokale Audiodatei und höre sie im Player an.</li>
+            <li>Wähle 5, 10, 15, 30 oder 60 Sekunden Vorbereitungszeit.</li>
+            <li>
+              Starte den Countdown. Der Song pausiert an seiner aktuellen
+              Position.
+            </li>
+            <li>
+              Nach Ablauf setzt dieser Player denselben Song fort. Wird
+              automatisches Abspielen blockiert, erscheint „Musik jetzt
+              fortsetzen“.
+            </li>
+          </ol>
+          <p class="notice">
+            Lass die Web-App während des Countdowns sichtbar und den Bildschirm
+            an. Safari kann Hintergrund-Tabs und gesperrte Geräte aussetzen.
+            Beim Zurückkehren wird die gespeicherte Endzeit geprüft; ein
+            verspäteter Start verlangt einen Fingertipp. Ein exakter Start im
+            gesperrten Zustand ist im Browser nicht garantiert.
+          </p>
+        </details>
+        <details>
+          <summary>Lokale Daten und Installation</summary>
+          <p>
+            Der gewählte Song, seine Position, dein Preset und ein laufender
+            Countdown bleiben lokal in diesem Browser gespeichert. Keine
+            Anmeldung, kein Server, keine Analyse und kein Tracking. Dateien
+            können vom Browser bei Speicherknappheit entfernt werden.
+          </p>
+          <button id="deleteAudio" class="danger">
+            Song und lokale GymDelay-Daten löschen
+          </button>
+          <p>
+            iPhone und iPad: in Safari „Teilen → Zum Home-Bildschirm“. Mac:
+            Safari „Ablage → Zum Dock hinzufügen“. Nach vollständigem Erstladen
+            ist die App offline nutzbar. Kamera, Mikrofon und Benachrichtigungen
+            sind nicht erforderlich.
+          </p>
+        </details>
+      </main>
+      <footer>
+        <p id="offlineStatus">Offline-Speicher wird vorbereitet …</p>
+        <p>GymDelay 1.0.0 · Unabhängiges persönliches Projekt.</p>
+      </footer>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

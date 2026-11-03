@@ -1,0 +1,61 @@
+:root {
+  color-scheme: dark;
+  --bg: #0c1523;
+  --surface: #142238;
+  --fg: #f5f8ed;
+  --muted: #b6c4d5;
+  --line: #3a4d63;
+  --accent: #d0f66d;
+  --on-accent: #162314;
+  --soft: #20323c;
+  --danger: #ffb7b0;
+}
+.shell {
+  max-width: 760px;
+}
+.hero h1 {
+  font-size: clamp(2.8rem, 9vw, 4.4rem);
+}
+.countdown {
+  text-align: center;
+}
+#presets {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+#presets button {
+  min-width: 0;
+  padding: 10px 4px;
+  font-size: 0.9rem;
+}
+#countdown {
+  padding: 26px 0 0;
+  font-size: 6rem;
+  margin: 0;
+}
+.countdown progress {
+  margin: 16px 0 28px;
+}
+.countdown .actions {
+  justify-content: center;
+}
+.notice {
+  margin: 16px 0;
+}
+audio {
+  margin-top: 12px;
+}
+#trackName {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+  .countdown .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .countdown .actions > button {
+    flex: auto;
+  }
+}

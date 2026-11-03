@@ -56,9 +56,10 @@ for (const folder of folders) {
     : [];
   if (status === "published" && !screenshots.length) fail(`${slug} needs at least one screenshot before publishing`);
 
-  if (projectType === "web-app") {
+  if (projectType === "web-app" || manifest.demoDir) {
+    if (manifest.demoDir && !/^[a-z0-9][a-z0-9_-]*$/i.test(manifest.demoDir)) fail(`${slug} has an invalid web-app directory`);
     const demoDir = path.join(dir, String(manifest.demoDir || "demo"));
-    if (await exists(demoDir) && !(await exists(path.join(demoDir, "index.html")))) {
+    if (!(await exists(path.join(demoDir, "index.html")))) {
       fail(`${slug} has a demo directory but no demo/index.html`);
     }
   }

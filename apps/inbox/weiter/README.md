@@ -136,3 +136,12 @@ Die APK wird **außerhalb des Play Stores** verteilt. Weiter ist **keine offizie
 Store-App** und wird nicht als durch einen Store geprüft beworben. Der
 vollständige Quellcode einschließlich Tests, Gradle-Wrapper und Build-Anleitung
 liegt in **Weiter-1.0.0-source.zip**.
+
+
+## Web-App für iPhone, iPad und Mac
+
+Auf der AppShelf-Detailseite führt **Web-App öffnen** zur vollständigen Browser-Version. Gedanken festhalten, nächste Schritte klären, Fotos und Sprachnotizen, Fokus und Android-kompatible JSON-Sicherung – vollständig lokal. Erinnerungen bei geöffneter Web-App oder beim nächsten Öffnen; Safari bietet keine garantierten lokalen Hintergrundalarme.
+
+Safari auf iPhone/iPad: Teilen → Zum Home-Bildschirm. Auf Mac ab Safari 17: Ablage → Zum Dock hinzufügen. Nach dem vollständigen Erstladen offline nutzbar. Keine Anmeldung und keine Medien-Uploads. Browserdaten sind vom Android-Speicher unabhängig.
+
+Das zusätzliche `Weiter-1.0.0-web-source.zip` enthält alle Browser-Dateien und eine Anleitung mit den Plattformgrenzen. Android-APK und vorhandenes Android-Quellcode-ZIP bleiben unverändert.

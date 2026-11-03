@@ -1,0 +1,15 @@
+# Weiter im Browser
+
+Vollständige lokale Web-App als Ergänzung zu Weiter 1.0.0 für Android. Gedanken, Inbox, Klar-machen-Formular, bis zu drei nächste Schritte, Tagesfortschritt, Parkplatz, Erledigt/Wiederöffnen, Papierkorb mit Undo, Fotos, Sprachnotizen, Fokus-Timer und JSON-Sicherung benötigen kein Backend.
+
+Öffne den Ordner `web/` über einen statischen HTTPS-Server (zur Entwicklung `python3 -m http.server` und `http://localhost:8000/web/`). Kein Build und keine externen Bibliotheken erforderlich. Auf AppShelf führt „Web-App öffnen“ zur installierbaren Version. iPhone/iPad: Safari → Teilen → Zum Home-Bildschirm. Mac ab Safari 17: Ablage → Zum Dock hinzufügen. Nach vollständig abgeschlossenem Erstladen ist die App offline bereit.
+
+Die Web-App verwendet die Aufgabenregeln und das validierte Sicherungsformat `weiter-backup`, Version 1, der Android-App. JSON-Export und Import enthalten Anhänge. Import ist atomar, bestehende IDs gewinnen, doppelte Feldnamen und ungültige Dateien werden abgelehnt. Grenzen: 2.000 Einträge, 8 Anhänge je Eintrag, 3 MB pro Anhang, 16 MB Anhänge insgesamt, 24 MB Sicherungsdatei. Kein automatisches Entfernen alter Einträge. Die Browserdaten sind vom Android-Speicher unabhängig; JSON ermöglicht den bewussten Austausch, keine automatische Synchronisierung.
+
+Ein Gedanke wird sofort in IndexedDB gespeichert. Bearbeitungsentwürfe bleiben beim Schließen erhalten. Mikrofonfreigabe ist nur zum Aufnehmen nötig. Bei Ablehnung funktionieren Texte und Datei-Anhänge weiter. Audioaufnahme (maximal 60 Sekunden) benötigt MediaRecorder. MP4/Ogg wird direkt gespeichert; WebM/Opus wird lokal über Web Audio in Android-kompatibles PCM-WAV umgewandelt. Ohne Aufnahme-API kann eine Audiodatei gewählt werden. Größere Fotos und andere decodierbare Bildformate werden lokal auf maximal 1920 Pixel verkleinert und als JPEG angehängt (Eingabe bis 25 MB). Fotos und Ton werden ausschließlich lokal verarbeitet, nie hochgeladen.
+
+Browsergrenzen: Safari kann keine garantierten lokalen Alarme bei geschlossener oder ausgesetzter App planen. Gespeicherte Erinnerungen werden bei geöffneter App und beim Wiederöffnen geprüft, mit optionaler Benachrichtigung bei erlaubter Browser-Unterstützung. Der Fokus-Timer nutzt eine gespeicherte Endzeit. Safari unterstützt den Empfang im System-Teilen-Menü nicht; Text einfügen und Datei auswählen stehen bereit. Ein Web Share Target ist für unterstützende Browser enthalten. Die Android-App bietet die jeweiligen Betriebssystemfunktionen.
+
+Browser können lokale Daten löschen (insbesondere private Sitzungen und bei Speicherknappheit). Regelmäßig JSON-Sicherungen exportieren. „Alle lokalen Weiter-Daten löschen“ entfernt nur Daten dieser Web-App nach Bestätigung. Andere AppShelf-Apps bleiben unberührt. Keine Konten, kein Tracking, kein Server. Unabhängiges persönliches Projekt; keine offizielle Store-App.
+
+Quellen im Repository: `web-apps/weiter/`, gemeinsame Hilfsdateien `web-apps/shared/`. `python3 scripts/package-web-apps.py` erzeugt die vollständige Katalogkopie und dieses Archiv; `--check` prüft Byte-Gleichheit. Tests: `npm run test:web` und nach dem Katalog-Build `npm run test:web:browser`.

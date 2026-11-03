@@ -59,6 +59,8 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
       - name: Navigation, phone layout, keyboard and static history
         run: npm run test:browser
+      - name: Real app workflows, persistence, media and offline mode in Chromium and WebKit
+        run: npm run test:web:browser
 
   leistenplan:
     name: LeistenPlan Android tests
@@ -113,4 +115,7 @@ jobs:
           disable-animations: true
           script: ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest
       - name: Verify complete source handoff
+        # The user removed this app from the catalogue; keep testing its retained source,
+        # but do not require or restore an intentionally removed download archive.
+        if: hashFiles('apps/inbox/leistenplan/app.json') != ''
         run: python3 scripts/package.py --check

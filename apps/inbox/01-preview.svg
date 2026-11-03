@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">GymDelay App Vorschau</title>
+  <desc id="desc">Dunkle Trainings-App mit Countdown für die aktuelle Musik</desc>
+  <rect width="1200" height="800" rx="42" fill="#0d1511"/>
+  <rect x="26" y="26" width="1148" height="748" rx="34" fill="#13231a" stroke="#365c46" stroke-width="3"/>
+  <circle cx="105" cy="112" r="30" fill="#b9f36b"/>
+  <path d="M96 102v28m0-28c15-8 27-4 35 2v29c-10-6-21-6-35 2" fill="none" stroke="#102016" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="165" y="126" fill="#f4f7ef" font-family="Arial, sans-serif" font-size="58" font-weight="700">GymDelay</text>
+  <text x="165" y="166" fill="#9bb7a3" font-family="Arial, sans-serif" font-size="22" letter-spacing="3">TRAINING MUSIC COUNTDOWN</text>
+  <rect x="78" y="226" width="1044" height="214" rx="28" fill="#1b3325"/>
+  <text x="120" y="277" fill="#b9f36b" font-family="Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="4">AKTUELLE MUSIK</text>
+  <text x="120" y="336" fill="#ffffff" font-family="Arial, sans-serif" font-size="38" font-weight="700">Blinding Lights</text>
+  <text x="120" y="374" fill="#a9c3b0" font-family="Arial, sans-serif" font-size="24">Workout Playlist · MediaSession</text>
+  <rect x="120" y="404" width="770" height="10" rx="5" fill="#35583f"/>
+  <rect x="120" y="404" width="236" height="10" rx="5" fill="#b9f36b"/>
+  <circle cx="356" cy="409" r="13" fill="#f5f8ed"/>
+  <text x="942" y="344" fill="#b9f36b" font-family="Arial, sans-serif" font-size="48" font-weight="700">00:30</text>
+  <text x="942" y="378" fill="#9bb7a3" font-family="Arial, sans-serif" font-size="18">bereit</text>
+  <rect x="78" y="486" width="502" height="108" rx="24" fill="#b9f36b"/>
+  <text x="329" y="552" text-anchor="middle" fill="#102016" font-family="Arial, sans-serif" font-size="26" font-weight="700">COUNTDOWN STARTEN</text>
+  <rect x="620" y="486" width="502" height="108" rx="24" fill="#1a2b20" stroke="#82ad8b" stroke-width="2"/>
+  <text x="871" y="552" text-anchor="middle" fill="#dce9dd" font-family="Arial, sans-serif" font-size="26" font-weight="700">ABBRECHEN</text>
+  <text x="78" y="674" fill="#9bb7a3" font-family="Arial, sans-serif" font-size="20">Lokale Steuerung · kein Login · keine Internetverbindung</text>
+</svg>

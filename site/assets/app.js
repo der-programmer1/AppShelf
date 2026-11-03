@@ -34,7 +34,7 @@ const renderCard = (app) => {
     : `<span class="app-card-mark">${escapeHtml((app.name || "A").slice(0, 1).toUpperCase())}</span>`;
   const tags = (app.tags || []).slice(0, 3).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   const projectType = projectTypeLabels[app.projectType || "app"] || "Projekt";
-  const demo = app.demoHref ? `<span class="card-action">Demo ↗</span>` : "";
+  const demo = app.demoHref ? `<span class="card-action">Web-App ↗</span>` : "";
   return `<a class="app-card" href="apps/${encodeURIComponent(app.slug)}/">
     <div class="app-card-visual">${visual}<span class="app-card-category">${escapeHtml(app.category || "App")}</span></div>
     <div class="app-card-body">

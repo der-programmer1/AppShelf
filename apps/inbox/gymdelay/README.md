@@ -48,3 +48,12 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64 \
 ```
 
 GymDelay ist eine unabhängige AppShelf-Veröffentlichung und keine offizielle Store-App. Die App-Logik wurde auf dem Build-System geprüft; ein echter Lauf auf einem physischen Gerät ist in diesem Paket nicht bestätigt.
+
+
+## Web-App für iPhone, iPad und Mac
+
+Auf der AppShelf-Detailseite führt **Web-App öffnen** zur vollständigen Browser-Version. Echte lokale Musikwiedergabe mit Pause, Vorbereitungs-Countdown und Fortsetzen desselben Songs. Wähle eine eigene Audiodatei. Safari kann fremde Musik-Apps nicht steuern; im Browser ist kein genauer Start bei Bildschirmsperre garantiert.
+
+Safari auf iPhone/iPad: Teilen → Zum Home-Bildschirm. Auf Mac ab Safari 17: Ablage → Zum Dock hinzufügen. Nach dem vollständigen Erstladen offline nutzbar. Keine Anmeldung und keine Medien-Uploads. Browserdaten sind vom Android-Speicher unabhängig.
+
+Das zusätzliche `GymDelay-1.0.0-web-source.zip` enthält alle Browser-Dateien und eine Anleitung mit den Plattformgrenzen. Android-APK und vorhandenes Android-Quellcode-ZIP bleiben unverändert.

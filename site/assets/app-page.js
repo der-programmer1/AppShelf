@@ -24,7 +24,7 @@ const render = (app) => {
     ? `<div class="feature-image">${imageMarkup(heroImage, `${app.name} Vorschau`)}<div class="image-fallback" hidden>Vorschau nicht verfügbar. Der Build muss die Preview-Datei noch veröffentlichen.</div></div>`
     : screenshots;
   const projectType = projectTypeLabels[app.projectType || "app"] || "Projekt";
-  const demo = app.demoHref ? `<section class="demo-section"><div class="demo-card"><div><p class="eyebrow">DIREKT AUSPROBIEREN</p><h2>Web-Demo</h2><p>Diese Version kann direkt im Browser geöffnet werden.</p></div><a class="button button-primary" href="${escapeHtml(detailHref(app.demoHref))}" target="_blank" rel="noopener">Demo öffnen ↗</a></div></section>` : "";
+  const demo = app.demoHref ? `<section class="demo-section"><div class="demo-card"><div><p class="eyebrow">AUCH AUF IPHONE, IPAD UND MAC</p><h2>Web-App</h2><p>${escapeHtml(app.webDescription || 'App direkt im Browser nutzen. Für iPhone, iPad, Mac und moderne Desktop-Browser.')}</p></div><a class="button button-primary" href="${escapeHtml(detailHref(app.demoHref))}" target="_blank" rel="noopener">Web-App öffnen ↗</a></div></section>` : "";
   const qr = app.qrCode?.href ? `<section class="qr-section"><div class="qr-card"><div><p class="eyebrow">MOBIL ÖFFNEN</p><h2>AppShelf auf dem Handy</h2><p>Scanne den QR-Code mit deinem Smartphone, um diese App-Seite direkt zu öffnen.</p><a class="text-link" href="${escapeHtml(app.qrCode.target || "#")}" target="_blank" rel="noopener">Zielseite öffnen →</a></div><img class="qr-image" src="${escapeHtml(detailHref(app.qrCode.href))}" alt="QR-Code für ${escapeHtml(app.name)}" data-fallback><div class="image-fallback" hidden>QR-Code nicht verfügbar.</div></div></section>` : "";
   root.innerHTML = `<div class="detail-layout">
     <section>
@@ -40,7 +40,7 @@ const render = (app) => {
       <div class="download-list">${downloads}</div>
     </aside>
   </div>
-  <section class="detail-section"><h2>Vorschau</h2>${heroPreview}</section>
+  <section class="detail-section"><h2>Vorschau</h2>${app.screenshots?.length > 1 ? screenshots : heroPreview}</section>
   ${demo}
   ${qr}
   <section class="detail-section"><h2>Dateien</h2>${table}</section>

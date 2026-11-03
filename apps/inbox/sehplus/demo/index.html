@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0e1214" />
+    <meta
+      name="description"
+      content="SehPlus ColorAssist – lokale Farbhilfe für den Alltag."
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>SehPlus ColorAssist</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <img src="icon.svg" alt="" class="brand-icon" />
+          <div>
+            <p class="eyebrow">SEHPLUS</p>
+            <p class="subtitle">Farben sichtbarer machen · lokal verarbeitet</p>
+          </div>
+        </div>
+        <div>
+          <a class="shelf-link" href="../">AppShelf</a
+          ><button id="installButton" class="quiet-button" type="button" hidden>
+            INSTALLIEREN
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section id="cameraPage" class="page" aria-labelledby="cameraTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow accent-text">LOKAL · OFFLINE</p>
+              <h1 id="cameraTitle">Kamera</h1>
+              <p>Live ansehen, Standbild aufnehmen oder ein Bild öffnen.</p>
+            </div>
+            <span class="status-pill">KEIN KONTO</span>
+          </div>
+
+          <div class="action-grid two-columns">
+            <button id="cameraButton" class="primary-button" type="button">
+              KAMERA STARTEN
+            </button>
+            <label class="secondary-button file-button">
+              BILD / VIDEO ÖFFNEN
+              <input
+                id="imageInput"
+                type="file"
+                accept="image/*,video/*"
+                class="accessible-file"
+              />
+            </label>
+          </div>
+
+          <div class="control-card">
+            <label for="filterSelect">FILTER</label>
+            <select id="filterSelect" aria-label="Farbfilter auswählen">
+              <option value="red_green_plus">Rot-Grün+</option>
+              <option value="red_green">Rot-Grün</option>
+              <option value="tritan">Blau-Gelb</option>
+              <option value="contrast">Kontrast</option>
+              <option value="neutral">Neutral</option>
+            </select>
+            <div class="range-row">
+              <span>Stärke</span>
+              <input
+                id="strengthRange"
+                type="range"
+                min="0"
+                max="100"
+                value="70"
+              />
+              <output id="strengthValue">70 %</output>
+            </div>
+          </div>
+
+          <div id="stage" class="stage" aria-label="Lokale SehPlus-Vorschau">
+            <canvas
+              id="viewCanvas"
+              tabindex="0"
+              aria-label="Bildvorschau. Pipette aktivieren und mit Pfeiltasten einen Messpunkt verschieben."
+            ></canvas>
+            <div id="stageEmpty" class="stage-empty">
+              Kamera starten oder ein Bild öffnen
+            </div>
+            <span class="local-badge">LOKAL</span>
+            <div id="pipetteMarker" class="pipette-marker" hidden>
+              <span></span>
+            </div>
+          </div>
+          <div id="videoControls" class="control-card" hidden>
+            <label for="videoSeek">Video-Zeitpunkt</label
+            ><output id="videoTime">0 s</output
+            ><input
+              id="videoSeek"
+              type="range"
+              min="0"
+              max="0"
+              step="0.1"
+              value="0"
+            />
+            <div class="action-grid two-columns">
+              <button id="videoPlay" class="secondary-button" type="button">
+                VIDEO ABSPIELEN</button
+              ><button id="saveImage" class="secondary-button" type="button">
+                BILD SPEICHERN
+              </button>
+            </div>
+          </div>
+
+          <p id="statusText" class="status-line" aria-live="polite">Bereit</p>
+          <p class="light-hint">
+            Licht-Hinweis: Schatten, Spiegelungen und warmes Raumlicht können
+            Aufnahme und Farberkennung verändern. Für wichtige Farben
+            gleichmäßig beleuchten.
+          </p>
+
+          <div class="action-grid three-columns">
+            <button
+              id="stillButton"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              STANDBILD
+            </button>
+            <button
+              id="pipetteButton"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              PIPETTE
+            </button>
+            <button
+              id="normalButton"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              NORMALANSICHT
+            </button>
+          </div>
+
+          <details class="fold-card" id="recognitionDetails">
+            <summary>FARBEN VERSCHIEBEN</summary>
+            <div class="fold-content">
+              <label for="recognitionSelect"
+                >Lesemodus für Testbilder und Whiteboards</label
+              >
+              <select id="recognitionSelect">
+                <option value="off">Aus – normaler Filter</option>
+                <option value="test_image">Testbild</option>
+                <option value="whiteboard">Whiteboard</option>
+              </select>
+              <p class="small-note">
+                Dieser Modus priorisiert Helligkeits- und
+                Blau-Gelb-Unterschiede. Farben wirken dann absichtlich weniger
+                natürlich.
+              </p>
+            </div>
+          </details>
+
+          <div class="zoom-row">
+            <button id="zoomOut" class="small-button" type="button" disabled>
+              −
+            </button>
+            <span id="zoomValue">Zoom 1×</span>
+            <button id="zoomReset" class="small-button" type="button" disabled>
+              1×
+            </button>
+            <button id="zoomIn" class="small-button" type="button" disabled>
+              +
+            </button>
+          </div>
+
+          <div class="result-card">
+            <div class="result-copy">
+              <p id="pipetteResult">
+                Pipette auswählen, dann über das Bild ziehen.
+              </p>
+              <div class="result-actions">
+                <button
+                  id="areaButton"
+                  class="text-button"
+                  type="button"
+                  disabled
+                >
+                  MESSFLÄCHE · MITTEL
+                </button>
+                <button
+                  id="torchButton"
+                  class="text-button"
+                  type="button"
+                  disabled
+                >
+                  TASCHENLAMPE
+                </button>
+              </div>
+            </div>
+            <div
+              id="colorSwatch"
+              class="color-swatch"
+              aria-label="Gemessene Farbe"
+            ></div>
+          </div>
+
+          <div class="action-grid two-columns compact-actions">
+            <button
+              id="saveNoteButton"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              MESSUNG MERKEN
+            </button>
+            <button
+              id="shareButton"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              FARBKARTE TEILEN
+            </button>
+          </div>
+          <div class="action-grid two-columns compact-actions">
+            <button
+              id="calibrate"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              LICHT KALIBRIEREN</button
+            ><button
+              id="compare"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              ZWEI FARBEN VERGLEICHEN</button
+            ><button id="saveStill" class="secondary-button" type="button">
+              BILD SPEICHERN</button
+            ><button
+              id="clearMedia"
+              class="secondary-button"
+              type="button"
+              disabled
+            >
+              MEDIUM SCHLIESSEN
+            </button>
+          </div>
+          <p id="calibrationStatus" class="small-note">
+            Keine Lichtkalibrierung aktiv
+          </p>
+          <p id="comparison" class="comparison" aria-live="polite"></p>
+          <p class="small-note">
+            Zum Messen tippen oder die Bildvorschau mit der Tastatur fokussieren
+            und Pfeiltasten verwenden. Ohne Pipette kannst du das vergrößerte
+            Bild verschieben. Die Verarbeitung ist für mobile Geräte auf 1600
+            Pixel an der längsten Seite begrenzt.
+          </p>
+        </section>
+
+        <section id="labPage" class="page" hidden aria-labelledby="labTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow accent-text">LOKAL · REPRODUZIERBAR</p>
+              <h1 id="labTitle">Offline-Testlabor</h1>
+              <p>
+                Prüfe Filter, Pipette, Zoom und Lesemodus mit den Testmotiven
+                aus der Android-App. Künstlich gezeichnete Testflächen, kein
+                medizinischer Sehtest.
+              </p>
+            </div>
+          </div>
+          <div id="labSamples" class="action-grid two-columns"></div>
+        </section>
+        <section
+          id="notesPage"
+          class="page"
+          hidden
+          aria-labelledby="notesTitle"
+        >
+          <h1 id="notesTitle">Farbmemos</h1>
+          <p>
+            Gemerkte Messungen enthalten Farbe, Namen und Messqualität. Es wird
+            kein Foto gespeichert.
+          </p>
+          <div id="notesList"></div>
+          <button id="deleteNotes" class="secondary-button" type="button">
+            ALLE FARBMEMOS LÖSCHEN
+          </button>
+        </section>
+
+        <section
+          id="aboutPage"
+          class="page"
+          hidden
+          aria-labelledby="aboutTitle"
+        >
+          <div class="hero-card">
+            <div class="hero-brand">
+              <img src="icon.svg" alt="" class="hero-icon" />
+              <div>
+                <p class="eyebrow accent-text">SEHPLUS COLORASSIST</p>
+                <h1 id="aboutTitle">Farben sicherer unterscheiden</h1>
+                <p>Lokal entwickelt für Alltag und mehr Selbstständigkeit.</p>
+              </div>
+            </div>
+            <div class="badge-row">
+              <span class="status-pill">OFFLINE</span
+              ><span class="status-pill">LOKAL</span
+              ><span class="status-pill">KEIN KONTO</span>
+            </div>
+          </div>
+
+          <details class="fold-card" open>
+            <summary>ÜBER SEHPLUS</summary>
+            <div class="fold-content">
+              <p>
+                SehPlus verarbeitet Kamera- und Bilddaten direkt auf deinem
+                Gerät. Die App hilft beim Unterscheiden von Farben, ersetzt aber
+                keine medizinische Untersuchung.
+              </p>
+              <div class="feature-grid">
+                <div class="feature-tile">
+                  <strong>FILTER</strong><span>Farben hervorheben</span>
+                </div>
+                <div class="feature-tile">
+                  <strong>PIPETTE</strong><span>Farbe messen</span>
+                </div>
+                <div class="feature-tile">
+                  <strong>STANDBILD</strong><span>Genau lesen</span>
+                </div>
+              </div>
+            </div>
+          </details>
+          <details class="fold-card">
+            <summary>HILFE &amp; NUTZUNG</summary>
+            <div class="fold-content">
+              <p>
+                Gleichmäßiges Licht, matte Flächen und eine ruhige Hand machen
+                die Farbmessung zuverlässiger. HEX- und RGB-Werte sind genauer
+                als ein ungefähres Farbetikett.
+              </p>
+              <button
+                id="helpButton"
+                class="secondary-button full-button"
+                type="button"
+              >
+                KURZE EINWEISUNG
+              </button>
+            </div>
+          </details>
+          <details class="fold-card">
+            <summary>VERWENDUNG</summary>
+            <div class="fold-content">
+              <p>
+                SehPlus ist eine unabhängige, offen bereitgestellte
+                Projektversion. Kamera und Bildauswahl werden nur nach deiner
+                Aktion verwendet; Speichern oder Teilen erfolgt ebenfalls nur
+                über deine gewählte Aktion.
+              </p>
+            </div>
+          </details>
+          <details class="fold-card">
+            <summary>ENTWICKLER &amp; VERSION</summary>
+            <div class="fold-content">
+              <span class="version-badge">VERSION 1.6.2 · WEB-APP</span>
+              <p>
+                Unabhängig entwickelt, um Farberkennung im Alltag einfacher zu
+                machen.
+              </p>
+              <p class="small-note">
+                Keine medizinische Diagnose · SehPlus ColorAssist v2
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <section
+          id="settingsPage"
+          class="page"
+          hidden
+          aria-labelledby="settingsTitle"
+        >
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow accent-text">PERSÖNLICH</p>
+              <h1 id="settingsTitle">Einstellungen</h1>
+              <p>Die Auswahl bleibt lokal auf diesem Gerät.</p>
+            </div>
+          </div>
+          <div class="settings-card">
+            <label class="switch-row"
+              ><span
+                ><strong>Automatisch verbessern</strong
+                ><small
+                  >Helligkeit und Kontrast vorsichtig ausgleichen.</small
+                ></span
+              ><input id="autoEnhance" type="checkbox" checked
+            /></label>
+            <label class="switch-row"
+              ><span
+                ><strong>Haptisches Feedback</strong
+                ><small>Kurze Rückmeldung bei wichtigen Aktionen.</small></span
+              ><input id="haptics" type="checkbox" checked
+            /></label>
+          </div>
+          <div class="settings-card">
+            <h2>Lokale Daten</h2>
+            <p>
+              Farbnamen und Einstellungen bleiben im Browser gespeichert. Bilder
+              werden nicht gespeichert, außer du lädst sie selbst herunter.
+            </p>
+            <button
+              id="clearData"
+              class="secondary-button full-button"
+              type="button"
+            >
+              LOKALE NOTIZEN LÖSCHEN
+            </button>
+          </div>
+          <div class="settings-card">
+            <h2>Akku und Performance</h2>
+            <p id="deviceStatus"></p>
+            <button id="refreshDevice" class="secondary-button" type="button">
+              STATUS AKTUALISIEREN</button
+            ><button id="testReport" class="secondary-button" type="button">
+              TESTBERICHT TEILEN
+            </button>
+          </div>
+          <div class="settings-card">
+            <h2>Auf Apple-Geräten</h2>
+            <p>
+              iPhone/iPad: Safari → Teilen → Zum Home-Bildschirm. Mac: Safari →
+              Ablage → Zum Dock hinzufügen. Nach dem vollständigen Laden ist die
+              App offline nutzbar. Kamera und optionales Teilen benötigen HTTPS.
+              Die Kamera wird im Hintergrund gestoppt; Dateiauswahl und
+              Testlabor funktionieren auch bei verweigertem Kamerazugriff.
+            </p>
+            <p>
+              Taschenlampe und hochauflösendes Standbild stehen nur bei
+              Browser-Unterstützung bereit. Sonst wird die Vorschau verwendet.
+              Bilder und Videos bleiben im Arbeitsspeicher und werden beim
+              Schließen freigegeben.
+            </p>
+            <p id="offlineStatus">Offline-Speicher wird vorbereitet …</p>
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Hauptnavigation">
+        <button
+          class="nav-button selected"
+          data-page="cameraPage"
+          type="button"
+        >
+          KAMERA
+        </button>
+        <button class="nav-button" data-page="labPage" type="button">
+          TESTLABOR
+        </button>
+        <button class="nav-button" data-page="notesPage" type="button">
+          MEMOS
+        </button>
+        <button class="nav-button" data-page="aboutPage" type="button">
+          ÜBER
+        </button>
+        <button class="nav-button" data-page="settingsPage" type="button">
+          EINSTELLUNGEN
+        </button>
+      </nav>
+    </div>
+    <dialog id="welcomeDialog">
+      <div class="dialog-card">
+        <p class="eyebrow accent-text">WILLKOMMEN BEI SEHPLUS</p>
+        <h2>Kurze Einweisung</h2>
+        <p>
+          SehPlus verarbeitet Kamera- und Bilddaten lokal. Gleichmäßiges Licht
+          und matte Flächen machen die Messung zuverlässiger.
+        </p>
+        <p>
+          Die Farbnamen sind Näherungen. Für wichtige Entscheidungen helfen
+          HEX/RGB, Messqualität und ein Vergleich unter dem passenden Licht.
+        </p>
+        <p class="small-note">
+          SehPlus ist ein unabhängiges persönliches Projekt und keine offizielle
+          Store-App.
+        </p>
+        <div class="action-grid two-columns">
+          <button id="welcomeLater" class="secondary-button" type="button">
+            SPÄTER
+          </button>
+          <button id="welcomeStart" class="primary-button" type="button">
+            ZUR KAMERA
+          </button>
+        </div>
+      </div>
+    </dialog>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#276852" />
+    <meta
+      name="description"
+      content="Weiter: Gedanken festhalten, nächste Schritte klären und mit einem kleinen Fokus anfangen. Lokal und ohne Konto."
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Weiter · Ein Schritt genügt</title>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <a class="brand" href="./"><img src="icon.svg" alt="" />Weiter</a
+        ><a href="../">Zur AppShelf-Seite</a>
+      </header>
+      <main>
+        <div class="hero">
+          <div class="eyebrow">Dein Alltag. Ein Schritt nach dem anderen.</div>
+          <h1>Was geht dir durch den Kopf?</h1>
+          <p class="muted">
+            Eine Retoure, ein Anruf, ein Formular: erst festhalten, dann den
+            nächsten kleinen Schritt finden.
+          </p>
+          <form id="captureForm" class="stack">
+            <label for="thought">Neuen Gedanken festhalten</label
+            ><textarea
+              id="thought"
+              maxlength="10000"
+              placeholder="Zum Beispiel: Paket zurückschicken"
+              required
+            ></textarea
+            ><button class="primary" id="captureButton">In die Inbox</button>
+          </form>
+        </div>
+        <p id="status" class="status" role="status"></p>
+        <button id="resumeEditor" hidden>
+          Ungespeicherte Bearbeitung fortsetzen
+        </button>
+        <section id="focus" class="card" hidden aria-labelledby="focusTitle">
+          <div class="eyebrow">Jetzt nur dieser Schritt</div>
+          <h2 id="focusTitle"></h2>
+          <div
+            id="focusClock"
+            class="timer-digits"
+            role="timer"
+            aria-live="off"
+          ></div>
+          <p id="focusState" role="status"></p>
+          <div class="row">
+            <button id="focusDone" class="primary">Aufgabe erledigt</button
+            ><button id="focusCancel">Timer beenden</button>
+          </div>
+        </section>
+        <nav id="tabs" class="tabs" aria-label="Aufgabenbereiche"></nav>
+        <section id="view" aria-live="polite"></section>
+        <details>
+          <summary>Sicherung, Erinnerungen und Datenschutz</summary>
+          <div class="stack">
+            <p>
+              Alle Gedanken, Fotos, Sprachnotizen und Timer bleiben in diesem
+              Browser. Kein Konto, keine Übertragung an einen Server.
+              Browserdaten können vom System gelöscht werden: Exportiere
+              regelmäßig eine Sicherung.
+            </p>
+            <div class="row">
+              <button id="export">JSON-Sicherung exportieren</button
+              ><label class="file-button"
+                >JSON-Sicherung importieren<input
+                  id="import"
+                  type="file"
+                  accept=".json,application/json"
+              /></label>
+            </div>
+            <p>
+              Das Sicherungsformat ist mit Weiter für Android kompatibel.
+              Vorhandene Einträge werden beim Import nie überschrieben.
+              Ungültige Dateien verändern keine Daten.
+            </p>
+            <div class="notice">
+              Erinnerungen erscheinen in dieser Web-App, solange sie geöffnet
+              ist, oder beim nächsten Öffnen. Safari kann bei geschlossener oder
+              ausgesetzter App keine verlässlichen lokalen Alarme ausführen. Der
+              Fokus-Timer merkt sich seine Endzeit und wird beim Zurückkehren
+              aktualisiert.
+            </div>
+            <button id="notificationPermission">
+              Benachrichtigungen im geöffneten Browser erlauben
+            </button>
+            <p id="notificationState" class="muted"></p>
+            <button id="persist">Dauerhaften lokalen Speicher anfragen</button
+            ><button id="clearAll" class="danger">
+              Alle lokalen Weiter-Daten löschen
+            </button>
+          </div>
+        </details>
+        <details>
+          <summary>Auf iPhone, iPad und Mac verwenden</summary>
+          <p>
+            Öffne diese Seite in Safari. Auf iPhone/iPad: Teilen → Zum
+            Home-Bildschirm → als Web-App öffnen. Auf dem Mac: Ablage → Zum Dock
+            hinzufügen (ab Safari 17). Nach dem ersten vollständigen Laden
+            funktioniert Weiter offline.
+          </p>
+          <p>
+            Geteilte Gedanken aus anderen Apps kannst du hier einfügen. Safari
+            unterstützt den direkten Empfang im System-Teilen-Menü nicht. Andere
+            unterstützende Browser können Weiter als Text-Teilen-Ziel anbieten.
+            Fotos und Audiodateien lassen sich direkt am Eintrag hinzufügen.
+          </p>
+        </details>
+      </main>
+      <footer>
+        <p id="offlineStatus">Offline-Speicher wird vorbereitet …</p>
+        <p>
+          Weiter 1.0.0 · Unabhängiges persönliches Projekt · Kein Backend, keine
+          Werbung, kein Tracking.
+        </p>
+      </footer>
+    </div>
+    <dialog id="editor">
+      <form id="editForm" class="stack">
+        <div class="dialog-head">
+          <h2>Gedanken klar machen</h2>
+          <button
+            type="button"
+            id="closeEditor"
+            aria-label="Bearbeitung schließen, Entwurf behalten"
+          >
+            Schließen
+          </button>
+        </div>
+        <label
+          >Gedanke<textarea
+            id="editThought"
+            maxlength="10000"
+            required
+          ></textarea></label
+        ><label
+          >Konkreter nächster Schritt<input
+            id="nextStep"
+            maxlength="10000"
+            placeholder="Zum Beispiel: Rücksendeetikett im Kundenkonto öffnen" /></label
+        ><label
+          >Notizen<textarea id="notes" maxlength="50000"></textarea>
+        </label>
+        <div class="grid">
+          <label
+            >Dauer in Minuten<input
+              id="minutes"
+              type="number"
+              min="1"
+              max="1440"
+              required /></label
+          ><label
+            >Wo passt es?<select id="place">
+              <option value="HOME">Zuhause</option>
+              <option value="OUTSIDE">Unterwegs</option>
+              <option value="ONLINE">Online</option>
+              <option value="WAITING">Warten auf</option>
+            </select></label
+          ><label
+            >Heute oder später?<select id="when">
+              <option value="today">Heute</option>
+              <option value="later">Später, ohne Datum</option>
+              <option value="date">Bestimmtes Datum</option>
+            </select></label
+          ><label id="dateLabel" hidden
+            >Datum<input id="dueDate" type="date"
+          /></label>
+        </div>
+        <p id="suggestion" class="notice" hidden></p>
+        <label
+          >Erinnerung<select id="reminder">
+            <option value="none">Keine</option>
+            <option value="today">Heute (in einer Stunde)</option>
+            <option value="tomorrow">Morgen um 9 Uhr</option>
+            <option value="custom">Datum und Uhrzeit</option>
+          </select></label
+        ><label id="reminderLabel" hidden
+          >Erinnerungszeit<input id="reminderAt" type="datetime-local"
+        /></label>
+        <p class="muted">
+          Vorschläge gelten erst mit „Klar machen“. Erinnerungen können im
+          Browser verzögert erscheinen.
+        </p>
+        <div id="attachments"></div>
+        <div class="row">
+          <label class="file-button"
+            >Foto / Audiodatei hinzufügen<input
+              id="attachmentInput"
+              type="file"
+              accept="image/*,audio/*" /></label
+          ><button id="record" type="button">Sprachnotiz aufnehmen</button>
+        </div>
+        <p id="attachmentStatus" role="status"></p>
+        <div class="row">
+          <button id="saveEdit" type="submit">Änderungen speichern</button
+          ><button id="clarify" class="primary" type="button">
+            Klar machen</button
+          ><button id="discardEdit" type="button">
+            Bearbeitungsentwurf verwerfen
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="timerDialog">
+      <form id="timerForm" class="stack">
+        <h2>Wie lange möchtest du anfangen?</h2>
+        <div id="timerPresets" class="row"></div>
+        <label
+          >Minuten<input
+            id="timerMinutes"
+            type="number"
+            min="1"
+            max="1440"
+            value="5"
+            required /></label
+        ><button class="primary">Fokus starten</button
+        ><button id="closeTimer" type="button">Abbrechen</button>
+      </form>
+    </dialog>
+    <div id="toast" role="status" hidden></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

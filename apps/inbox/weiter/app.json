@@ -11,9 +11,12 @@
     "Fokus"
   ],
   "platform": [
-    "Android"
+    "Android",
+    "Web/PWA"
   ],
   "status": "published",
-  "updatedAt": "2026-11-02",
-  "notes": "Unabhängiges persönliches Projekt, keine offizielle Store-App. Die APK wird außerhalb des Play Stores verteilt. Inbox, nächste Schritte, Parkplatz, Fokus-Timer und lokale JSON-Sicherung benötigen kein Backend. Foto und Sprachnotiz sind optional; Erinnerungen benötigen erlaubte Benachrichtigungen und können durch Android verzögert werden."
+  "updatedAt": "2026-11-03",
+  "notes": "Unabhängiges persönliches Projekt, keine offizielle Store-App. Die APK wird außerhalb des Play Stores verteilt. Inbox, nächste Schritte, Parkplatz, Fokus-Timer und lokale JSON-Sicherung benötigen kein Backend. Foto und Sprachnotiz sind optional; Erinnerungen benötigen erlaubte Benachrichtigungen und können durch Android verzögert werden.",
+  "demoDir": "demo",
+  "webDescription": "Gedanken festhalten, nächste Schritte klären, Fotos und Sprachnotizen, Fokus und Android-kompatible JSON-Sicherung – vollständig lokal. Erinnerungen bei geöffneter Web-App oder beim nächsten Öffnen; Safari bietet keine garantierten lokalen Hintergrundalarme."
 }

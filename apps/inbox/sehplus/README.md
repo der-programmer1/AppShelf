@@ -34,3 +34,12 @@ Die Webversion kann direkt im Browser geöffnet und – wenn der Browser es unte
 ## Quellcode
 
 Der vollständige Quellcode liegt im Download `SehPlus-1.6.2-source.zip`.
+
+
+## Web-App für iPhone, iPad und Mac
+
+Auf der AppShelf-Detailseite führt **Web-App öffnen** zur vollständigen Browser-Version. Kamera, lokale Bilder und Videos, Farbfilter, Pipette, Lichtkalibrierung, Farbvergleich, Farbmemos und Offline-Testlabor. Direkt auf deinem Gerät. Kamera-Spezialfunktionen hängen vom Browser ab; die Verarbeitung ist auf 1600 Pixel begrenzt.
+
+Safari auf iPhone/iPad: Teilen → Zum Home-Bildschirm. Auf Mac ab Safari 17: Ablage → Zum Dock hinzufügen. Nach dem vollständigen Erstladen offline nutzbar. Keine Anmeldung und keine Medien-Uploads. Browserdaten sind vom Android-Speicher unabhängig.
+
+Das zusätzliche `SehPlus-1.6.2-web-source.zip` enthält alle Browser-Dateien und eine Anleitung mit den Plattformgrenzen. Android-APK und vorhandenes Android-Quellcode-ZIP bleiben unverändert.

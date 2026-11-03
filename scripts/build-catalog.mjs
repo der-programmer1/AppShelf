@@ -117,6 +117,7 @@ async function readApp(dirName) {
     status: manifest.status || "published",
     updatedAt,
     notes: manifest.notes || "",
+    webDescription: manifest.webDescription || "",
     qrCode: { href: qrHrefFor(slug), target: pageUrlFor(slug) },
     demoHref: hasDemo ? `apps/${encodeURIComponent(slug)}/demo/` : "",
     demoSourceDir: hasDemo ? demoDir : "",

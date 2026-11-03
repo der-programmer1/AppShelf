@@ -3,6 +3,18 @@
   "entries": [
     {
       "date": "2026-11-03",
+      "category": "Qualität",
+      "title": "Weiter: Android- und Webquellen in einem ZIP",
+      "summary": "Das vollständige Quellarchiv enthält jetzt beide Varianten von Weiter.",
+      "details": "Wer Weiter nachvollziehen oder weiterentwickeln möchte, findet die ausgelieferte Webversion mit Manifest und Offline-Dateien im selben ZIP wie das Android-Projekt.",
+      "app": "Weiter",
+      "appSlug": "weiter",
+      "version": "1.0.0",
+      "href": "apps/weiter/",
+      "linkLabel": "Weiter ansehen"
+    },
+    {
+      "date": "2026-11-03",
       "category": "Verbesserung",
       "title": "Alle AppShelf-Neuigkeiten an einem Ort",
       "summary": "Über den Neuigkeiten-Button findest du neue Apps, App-Updates und Änderungen an AppShelf auf einer eigenen Seite.",

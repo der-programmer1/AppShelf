@@ -17,7 +17,10 @@ archive = target / f'Weiter-{version}-source.zip'
 apk = target / f'Weiter-{version}.apk'
 parser = argparse.ArgumentParser()
 parser.add_argument('--check', action='store_true')
+parser.add_argument('--source-only', action='store_true', help='Repackage source without rebuilding or replacing the APK')
 options = parser.parse_args()
+if options.check and options.source_only:
+    parser.error('--check and --source-only are mutually exclusive')
 raw = subprocess.check_output(
     ['git', 'ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', '.'], cwd=project)
 files = sorted(set(name.decode('utf-8') for name in raw.split(b'\0') if name))
@@ -45,33 +48,45 @@ for name in files:
         assert not re.search(rb'/(?:workspace|Users|home)/', content), 'Local absolute path in source: ' + name
         assert not re.search(rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----', content), 'Private key in source'
 
-if not options.check:
+sources = {'Weiter/' + name: (project / name).read_bytes() for name in files}
+web = target / 'demo'
+required_web = {'index.html', 'manifest.webmanifest', 'sw.js', 'icon.svg'}
+web_files = sorted(web.iterdir())
+assert required_web <= {file.name for file in web_files}, 'The Web/PWA handoff is incomplete'
+for file in web_files:
+    assert file.is_file() and not file.is_symlink(), 'Expected a regular web asset: ' + file.name
+    assert re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', file.name), 'Unsafe web asset name'
+    sources['Weiter/web/' + file.name] = file.read_bytes()
+
+if not options.check and not options.source_only:
     built = project / 'app/build/outputs/apk/release/app-release.apk'
     assert built.is_file() and built.stat().st_size > 1024, 'Build a real APK before packaging'
     with zipfile.ZipFile(built) as zipped:
         assert zipped.testzip() is None, 'Built APK ZIP is corrupt'
         assert {'AndroidManifest.xml', 'classes.dex'} <= set(zipped.namelist()), 'Built APK is incomplete'
+if not options.check:
     target.mkdir(parents=True, exist_ok=True)
     temporary = archive.with_suffix('.zip.tmp')
     with zipfile.ZipFile(temporary, 'w', compression=zipfile.ZIP_DEFLATED) as output:
-        for name in files:
-            info = zipfile.ZipInfo('Weiter/' + name, date_time=(1980, 1, 1, 0, 0, 0))
+        for name, content in sorted(sources.items()):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = (0o755 if name == 'gradlew' else 0o644) << 16
-            output.writestr(info, (project / name).read_bytes())
+            info.external_attr = (0o755 if name == 'Weiter/gradlew' else 0o644) << 16
+            output.writestr(info, content)
     temporary.replace(archive)
+if not options.check and not options.source_only:
     temporary_apk = apk.with_suffix('.apk.tmp')
     shutil.copyfile(built, temporary_apk)
     temporary_apk.replace(apk)
 
 with zipfile.ZipFile(archive) as zipped:
     assert zipped.testzip() is None, 'Source ZIP is corrupt'
-    expected = {'Weiter/' + name for name in files}
+    expected = set(sources)
     assert len(zipped.namelist()) == len(expected) and set(zipped.namelist()) == expected, 'Source ZIP membership differs'
-    for name in files:
-        assert zipped.read('Weiter/' + name) == (project / name).read_bytes(), 'Source ZIP differs: ' + name
+    for name, content in sources.items():
+        assert zipped.read(name) == content, 'Source ZIP differs: ' + name
 with zipfile.ZipFile(apk) as zipped:
     assert zipped.testzip() is None, 'APK ZIP is corrupt'
     assert {'AndroidManifest.xml', 'classes.dex'} <= set(zipped.namelist()), 'APK is incomplete'
 assert apk.stat().st_size > 1024, 'APK is empty or suspiciously small'
-print(f'Package verified: {len(files)} matching source files, readable source ZIP, APK {apk.stat().st_size} bytes.')
+print(f'Package verified: {len(sources)} matching Android and web source files, readable source ZIP, APK {apk.stat().st_size} bytes.')

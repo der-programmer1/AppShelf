@@ -145,3 +145,7 @@ Auf der AppShelf-Detailseite führt **Web-App öffnen** zur vollständigen Brows
 Safari auf iPhone/iPad: Teilen → Zum Home-Bildschirm. Auf Mac ab Safari 17: Ablage → Zum Dock hinzufügen. Nach dem vollständigen Erstladen offline nutzbar. Keine Anmeldung und keine Medien-Uploads. Browserdaten sind vom Android-Speicher unabhängig.
 
 Das zusätzliche `Weiter-1.0.0-web-source.zip` enthält alle Browser-Dateien und eine Anleitung mit den Plattformgrenzen. Android-APK und vorhandenes Android-Quellcode-ZIP bleiben unverändert.
+
+### Vollständiges Quellarchiv
+
+Das Android-Quellarchiv enthält unter `Weiter/web/` auch die aktuelle Web-App mit Manifest, Service Worker und lokalen Assets. Die Webversion lässt sich über die AppShelf-Detailseite starten.

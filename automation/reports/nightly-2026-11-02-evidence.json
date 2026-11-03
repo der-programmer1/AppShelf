@@ -1,0 +1,103 @@
+{
+  "baseCommit": "2c13f755ec900992e0318c5e2bbe4c0c8e9d7aed",
+  "auditType": "static source and APK ZIP/binary-manifest inspection, no app execution",
+  "apps": [
+    {
+      "slug": "leistenplan",
+      "version": "1.0.1",
+      "webPlatformDeclared": false,
+      "demoDirectoryExists": false,
+      "apk": [
+        {
+          "file": "LeistenPlan-1.0.1.apk",
+          "bytes": 912474,
+          "crcPassed": true,
+          "manifest": {
+            "versionCode": 2,
+            "versionName": "1.0.1",
+            "compileSdkVersion": 36,
+            "compileSdkVersionCodename": "16",
+            "package": "de.appshelf.leistenplan",
+            "platformBuildVersionCode": 36,
+            "platformBuildVersionName": 16
+          }
+        }
+      ],
+      "source": [
+        {
+          "file": "LeistenPlan-1.0.1-source.zip",
+          "bytes": 68501,
+          "crcPassed": true,
+          "entries": 22,
+          "webFiles": []
+        }
+      ]
+    },
+    {
+      "slug": "sehplus",
+      "version": "1.6.2",
+      "webPlatformDeclared": true,
+      "demoDirectoryExists": false,
+      "apk": [
+        {
+          "file": "SehPlus-1.6.2-debug.apk",
+          "bytes": 953024,
+          "crcPassed": true,
+          "manifest": {
+            "versionCode": 15,
+            "versionName": "1.6.2",
+            "compileSdkVersion": 36,
+            "compileSdkVersionCodename": "16",
+            "package": "com.sehplus.app",
+            "platformBuildVersionCode": 36,
+            "platformBuildVersionName": 16
+          }
+        }
+      ],
+      "source": [
+        {
+          "file": "SehPlus-1.6.2-source.zip",
+          "bytes": 1530289,
+          "crcPassed": true,
+          "entries": 56,
+          "webFiles": [
+            "SehPlus/web/index.html",
+            "SehPlus/web/sw.js",
+            "SehPlus/web/manifest.webmanifest"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "weiter",
+      "version": "1.0.0",
+      "webPlatformDeclared": false,
+      "demoDirectoryExists": false,
+      "apk": [
+        {
+          "file": "Weiter-1.0.0.apk",
+          "bytes": 11466905,
+          "crcPassed": true,
+          "manifest": {
+            "versionCode": 1,
+            "versionName": "1.0.0",
+            "compileSdkVersion": 36,
+            "compileSdkVersionCodename": "16",
+            "package": "de.appshelf.weiter",
+            "platformBuildVersionCode": 36,
+            "platformBuildVersionName": 16
+          }
+        }
+      ],
+      "source": [
+        {
+          "file": "Weiter-1.0.0-source.zip",
+          "bytes": 101578,
+          "crcPassed": true,
+          "entries": 31,
+          "webFiles": []
+        }
+      ]
+    }
+  ]
+}

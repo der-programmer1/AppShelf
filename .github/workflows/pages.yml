@@ -1,31 +1,28 @@
 name: Build and publish AppShelf
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
-    paths:
-      - "apps/inbox/**"
-      - "site/**"
-      - "scripts/**"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
-  group: pages
+  group: ${{ github.event_name == 'pull_request' && format('pages-pr-{0}', github.event.pull_request.number) || 'pages' }}
   cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate catalogue
+    name: Validate Pages build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -35,14 +32,25 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Validate project manifests and build
         run: npm test
+      - name: Build Pages output before merging
+        if: github.event_name == 'pull_request'
+        env:
+          CI: "true"
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npm run build
 
   releases:
     name: Publish app files
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -54,6 +62,11 @@ jobs:
 
   pages:
     name: Build GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     needs: [validate, releases]
     runs-on: ubuntu-latest
     environment:
@@ -62,6 +75,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

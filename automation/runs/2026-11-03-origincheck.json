@@ -96,7 +96,9 @@
       "Linux WebKit"
     ],
     "physicalSafari": false,
-    "liveProvider": false
+    "liveProvider": false,
+    "headlessShellRevision": 1234,
+    "headlessOfflineIndicatorSetViaCDP": true
   },
   "backendTests": 21,
   "webUnitTests": 11,
@@ -122,7 +124,7 @@
   "autoMergeEnabled": false,
   "sourceZip": {
     "file": "apps/inbox/origincheck/OriginCheck-0.1.0-source.zip",
-    "size": 217655,
-    "sha256": "26049dba168cdb58a8331983541a09f4cbda9395c5262c7a549ce323c995501e"
+    "size": 218022,
+    "sha256": "2e543d3c4b5de8497d2e78db3bb38c0a291b1453b701d1bc88666df95ef98cd5"
   }
 }

@@ -5,5 +5,10 @@ self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('origincheck-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET'||!ALLOWED.has(event.request.url))return;
-  event.respondWith(fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(c=>c.put(event.request,copy)));}return response;}).catch(()=>caches.match(event.request)));
+  // Versioned static shell: serve installed bytes without waiting on an unavailable network.
+  // API requests and media are outside ALLOWED and never enter this cache.
+  event.respondWith(caches.open(CACHE).then(async cache=>{
+    const installed=await cache.match(event.request);if(installed)return installed;
+    const response=await fetch(event.request);if(response.ok)await cache.put(event.request,response.clone());return response;
+  }));
 });

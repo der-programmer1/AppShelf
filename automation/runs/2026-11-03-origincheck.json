@@ -98,7 +98,8 @@
     "physicalSafari": false,
     "liveProvider": false,
     "headlessShellRevision": 1234,
-    "headlessOfflineIndicatorSetViaCDP": true
+    "headlessOfflineIndicatorSetViaCDP": true,
+    "versionedShellCacheFirst": true
   },
   "backendTests": 21,
   "webUnitTests": 11,
@@ -124,7 +125,7 @@
   "autoMergeEnabled": false,
   "sourceZip": {
     "file": "apps/inbox/origincheck/OriginCheck-0.1.0-source.zip",
-    "size": 218022,
-    "sha256": "2e543d3c4b5de8497d2e78db3bb38c0a291b1453b701d1bc88666df95ef98cd5"
+    "size": 218273,
+    "sha256": "a67fbd3c11769cec1a30e8f4e5c5857056721f5afb99960b00b8184d32608063"
   }
 }

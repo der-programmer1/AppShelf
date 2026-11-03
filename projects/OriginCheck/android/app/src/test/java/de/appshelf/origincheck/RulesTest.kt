@@ -1,0 +1,20 @@
+package de.appshelf.origincheck
+
+import org.junit.Test
+import org.junit.Assert.*
+import org.json.JSONObject
+
+class RulesTest {
+ private fun fixture(verdict:String="inconclusive",band:String="niedrig")=JSONObject().put("schemaVersion",1).put("verdict",verdict).put("confidenceBand",band).put("summary","Nur ein ausdrücklich gekennzeichneter Parser-Test, keine Live-Analyse.").put("signals",org.json.JSONArray()).put("limitations",org.json.JSONArray(listOf("Testvertrag."))).put("analyzedAt","2026-11-03T08:00:00Z").put("providerStatus","ok")
+ private fun rejected(block:()->Unit){try{block();fail("Expected rejection")}catch(_:IllegalArgumentException){}catch(_:org.json.JSONException){}}
+ @Test fun fourVerdictsMapToGermanLabels(){for(v in Verdict.entries){assertEquals(v,Verdict.from(v.wire));assertTrue(v.label.isNotBlank())};assertEquals("Nicht eindeutig bestimmbar",Verdict.INCONCLUSIVE.label)}
+ @Test fun unknownVerdictRejected(){rejected{Verdict.from("definitely_ai")};rejected{Rules.parseResult(fixture("real").toString())}}
+ @Test fun allTrustBandsAndUnknownBand(){for(b in listOf("niedrig","mittel","hoch"))assertEquals(b,Rules.parseResult(fixture(band=b).toString()).confidenceBand);rejected{Rules.parseResult(fixture(band="99%").toString())}}
+ @Test fun inconclusiveIsAValidProviderResult(){assertEquals(Verdict.INCONCLUSIVE,Rules.parseResult(fixture().toString()).verdict)}
+ @Test fun providerErrorsNeverBecomeResults(){for(text in listOf("{}","not json",JSONObject().put("error",JSONObject().put("code","backend_not_configured")).toString(),fixture().put("providerStatus","failed").toString(),fixture().put("schemaVersion",2).toString()))rejected{Rules.parseResult(text)}}
+ @Test fun httpsRequiredForBackend(){assertEquals("https://github.com/service",Rules.backendUrl("https://github.com/service/"));assertEquals("https://localhost:8443",Rules.backendUrl("https://localhost:8443"));for(u in listOf("http://github.com","https://user:pass@github.com","https://github.com/?key=x","https://github.com/#a","not-url"))rejected{Rules.backendUrl(u)}}
+ @Test fun publicLinkSyntaxAndSocialFallback(){assertEquals("https://github.com/a.png",Rules.publicLink("https://github.com/a.png"));for(u in listOf("http://github.com/a","https://a:b@github.com/a","https://github.com:444/a","not-a-url"))rejected{Rules.publicLink(u)};assertTrue(Rules.isSocial("https://www.instagram.com/p/a"));assertTrue(Rules.isSocial("https://youtu.be/a"));assertFalse(Rules.isSocial("https://github.com/a.png"));assertTrue(Rules.SOCIAL_MESSAGE.startsWith("Dieser Link kann nicht direkt verarbeitet werden."))}
+ @Test fun sixDistinctFrameTimesAndDurationLimit(){assertEquals(listOf(5.0,15.0,25.0,35.0,45.0,55.0),Rules.frameTimes(60.0));assertEquals(6,Rules.frameTimes(180.0).distinct().size);for(t in listOf(0.0,-1.0,180.001,Double.NaN,Double.POSITIVE_INFINITY))rejected{Rules.frameTimes(t)}}
+ @Test fun actualSignaturesAndFileLimits(){val png=byteArrayOf(-119,80,78,71,13,10,26,10,0,0,0,13);val jpeg=byteArrayOf(-1,-40,-1,0,0,0,0,0,0,0,0,0);val mp4=byteArrayOf(0,0,0,24,102,116,121,112,105,115,111,109,0,0,0,0);assertEquals("image/png",Rules.validateFile("image/png",Limits.IMAGE_BYTES,png));assertEquals("image/jpeg",Rules.sniff(jpeg));assertEquals("video/mp4",Rules.validateFile("video/mp4",Limits.VIDEO_BYTES,mp4));rejected{Rules.validateFile("image/png",Limits.IMAGE_BYTES+1,png)};rejected{Rules.validateFile("video/mp4",Limits.VIDEO_BYTES+1,mp4)};rejected{Rules.validateFile("image/jpeg",20,png)};rejected{Rules.validateFile("image/png",0,png)};rejected{Rules.validateFile("image/png",10,ByteArray(12))}}
+ @Test fun resultRetainsSignalsAndLimitations(){val obj=fixture().put("signals",org.json.JSONArray().put(JSONObject().put("title","EXIF").put("status","nicht gefunden").put("explanation","Fehlende Metadaten sind kein KI-Beweis.")));val result=Rules.parseResult(obj.toString());assertEquals("nicht gefunden",result.signals.single().status);assertEquals(1,result.limitations.size);assertEquals(result.rawJson,Rules.parseResult(result.rawJson).rawJson)}
+}

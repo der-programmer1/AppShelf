@@ -45,6 +45,8 @@ Unbekannte Verdicts, ungültige JSON-Antworten, fehlender Schlüssel, Timeouts u
 
 ## Backend einrichten
 
+Für Render ist im AppShelf-Repository eine ausgefüllte `render.yaml` vorbereitet. Sie legt eine einzelne kostenpflichtige Instanz mit 0,5 CPU / 512 MB in Frankfurt an und fragt den OpenAI-Key ausschließlich bei Render ab. Im Render-Dashboard **New → Blueprint**, Repository `der-programmer1/AppShelf`, Branch `main`, Datei `render.yaml` wählen. Den angezeigten Preis prüfen und `OPENAI_API_KEY` direkt dort eingeben. Ein ChatGPT-Abo enthält kein OpenAI-API-Guthaben. Details, technische TLS-Anbindung und lokale Containerprüfung stehen in [backend/README.md](backend/README.md). Die Vorlage selbst ist noch kein laufendes Hosting-Deployment; eine öffentliche URL und Live-Analyse müssen danach tatsächlich getestet werden.
+
 Siehe [backend/README.md](backend/README.md). Node.js **22.23.0 oder neuer**, ein vertrauenswürdiges TLS-Zertifikat und eine tatsächliche Betreiberadresse sind erforderlich. Der Dienst liest den Anbieterzugang ausschließlich aus **`OPENAI_API_KEY` in seiner Serverumgebung**. APK, Web-App und Android-Quellcode kennen keinen Schlüssel. Standardmodell: `gpt-4.1-mini`, änderbar über `OPENAI_MODEL`. Modellzugang und Verfügbarkeit hängen vom eigenen OpenAI-Konto ab.
 
 Ohne API-Key startet der HTTPS-Dienst trotzdem; `/health` und Analyseanfragen liefern **503 / Analyse-Backend nicht konfiguriert**. Die Clients prüfen nach Zustimmung zuerst `/health`, damit bei fehlendem Schlüssel keine Medien hochgeladen werden. Ein bereiter Healthcheck bestätigt nur Konfiguration, keine erfolgreiche OpenAI-Verbindung.

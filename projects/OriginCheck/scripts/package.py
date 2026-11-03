@@ -16,7 +16,7 @@ files=sorted(set(name.decode() for name in raw.split(b'\0') if name))
 required={'README.md','.env.example','.gitignore','package.json','package-lock.json','android/gradlew','android/gradlew.bat',
  'android/gradle/wrapper/gradle-wrapper.jar','android/gradle/wrapper/gradle-wrapper.properties','android/app/build.gradle',
  'android/app/src/main/AndroidManifest.xml','backend/server.js','backend/provider.js','backend/package-lock.json',
- 'backend/.env.example','backend/test/server.test.js','web/index.html','web/app.js','web/style.css','web/manifest.webmanifest','web/sw.js',
+ 'backend/.env.example','backend/test/server.test.js','backend/Dockerfile','backend/hosting/entrypoint.sh','backend/hosting/nginx.conf.template','backend/hosting/test_container.py','web/index.html','web/app.js','web/style.css','web/manifest.webmanifest','web/sw.js',
  'tests/browser.mjs','tests/web.test.js','scripts/package.py'}
 assert required <= set(files), 'Incomplete source handoff: '+str(required-set(files))
 assert any('/src/test/' in name for name in files) and any('/src/androidTest/' in name for name in files)

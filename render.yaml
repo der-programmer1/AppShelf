@@ -1,0 +1,27 @@
+# Render prompts for the secret; never add its value to this file.
+services:
+  - type: web
+    name: origincheck-backend
+    runtime: docker
+    plan: 0.5c-512mb
+    region: frankfurt
+    numInstances: 1
+    dockerfilePath: projects/OriginCheck/backend/Dockerfile
+    dockerContext: projects/OriginCheck/backend
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - projects/OriginCheck/backend/**
+        - render.yaml
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "10"
+      - key: MAX_UPLOAD_BYTES
+        value: "25000000"
+      - key: REQUEST_TIMEOUT_MS
+        value: "45000"

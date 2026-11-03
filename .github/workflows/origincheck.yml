@@ -13,6 +13,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  hosting:
+    name: OriginCheck hosting container
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the real hosting image without API credentials
+        run: docker build -t origincheck-hosting:0.1.0 projects/OriginCheck/backend
+      - name: Verified internal TLS, CORS, consent, limits and no fake results
+        run: python3 projects/OriginCheck/backend/hosting/test_container.py
   services:
     name: OriginCheck backend and browser tests
     runs-on: ubuntu-24.04

@@ -2,6 +2,33 @@
 
 Persönlicher, zustandsloser Node.js-Dienst für die optionalen Cloud-Analysen. Kein fertig gehosteter Dienst wird mitgeliefert. Originalbilder und Video-Kontaktbögen werden im RAM verarbeitet und nicht dauerhaft gespeichert. Die Originalvideos verlassen den Client nicht.
 
+## Einrichten mit Render
+
+Das Repository enthält eine vorbereitete `render.yaml` im AppShelf-Stamm und einen tatsächlich baubaren Hosting-Container. Ein laufender öffentlicher Dienst entsteht erst, wenn du den Blueprint in deinem eigenen Render-Konto anlegst und deinen OpenAI-Key dort eingibst.
+
+1. Bei [Render](https://dashboard.render.com/) mit GitHub anmelden und Zugriff auf `der-programmer1/AppShelf` erlauben.
+2. **New → Blueprint** wählen, dieses Repository und den Branch `main` auswählen; Blueprint-Datei: `render.yaml`.
+3. Render fragt nach `OPENAI_API_KEY`. Den Wert ausschließlich dort als Secret/Umgebungsvariable eintragen. Kein Wert steht im Blueprint (`sync: false`). Nicht an GitHub oder einen Chat übermitteln.
+4. Den angezeigten kostenpflichtigen Dienst mit **0,5 CPU / 512 MB** in Frankfurt prüfen und anlegen. Er ist für laufenden Betrieb vorgesehen; kostenlose, einschlafende Dienste können den ersten Analyseaufruf verzögern. OpenAI-API-Verbrauch wird zusätzlich über dein OpenAI-Konto abgerechnet; ein ChatGPT-Abo enthält kein API-Guthaben.
+5. Nach dem Deploy die von Render angezeigte öffentliche HTTPS-Service-URL kopieren. `/health` sollte bei vorhandener Konfiguration 200 liefern. Das bestätigt noch keinen erfolgreichen OpenAI-Aufruf; dafür muss zusätzlich ein echtes Medium analysiert werden.
+
+Der Blueprint setzt Bild-/Kontaktbogen-Uploads auf 25.000.000 Bytes, maximal zehn Analyseversuche pro Minute und 45 Sekunden Timeout. Eine Instanz hält das globale Budget verbindlich. CORS für `https://der-programmer1.github.io` ist bereits eingebaut. Automatische Backend-Deployments warten auf erfolgreiche GitHub-Prüfungen. Die Web-App bekommt erst nach bestätigtem öffentlichem Test die echte Backend-URL als Standard.
+
+Render verwaltet das öffentliche HTTPS-Zertifikat und leitet HTTP auf HTTPS um. Der Container nimmt Plattform-Anfragen an seinem internen HTTP-Port entgegen und reicht sie über **zertifikatsgeprüftes TLS** an den unveränderten, nur an Loopback gebundenen Node-Server weiter. Er vertraut keinen vom Client behaupteten Forwarded-Headern. Schlüssel/Zertifikat für die interne Verbindung werden bei jedem Containerstart frisch erzeugt und nie ins Image geschrieben. Das interne Zertifikat gilt zehn Jahre, wird bei jedem Neustart ersetzt und ist keine öffentliche Betreiberidentität. Der Containerport darf außerhalb einer TLS-terminierenden Hosting-Plattform nur privat für Entwicklung verwendet werden.
+
+Der Container läuft ohne Root. Nginx schreibt weder Zugriffslogs noch gepufferte Medien auf Datenträger; der Node-Dienst behält seine vorhandenen Kontrollen und Speicherbereinigung. In der Hosting-Variante teilen alle Clients das konservative globale Zehn-Anfragen-Budget, weil der Node-Server nur den privaten Proxy sieht. Keine API-Schlüssel in Docker-Build-Argumenten, Images oder GitHub-Secrets hinterlegen.
+
+Lokale Containerprüfung ohne OpenAI-Key:
+
+```sh
+docker build -t origincheck-hosting:0.1.0 backend
+python3 backend/hosting/test_container.py
+```
+
+Diese Befehle werden aus dem OriginCheck-Projektverzeichnis ausgeführt. Die Tests prüfen einen echten Container und ein echtes PNG, erwarten ohne API-Key korrekt 503 und verwenden keine erfundene Analyse. Ein Render-Deployment oder eine Live-OpenAI-Analyse wird dadurch nicht behauptet.
+
+Offizielle Grundlage, geprüft am 3. November 2026: [Render-Blueprint-Spezifikation](https://render.com/docs/blueprint-spec), [Render-TLS](https://render.com/docs/tls), [Environment Variables und Secrets](https://render.com/docs/configure-environment-variables), [Docker auf Render](https://render.com/docs/docker).
+
 ## Start
 
 Node.js ab 22.23.0 verwenden. `npm ci --ignore-scripts` ausführen, `.env.example` nach `.env` kopieren und **serverseitig** die Werte setzen. `.env` niemals committen oder an den Browser verteilen. Ein wirklich gültiges, zum Betreiber-Host passendes TLS-Zertifikat und sein privater Schlüssel müssen außerhalb veröffentlichter Artefakte vorhanden sein.

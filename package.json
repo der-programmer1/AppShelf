@@ -6,9 +6,13 @@
     "build": "node scripts/build-catalog.mjs --out dist",
     "validate": "node scripts/validate-catalog.mjs",
     "validate:artifacts": "node scripts/validate-project-artifacts.mjs",
-    "test": "npm run validate && npm run validate:artifacts && node scripts/test-catalog.mjs"
+    "test": "npm run validate && npm run validate:artifacts && node scripts/test-catalog.mjs && node --test scripts/test-updates.mjs scripts/test-automatic-updates.mjs",
+    "test:browser": "node scripts/test-news-browser.mjs"
   },
   "dependencies": {
     "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
   }
 }

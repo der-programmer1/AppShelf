@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout proposed changes
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,6 +35,30 @@ jobs:
           CI: "true"
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: npm run build
+
+  news-browser:
+    name: AppShelf news browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Build the real project-site layout
+        env:
+          CI: "true"
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: npm run build
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+      - name: Navigation, phone layout, keyboard and static history
+        run: npm run test:browser
 
   leistenplan:
     name: LeistenPlan Android tests

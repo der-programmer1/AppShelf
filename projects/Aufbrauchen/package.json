@@ -1,0 +1,14 @@
+{
+  "name": "aufbrauchen",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/model.test.js",
+    "test:browser": "node tests/browser.mjs",
+    "package": "python3 scripts/package.py",
+    "check:package": "python3 scripts/package.py --check"
+  },
+  "devDependencies": {"playwright":"1.62.1"},
+  "engines": {"node": ">=22.23.0"}
+}

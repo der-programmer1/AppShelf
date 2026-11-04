@@ -2,6 +2,18 @@
   "schemaVersion": 1,
   "entries": [
     {
+      "date": "2026-11-04",
+      "category": "Neue App",
+      "title": "Neu: Aufbrauchen für Vorrat und Einkauf",
+      "summary": "Behalte Lebensmittel und Mengen im Blick, verbrauche zuerst bald fällige Vorräte und übernimm deine Einkäufe anschließend wieder in den Vorrat.",
+      "details": "Android-App und vollständige Web-App für iPhone, iPad und Mac. Mit Datumsübersicht, exakten Teilmengen, Einkaufsliste, Vorlagen, Archiv, Papierkorb, Rückgängig und austauschbaren JSON-Sicherungen. Alle Kernfunktionen laufen lokal und offline. Die Datumsübersicht zeigt deine Eingaben und prüft keine Lebensmittel auf Frische. Kein Konto und kein Backend nötig.",
+      "app": "Aufbrauchen",
+      "appSlug": "aufbrauchen",
+      "version": "1.0.0",
+      "href": "apps/aufbrauchen/",
+      "linkLabel": "Aufbrauchen ansehen"
+    },
+    {
       "date": "2026-11-03",
       "category": "Verbesserung",
       "title": "Alle AppShelf-Neuigkeiten an einem Ort",

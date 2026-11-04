@@ -1,0 +1,11 @@
+**/build/
+**/.gradle/
+**/.kotlin/
+**/local.properties
+node_modules/
+test-results/
+__pycache__/
+*.jks
+*.keystore
+.env
+*.tmp

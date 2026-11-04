@@ -1,0 +1,868 @@
+{
+  "format": "aufbrauchen-golden-v1",
+  "cases": [
+    {
+      "name": "partial consumption uses exact thousandths",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "consume",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1250,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "closedAt": null,
+            "rev": 2
+          }
+        ],
+        "shopping": []
+      },
+      "error": false,
+      "id": "milk",
+      "value": 250
+    },
+    {
+      "name": "full consumption archives rather than deleting",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "consume",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "used",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "closedAt": 1793793600000,
+            "rev": 2
+          }
+        ],
+        "shopping": []
+      },
+      "error": false,
+      "id": "milk",
+      "value": 1500
+    },
+    {
+      "name": "over-consumption is rejected",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "consume",
+      "now": 1793793600000,
+      "expected": null,
+      "error": true,
+      "id": "milk",
+      "value": 1501
+    },
+    {
+      "name": "restore a deleted consumed item keeps history",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "trash",
+            "previousStatus": "used",
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600001,
+            "closedAt": 1793793600000,
+            "rev": 3
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "restore",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "used",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600002,
+            "closedAt": 1793793600000,
+            "rev": 4
+          }
+        ],
+        "shopping": []
+      },
+      "error": false,
+      "id": "milk"
+    },
+    {
+      "name": "reopen restores the last remaining amount",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "used",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "closedAt": 1793793600000,
+            "rev": 2
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "reopen",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600001,
+            "closedAt": null,
+            "rev": 3
+          }
+        ],
+        "shopping": []
+      },
+      "error": false,
+      "id": "milk"
+    },
+    {
+      "name": "existing matching purchase accumulates exact quantity",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "note": "",
+            "status": "open",
+            "previousStatus": null,
+            "stockId": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "rev": 1
+          }
+        ]
+      },
+      "operation": "shopping",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 2500,
+            "unit": "l",
+            "note": "",
+            "status": "open",
+            "previousStatus": null,
+            "stockId": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "rev": 2
+          }
+        ]
+      },
+      "error": false,
+      "id": "milk",
+      "newId": "unused-id"
+    },
+    {
+      "name": "purchase checkbox records bought state",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "note": "",
+            "status": "open",
+            "previousStatus": null,
+            "stockId": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "rev": 1
+          }
+        ]
+      },
+      "operation": "check",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "note": "",
+            "status": "checked",
+            "previousStatus": null,
+            "stockId": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "rev": 2
+          }
+        ]
+      },
+      "error": false,
+      "id": "shopping-1"
+    },
+    {
+      "name": "bought purchase transfers atomically",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "note": "",
+            "status": "checked",
+            "previousStatus": null,
+            "stockId": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "rev": 2
+          }
+        ]
+      },
+      "operation": "saveEditor",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          },
+          {
+            "id": "new-stock",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-08",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "",
+            "favorite": false,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793600000,
+            "updatedAt": 1793793600000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "note": "",
+            "status": "stocked",
+            "previousStatus": null,
+            "stockId": "new-stock",
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600001,
+            "rev": 3
+          }
+        ]
+      },
+      "error": false,
+      "draft": {
+        "kind": "item",
+        "id": "new-stock",
+        "baseRev": 0,
+        "sourceShopId": "shopping-1",
+        "sourceShopRev": 2,
+        "values": {
+          "name": "Milch",
+          "amount": "1",
+          "unit": "l",
+          "place": "fridge",
+          "category": "dairy",
+          "date": "2026-11-08",
+          "dateKind": "best_before",
+          "openedOn": "",
+          "note": "",
+          "favorite": "false"
+        }
+      }
+    },
+    {
+      "name": "a purchase cannot be transferred twice",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          },
+          {
+            "id": "new-stock",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-08",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "",
+            "favorite": false,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793600000,
+            "updatedAt": 1793793600000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": [
+          {
+            "id": "shopping-1",
+            "name": "Milch",
+            "quantityMilli": 1000,
+            "unit": "l",
+            "note": "",
+            "status": "stocked",
+            "previousStatus": null,
+            "stockId": "new-stock",
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600001,
+            "rev": 3
+          }
+        ]
+      },
+      "operation": "saveEditor",
+      "now": 1793793600000,
+      "expected": null,
+      "error": true,
+      "draft": {
+        "kind": "item",
+        "id": "another-stock",
+        "baseRev": 0,
+        "sourceShopId": "shopping-1",
+        "sourceShopRev": 2,
+        "values": {
+          "name": "Milch",
+          "amount": "1",
+          "unit": "l",
+          "place": "fridge",
+          "category": "dairy",
+          "date": "2026-11-08",
+          "dateKind": "best_before",
+          "openedOn": "",
+          "note": "",
+          "favorite": "false"
+        }
+      }
+    },
+    {
+      "name": "stale edits preserve current data",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1250,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "closedAt": null,
+            "rev": 2
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "saveEditor",
+      "now": 1793793600000,
+      "expected": null,
+      "error": true,
+      "draft": {
+        "kind": "item",
+        "id": "milk",
+        "baseRev": 1,
+        "sourceShopId": null,
+        "sourceShopRev": 0,
+        "values": {
+          "name": "Milch",
+          "amount": "2",
+          "unit": "l",
+          "place": "fridge",
+          "category": "dairy",
+          "date": "2026-11-08",
+          "dateKind": "best_before",
+          "openedOn": "",
+          "note": "",
+          "favorite": "false"
+        }
+      }
+    },
+    {
+      "name": "favorite toggles without modifying food",
+      "input": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": true,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793599000,
+            "closedAt": null,
+            "rev": 1
+          }
+        ],
+        "shopping": []
+      },
+      "operation": "favorite",
+      "now": 1793793600000,
+      "expected": {
+        "format": "aufbrauchen-backup",
+        "version": 1,
+        "revision": 0,
+        "settings": {
+          "soonDays": 3,
+          "onboarded": false
+        },
+        "items": [
+          {
+            "id": "milk",
+            "name": "Milch",
+            "quantityMilli": 1500,
+            "unit": "l",
+            "place": "fridge",
+            "category": "dairy",
+            "date": "2026-11-06",
+            "dateKind": "best_before",
+            "openedOn": null,
+            "note": "Für das Frühstück",
+            "favorite": false,
+            "status": "stock",
+            "previousStatus": null,
+            "createdAt": 1793793599000,
+            "updatedAt": 1793793600000,
+            "closedAt": null,
+            "rev": 2
+          }
+        ],
+        "shopping": []
+      },
+      "error": false,
+      "id": "milk"
+    }
+  ]
+}

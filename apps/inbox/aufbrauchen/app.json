@@ -1,0 +1,24 @@
+{
+  "name": "Aufbrauchen",
+  "slug": "aufbrauchen",
+  "projectType": "app",
+  "demoDir": "demo",
+  "version": "1.0.0",
+  "description": "Erst aufbrauchen, dann nachkaufen: Behalte Lebensmittel und Mengen im Blick, sieh bald erreichte Datumsangaben und übernimm gekaufte Artikel wieder in deinen Vorrat. Vollständig lokal, offline und ohne Konto – auf Android und im Browser.",
+  "category": "Alltag",
+  "tags": [
+    "Vorrat",
+    "Lebensmittel",
+    "Einkaufen",
+    "Offline",
+    "PWA"
+  ],
+  "platform": [
+    "Android",
+    "Web/PWA"
+  ],
+  "status": "published",
+  "updatedAt": "2026-11-04",
+  "notes": "Unabhängiges persönliches Projekt, keine offizielle Store-App. APK außerhalb des Play Stores. Keine Konten, Werbung, Analyse-Tracker oder Medien-Uploads. Die Datumsübersicht zeigt deine Eingaben und prüft keine Lebensmittel auf Frische. MHD und Verbrauchsdatum werden unterschieden. Keine Hintergrundalarme; keine automatische Löschung. Android und Browser tauschen Daten bewusst per JSON-Sicherung aus.",
+  "webDescription": "Vorrat, genaue Teilmengen, Datumsübersicht, Einkauf mit einmaliger Übernahme, Vorlagen, Archiv, Papierkorb und lokale JSON-Sicherung. Alle Kernfunktionen laufen nach dem ersten vollständigen Laden offline. Auf iPhone/iPad in Safari zum Home-Bildschirm hinzufügen."
+}

@@ -5,6 +5,9 @@
   "version": "1.0.0",
   "description": "Aus einem Gedanken wird der nächste machbare Schritt. Halte zum Beispiel eine Retoure, einen Einkauf oder einen Anruf fest, kläre die nächste kleine Handlung und behalte heute bis zu drei Schritte im Blick – lokal und ohne Benutzerkonto.",
   "category": "Alltag",
+  "sourcePath": "projects/Weiter",
+  "techStack": ["Kotlin", "Jetpack Compose", "JavaScript", "PWA"],
+  "preview": "01-start.png",
   "tags": [
     "offline",
     "Aufgaben",

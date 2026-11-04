@@ -3,104 +3,51 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Eine sortierte Sammlung eigener Apps, APKs und Quellarchive.">
-    <title>AppShelf — Meine Apps</title>
+    <meta name="description" content="Unabhängige Apps, Web-Apps und Tools mit Screenshots, Downloads und Quellcode.">
+    <title>AppShelf — Digitale Werkstatt</title>
     <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
+    <noscript><style>.catalog-controls { display: none }</style></noscript>
+    <script src="assets/filters.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Zum Inhalt</a>
-    <div class="site-shell">
-      <header class="topbar">
-        <a class="brand" href="./" aria-label="AppShelf Startseite">
-          <span class="brand-mark">✦</span>
-          <span>App<span class="brand-accent">Shelf</span></span>
-        </a>
-        <div class="topbar-actions"><div class="topbar-meta"><span class="status-dot"></span> Eigenes App-Archiv</div><a class="button button-secondary" href="updates/">Neuigkeiten</a></div>
-      </header>
-
-      <main id="main-content">
-        <section class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">DEIN DIGITALER WERKSTATT-SCHRANK</p>
-            <h1>Viele Ideen.<br><em>Ein klarer Ort.</em></h1>
-            <p class="hero-lede">Apps, Web-Apps, Spiele und Tools – sortiert, beschrieben und mit jedem Download griffbereit.</p>
-            <p class="project-note">Ein persönliches, unabhängiges Archiv eigener Projekte – keine offizielle Store-Plattform.</p>
-            <div class="hero-actions"><a class="button button-primary" href="#catalog-title">Apps entdecken</a><a class="button button-outline" href="updates/">Alle Neuigkeiten ansehen</a></div>
-          </div>
-          <div class="hero-orbit" aria-hidden="true">
-            <span class="orbit-line orbit-line-one"></span>
-            <span class="orbit-line orbit-line-two"></span>
-            <span class="orbit-card orbit-card-main">APK<br><strong>bereit</strong></span>
-            <span class="orbit-card orbit-card-small">01<br><strong>Idee</strong></span>
-          </div>
-        </section>
-
-        <section class="stats-row" aria-label="Katalogübersicht">
-          <div><strong id="stat-projects">—</strong><span>Projekte</span></div>
-          <div><strong id="stat-categories">—</strong><span>Kategorien</span></div>
-          <div><strong id="stat-updated">—</strong><span>Letztes Update</span></div>
-        </section>
-
-        <section class="updates-preview" aria-labelledby="updates-title">
-          <div class="section-heading">
-            <div><p class="eyebrow">DAS VERÄNDERT SICH</p><h2 id="updates-title">Fortschritt &amp; Neuigkeiten</h2></div>
-            <a class="updates-nav" href="updates/">Alle Neuigkeiten →</a>
-          </div>
-          <!-- LATEST_UPDATE -->
-        </section>
-
-        <section class="catalog-section" aria-labelledby="catalog-title">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">DIE SAMMLUNG</p>
-              <h2 id="catalog-title">Alle Projekte</h2>
-            </div>
-            <p id="catalog-count" class="result-count">Katalog wird geladen …</p>
-          </div>
-
-          <div class="toolbar">
-            <label class="search-field">
-              <span aria-hidden="true">⌕</span>
-              <input id="search-input" type="search" placeholder="Apps, Tags oder Probleme suchen …" autocomplete="off">
-            </label>
-            <label class="select-field">
-              <span class="sr-only">Projektart</span>
-              <select id="project-type-select"><option value="all">Alle Projektarten</option></select>
-            </label>
-            <label class="select-field">
-              <span class="sr-only">Kategorie</span>
-              <select id="category-select"><option value="all">Alle Kategorien</option></select>
-            </label>
-            <label class="select-field">
-              <span class="sr-only">Sortierung</span>
-              <select id="sort-select">
-                <option value="recent">Zuletzt aktualisiert</option>
-                <option value="name">Name A–Z</option>
-                <option value="category">Kategorie</option>
-              </select>
-            </label>
-          </div>
-
-          <div id="app-grid" class="app-grid" aria-live="polite"></div>
-          <div id="empty-state" class="empty-state" hidden>
-            <span class="empty-icon">⌁</span>
-              <h3>Kein passendes Projekt gefunden</h3>
-            <p>Versuche einen anderen Suchbegriff oder setze die Filter zurück.</p>
-            <button id="reset-filters" class="button button-secondary">Filter zurücksetzen</button>
-          </div>
-          <div id="load-error" class="load-error" hidden>
-            <h3>Katalog konnte nicht geladen werden</h3>
-            <p>Prüfe, ob der GitHub-Pages-Build erfolgreich durchgelaufen ist.</p>
-          </div>
-        </section>
-      </main>
-
-      <footer class="footer">
-        <span>AppShelf · eigene, unabhängige Projekte</span>
-        <a class="updates-nav" href="updates/">Fortschritt &amp; Neuigkeiten</a>
-      </footer>
-    </div>
-    <script src="assets/app.js" defer></script>
+    <header class="topbar shell">
+      <a class="brand" href="./" aria-label="AppShelf Startseite"><span aria-hidden="true">[ ]</span> AppShelf</a>
+      <nav aria-label="Hauptnavigation">
+        <a href="#catalog-title">Projekte</a>
+        <a href="<!-- REPOSITORY_URL -->">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+    <main id="main-content" class="shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow"><span aria-hidden="true">// </span>DIGITALE WERKSTATT</p>
+          <h1 id="page-title">Ein Regal für<br><em>eigene Projekte.</em></h1>
+          <p class="intro">Apps, Web-Apps und Tools zum Ausprobieren. Mit Downloads und Einblick in den Quellcode.</p>
+          <a class="button primary" href="#catalog-title">Projekte entdecken <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="inventory">
+          <p class="inventory-label"><span aria-hidden="true"></span> AppShelf / Inventar</p>
+          <!-- INVENTORY -->
+        </div>
+      </section>
+      <section class="catalog" aria-labelledby="catalog-title">
+        <div class="section-heading">
+          <div><p class="eyebrow"><span aria-hidden="true">01 / </span>SAMMLUNG</p><h2 id="catalog-title">Projekte</h2></div>
+          <p id="catalog-count" class="result-count" role="status"><!-- PROJECT_COUNT --></p>
+        </div>
+        <!-- CATALOG_CONTROLS -->
+        <div id="app-grid" class="app-grid">
+          <!-- PROJECT_CARDS -->
+        </div>
+        <div id="empty-state" class="empty-state" hidden>
+          <p>Keine passenden Projekte gefunden.</p>
+          <button id="reset-filters" class="button" type="button">Filter zurücksetzen</button>
+        </div>
+      </section>
+      <!-- ACTIVITY -->
+    </main>
+    <footer class="footer shell"><span>AppShelf · Unabhängige Projekte</span><a href="<!-- REPOSITORY_URL -->">GitHub <span aria-hidden="true">↗</span></a></footer>
   </body>
 </html>

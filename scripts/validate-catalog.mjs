@@ -55,18 +55,22 @@ for (const folder of folders) {
     ? (await readdir(screenshotsDir, { withFileTypes: true })).filter((entry) => entry.isFile() && screenshotPattern.test(entry.name))
     : [];
   if (status === "published" && !screenshots.length) fail(`${slug} needs at least one screenshot before publishing`);
+  if (manifest.preview !== undefined && !screenshots.some((entry) => entry.name === manifest.preview)) fail(`${slug} has an invalid preview file`);
 
+  const demoName = String(manifest.demoDir || "demo");
   if (projectType === "web-app" || manifest.demoDir) {
     if (manifest.demoDir && !/^[a-z0-9][a-z0-9_-]*$/i.test(manifest.demoDir)) fail(`${slug} has an invalid web-app directory`);
-    const demoDir = path.join(dir, String(manifest.demoDir || "demo"));
+    const demoDir = path.join(dir, demoName);
     if (!(await exists(path.join(demoDir, "index.html")))) {
       fail(`${slug} has a demo directory but no demo/index.html`);
     }
   }
 
   const files = await readdir(dir, { recursive: true });
-  const invalidDownloads = files.filter((file) => {
-    if (file === "screenshots" || file === "demo" || file.includes("screenshots/") || file.includes("demo/") || file.endsWith("app.json") || file.startsWith(".")) return false;
+  const invalidDownloads = files.filter((relative) => {
+    const file = relative.split(path.sep).join("/");
+    const topLevel = file.split("/")[0];
+    if (["screenshots", "demo", demoName].includes(topLevel) || file.endsWith("app.json") || file.startsWith(".")) return false;
     return !downloadExtensions.has(path.extname(file).toLowerCase());
   });
   if (invalidDownloads.length) fail(`${slug} contains unsupported downloadable file(s): ${invalidDownloads.join(", ")}`);

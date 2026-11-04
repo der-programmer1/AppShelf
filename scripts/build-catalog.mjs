@@ -1,9 +1,12 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
-import { loadUpdates, renderUpdates } from "./updates.mjs";
+import { loadUpdates } from "./updates.mjs";
 import { readPublicationHistory, collectAutomaticUpdates } from "./automatic-updates.mjs";
+import { renderHome, renderDetail } from "./render-catalog.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(root, "site");
@@ -12,10 +15,12 @@ const args = process.argv.slice(2);
 const outArg = args.indexOf("--out");
 const outDir = path.resolve(root, outArg >= 0 ? args[outArg + 1] : "dist");
 const allowedFiles = new Set([".apk", ".aab", ".zip", ".pdf", ".md"]);
-const allowedDemoFiles = new Set([".html", ".css", ".js", ".json", ".svg", ".png", ".jpg", ".jpeg", ".webp", ".ico", ".woff", ".woff2"]);
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const projectTypes = new Set(["app", "web-app", "game", "tool"]);
-const repository = process.env.GITHUB_REPOSITORY || "";
+const repository = process.env.GITHUB_REPOSITORY || "der-programmer1/AppShelf";
+const repositoryUrl = `https://github.com/${repository}`;
+const publishReleaseAssets = process.env.CI === "true" && Boolean(process.env.GITHUB_REPOSITORY);
+const branch = process.env.GITHUB_BASE_REF || (process.env.GITHUB_REF_TYPE === "branch" ? process.env.GITHUB_REF_NAME : "") || "main";
 
 const githubPagesBaseUrl = (value) => {
   const [owner, repo] = value.split("/", 2);
@@ -25,10 +30,12 @@ const githubPagesBaseUrl = (value) => {
     : `https://${owner}.github.io/${repo}`;
 };
 
-const pagesBaseUrl = String(process.env.PAGES_BASE_URL || githubPagesBaseUrl(repository) || "http://localhost:8080")
+const pagesBaseUrl = String(process.env.PAGES_BASE_URL || githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || "") || "http://localhost:8080")
   .trim().replace(/\/+$/, "");
-const pageUrlFor = (slug) => `${pagesBaseUrl}/apps/${encodeURIComponent(slug)}/`;
-const qrHrefFor = (slug) => `media/${encodeURIComponent(slug)}/qr-app-page.svg`;
+const makeQr = (slug, name, href) => ({
+  href: `media/${encodeURIComponent(slug)}/qr-${name}.svg`,
+  target: new URL(href, pagesBaseUrl + "/").href,
+});
 
 const exists = async (file) => { try { await stat(file); return true; } catch { return false; } };
 const readJson = async (file) => JSON.parse(await readFile(file, "utf8"));
@@ -56,29 +63,51 @@ const kindFor = (file) => {
   if (lower.endsWith(".md")) return "readme";
   return "other";
 };
-const encodePath = (value) => encodeURIComponent(value).replaceAll("%2F", "/");
 const releaseHref = (slug, version, filename) => {
-  const repo = process.env.GITHUB_REPOSITORY;
-  if (process.env.CI === "true" && repo) return `https://github.com/${repo}/releases/download/app-${slug}-v${version}/${encodeURIComponent(filename)}`;
+  const tag = encodeURIComponent(`app-${slug}-v${version}`);
+  if (publishReleaseAssets) return `${repositoryUrl}/releases/download/${tag}/${encodeURIComponent(filename)}`;
   return `downloads/${encodeURIComponent(slug)}/${encodeURIComponent(filename)}`;
 };
 
-async function collectFiles(dir, relative = "") {
+async function collectFiles(dir, demoDirName, relative = "") {
   const entries = await readdir(path.join(dir, relative), { withFileTypes: true });
   const result = [];
   for (const entry of entries) {
-    if (entry.name === "app.json" || entry.name === "screenshots" || entry.name === "demo" || entry.name.startsWith(".")) continue;
+    if (entry.name === "app.json" || entry.name === "screenshots" || entry.name === "demo" || entry.name === demoDirName || entry.name.startsWith(".")) continue;
     const next = path.join(relative, entry.name);
-    if (entry.isDirectory()) result.push(...await collectFiles(dir, next));
+    if (entry.isDirectory()) result.push(...await collectFiles(dir, demoDirName, next));
     else if (allowedFiles.has(path.extname(entry.name).toLowerCase())) result.push(next);
   }
   return result;
+}
+
+async function readSourceUrl(manifest, slug) {
+  if (manifest.repositoryUrl !== undefined) {
+    if (typeof manifest.repositoryUrl !== "string" || !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(manifest.repositoryUrl)) {
+      throw new Error(`${slug}: repositoryUrl must point to a GitHub repository`);
+    }
+    return manifest.repositoryUrl;
+  }
+  const source = manifest.sourcePath ?? `apps/inbox/${slug}`;
+  const segments = typeof source === "string" ? source.split("/") : [];
+  if (!segments.length || segments.some((part) => !/^[a-z0-9][a-z0-9._-]*$/i.test(part))
+      || !(await stat(path.join(root, ...segments)).catch(() => null))?.isDirectory()) {
+    throw new Error(`${slug}: sourcePath must point to a directory in this repository`);
+  }
+  return `${repositoryUrl}/tree/${encodeURIComponent(branch)}/${segments.map(encodeURIComponent).join("/")}`;
+}
+
+async function sha256(file) {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(file)) hash.update(chunk);
+  return hash.digest("hex");
 }
 
 async function readApp(dirName) {
   const dir = path.join(inboxDir, dirName);
   const manifestPath = path.join(dir, "app.json");
   const manifest = await exists(manifestPath) ? await readJson(manifestPath) : {};
+  if (manifest.status === "draft") return null;
   const name = String(manifest.name || dirName).trim();
   const slug = String(manifest.slug || dirName).trim();
   if (!slugPattern.test(slug)) throw new Error(`Invalid slug for ${dirName}: ${slug}`);
@@ -86,22 +115,39 @@ async function readApp(dirName) {
   if (!projectTypes.has(projectType)) throw new Error(`Invalid projectType for ${dirName}: ${projectType}`);
   const description = String(manifest.description || await readDescription(dir)).trim();
   const version = String(manifest.version || "0.1.0");
+  const demoDirName = String(manifest.demoDir || (projectType === "web-app" ? "demo" : "")).trim();
+  if (demoDirName && !/^[a-z0-9][a-z0-9_-]*$/i.test(demoDirName)) throw new Error(`${slug}: invalid demo directory`);
+  const demoDir = demoDirName ? path.join(dir, demoDirName) : "";
+  const hasDemo = Boolean(demoDir && await exists(path.join(demoDir, "index.html")));
+  const demoHref = hasDemo ? `apps/${encodeURIComponent(slug)}/demo/` : "";
+  const techStack = manifest.techStack ?? [];
+  if (!Array.isArray(techStack) || techStack.some((tech) => typeof tech !== "string" || !tech.trim() || tech.length > 36)) {
+    throw new Error(`${slug}: techStack must contain short technology names`);
+  }
   const files = [];
-  for (const relative of await collectFiles(dir)) {
+  let apkCount = 0;
+  for (const relative of (await collectFiles(dir, demoDirName)).sort()) {
     const filename = path.basename(relative);
-    files.push({ filename, relative, kind: kindFor(filename), href: releaseHref(slug, version, filename) });
+    const kind = kindFor(filename);
+    const href = releaseHref(slug, version, filename);
+    const file = { filename, relative: relative.split(path.sep).join("/"), kind, href };
+    if (kind === "apk") {
+      file.sha256 = await sha256(path.join(dir, relative));
+      file.qrCode = makeQr(slug, `apk-${++apkCount}`, href);
+    }
+    files.push(file);
   }
   const screenshots = [];
   const screenshotDir = path.join(dir, "screenshots");
   if (await exists(screenshotDir)) {
-    for (const file of await readdir(screenshotDir)) {
-      if (!/\.(png|jpe?g|webp|svg)$/i.test(file)) continue;
+    for (const entry of await readdir(screenshotDir, { withFileTypes: true })) {
+      const file = entry.name;
+      if (!entry.isFile() || !/\.(png|jpe?g|webp|svg)$/i.test(file)) continue;
       screenshots.push({ filename: file, href: `media/${encodeURIComponent(slug)}/${encodeURIComponent(file)}`, alt: `${name} Screenshot` });
     }
   }
-  const demoDirName = String(manifest.demoDir || (projectType === "web-app" ? "demo" : "")).trim();
-  const demoDir = demoDirName ? path.join(dir, demoDirName) : "";
-  const hasDemo = Boolean(demoDir && await exists(demoDir));
+  const preview = manifest.preview === undefined ? screenshots[0] : screenshots.find((shot) => shot.filename === manifest.preview);
+  if (!preview) throw new Error(`${slug}: published projects require a valid screenshot preview`);
   const manifestStat = await stat(manifestPath).catch(() => stat(dir));
   const updatedAt = manifest.updatedAt || manifestStat.mtime.toISOString();
   return {
@@ -118,8 +164,12 @@ async function readApp(dirName) {
     updatedAt,
     notes: manifest.notes || "",
     webDescription: manifest.webDescription || "",
-    qrCode: { href: qrHrefFor(slug), target: pageUrlFor(slug) },
-    demoHref: hasDemo ? `apps/${encodeURIComponent(slug)}/demo/` : "",
+    techStack: [...new Set(techStack.map((tech) => tech.trim()))],
+    sourceUrl: await readSourceUrl(manifest, slug),
+    preview,
+    qrCode: makeQr(slug, "app-page", `apps/${encodeURIComponent(slug)}/`),
+    demoHref,
+    demoQrCode: hasDemo ? makeQr(slug, "web", demoHref) : null,
     demoSourceDir: hasDemo ? demoDir : "",
     files,
     screenshots,
@@ -130,67 +180,56 @@ async function copyLocalAssets(apps) {
   for (const app of apps) {
     const sourceDir = path.join(inboxDir, app.slug);
     const targetDir = path.join(outDir, "downloads", app.slug);
-    if (process.env.CI !== "true" || process.env.COPY_BINARIES === "1") {
+    if (!publishReleaseAssets || process.env.COPY_BINARIES === "1") {
       await mkdir(targetDir, { recursive: true });
       for (const file of app.files) await cp(path.join(sourceDir, file.relative), path.join(targetDir, file.filename));
     }
     const screenshotDir = path.join(sourceDir, "screenshots");
-    if (await exists(screenshotDir)) {
-      const targetScreens = path.join(outDir, "media", app.slug);
-      await mkdir(targetScreens, { recursive: true });
-      for (const shot of app.screenshots) await cp(path.join(screenshotDir, shot.filename), path.join(targetScreens, shot.filename));
-    }
     const targetScreens = path.join(outDir, "media", app.slug);
     await mkdir(targetScreens, { recursive: true });
-    const qrSvg = await QRCode.toString(app.qrCode.target, {
-      type: "svg",
-      errorCorrectionLevel: "M",
-      margin: 2,
-      width: 320,
-      color: { dark: "#15211d", light: "#fffdf8" },
-    });
-    await writeFile(path.join(targetScreens, "qr-app-page.svg"), qrSvg, "utf8");
+    for (const shot of app.screenshots) await cp(path.join(screenshotDir, shot.filename), path.join(targetScreens, shot.filename));
+    const qrCodes = [app.qrCode, app.demoQrCode, ...app.files.map((file) => file.qrCode)].filter(Boolean);
+    for (const code of qrCodes) {
+      const svg = await QRCode.toString(code.target, { type: "svg", errorCorrectionLevel: "M", margin: 4, width: 320 });
+      await writeFile(path.join(outDir, code.href), svg, "utf8");
+    }
     if (app.demoSourceDir) {
       await cp(app.demoSourceDir, path.join(outDir, "apps", app.slug, "demo"), { recursive: true });
     }
   }
 }
 
-const appPageTemplate = await readFile(path.join(siteDir, "app.html"), "utf8");
 // Validate before replacing the previous output, including direct Pages builds.
 const updates = await loadUpdates(path.join(siteDir, "updates.json"));
 const publicationHistory = readPublicationHistory(root);
 const generatedAt = new Date().toISOString();
-await rm(outDir, { recursive: true, force: true });
-await mkdir(outDir, { recursive: true });
-await cp(siteDir, outDir, { recursive: true });
+const homeTemplate = await readFile(path.join(siteDir, "index.html"), "utf8");
+const appPageTemplate = await readFile(path.join(siteDir, "app.html"), "utf8");
 const entries = (await readdir(inboxDir, { withFileTypes: true })).filter((entry) => entry.isDirectory());
 const apps = [];
 for (const entry of entries) {
   const app = await readApp(entry.name);
-  if (app.status !== "draft") apps.push(app);
+  if (app) apps.push(app);
 }
 apps.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)) || a.name.localeCompare(b.name, "de"));
-await copyLocalAssets(apps);
-await rm(path.join(outDir, "app.html"), { force: true });
-for (const app of apps) {
-  const pageDir = path.join(outDir, "apps", app.slug);
-  await mkdir(pageDir, { recursive: true });
-  await writeFile(path.join(pageDir, "index.html"), appPageTemplate.replaceAll("__APP_SLUG__", app.slug), "utf8");
-}
 const publicApps = apps.map(({ demoSourceDir, ...app }) => app);
-const newsEntries = collectAutomaticUpdates(root, publicApps, updates.entries, { history: publicationHistory, repository: repository || "der-programmer1/AppShelf" });
+const newsEntries = collectAutomaticUpdates(root, publicApps, updates.entries, { history: publicationHistory, repository });
 for (const update of updates.entries) {
   if (update.href !== "updates/" && !publicApps.some((app) => app.slug === update.appSlug)) throw new Error(`Updates link points to an unpublished app: ${update.appSlug}`);
 }
-const indexPath = path.join(outDir, "index.html");
-const updatesPath = path.join(outDir, "updates", "index.html");
-const homeTemplate = await readFile(indexPath, "utf8");
-const updatesTemplate = await readFile(updatesPath, "utf8");
-if (!homeTemplate.includes("<!-- LATEST_UPDATE -->") || !updatesTemplate.includes("<!-- UPDATES_HISTORY -->")) throw new Error("Updates render markers are missing");
-const updatedLabel = new Intl.DateTimeFormat("de-DE", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Berlin" }).format(new Date(generatedAt));
-await writeFile(indexPath, homeTemplate.replace("<!-- LATEST_UPDATE -->", renderUpdates(newsEntries, { latest: true })), "utf8");
-await writeFile(updatesPath, updatesTemplate.replace("<!-- UPDATES_HISTORY -->", renderUpdates(newsEntries)).replace("<!-- UPDATES_TIMESTAMP -->", `<time datetime="${generatedAt}">${updatedLabel} (Berlin)</time>`), "utf8");
+
+const home = renderHome(homeTemplate, publicApps, newsEntries, repositoryUrl, branch);
+await rm(outDir, { recursive: true, force: true });
+await mkdir(outDir, { recursive: true });
+await cp(path.join(siteDir, "assets"), path.join(outDir, "assets"), { recursive: true });
+await cp(path.join(siteDir, "updates"), path.join(outDir, "updates"), { recursive: true });
+await writeFile(path.join(outDir, "index.html"), home, "utf8");
+await copyLocalAssets(apps);
+for (const app of apps) {
+  const pageDir = path.join(outDir, "apps", app.slug);
+  await mkdir(pageDir, { recursive: true });
+  await writeFile(path.join(pageDir, "index.html"), renderDetail(appPageTemplate, app), "utf8");
+}
 await writeFile(path.join(outDir, "updates.json"), JSON.stringify({ ...updates, entries: newsEntries, generatedAt, automatic: true }, null, 2), "utf8");
 const catalog = { schemaVersion: 2, generatedAt, count: publicApps.length, apps: publicApps };
 await writeFile(path.join(outDir, "catalog.json"), JSON.stringify(catalog, null, 2), "utf8");

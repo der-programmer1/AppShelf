@@ -3,6 +3,18 @@
   "entries": [
     {
       "date": "2026-11-04",
+      "category": "Verbesserung",
+      "title": "AppShelf: Die digitale Werkstatt",
+      "summary": "Projektkarten mit echten Screenshots, Quellcode-Links und QR-Codes zum Öffnen oder Herunterladen.",
+      "details": "Katalog und Projektseiten stehen als statisches HTML bereit. Auf den Projektseiten gibt es SHA-256-Prüfsummen zu den veröffentlichten APKs.",
+      "app": "AppShelf",
+      "appSlug": "appshelf",
+      "version": "Website",
+      "href": "updates/",
+      "linkLabel": "Änderungen auf GitHub"
+    },
+    {
+      "date": "2026-11-04",
       "category": "Neue App",
       "title": "Neu: Aufbrauchen für Vorrat und Einkauf",
       "summary": "Behalte Lebensmittel und Mengen im Blick, verbrauche zuerst bald fällige Vorräte und übernimm deine Einkäufe anschließend wieder in den Vorrat.",

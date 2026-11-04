@@ -49,7 +49,7 @@ test("rejects empty values, control characters, internal paths and oversized tex
 });
 
 test("renders visitor text without interpreting HTML or script attributes", () => {
-  const html = renderUpdates([{ ...entry, title: '<img src=x onerror="alert(1)">', details: "<script>alert('x')</script> &" }]);
+  const html = renderUpdates([{ ...entry, title: '<img src=x onerror="alert(1)">', summary: "<script>alert('x')</script> &" }]);
   assert.ok(html.includes("&lt;img"));
   assert.ok(html.includes("&lt;script&gt;"));
   assert.ok(html.includes("&amp;"));
@@ -57,12 +57,14 @@ test("renders visitor text without interpreting HTML or script attributes", () =
   assert.ok(!html.includes("<script>"));
 });
 
-test("homepage shows only the newest entry and history keeps all details", () => {
-  const entries = [entry, { ...entry, title: "Älteres Update", date: "2026-11-01" }];
-  assert.ok(!renderUpdates(entries, { latest: true }).includes("Älteres Update"));
-  assert.ok(!renderUpdates(entries, { latest: true }).includes(entry.details));
-  assert.ok(renderUpdates(entries).includes(entry.details));
-  assert.ok(renderUpdates(entries).includes("Älteres Update"));
+test("the homepage timeline shows at most three entries and routes site changes to GitHub", () => {
+  const commits = "https://github.com/der-programmer1/AppShelf/commits/main/";
+  const entries = [entry, { ...entry, href: "updates/", title: "Website" }, entry, { ...entry, title: "Älteres Update" }];
+  const html = renderUpdates(entries, commits);
+  assert.equal(html.match(/class="activity-item"/g).length, 3);
+  assert.ok(html.includes(`href="${commits}">Website`));
+  assert.ok(!html.includes(entry.details));
+  assert.ok(!html.includes("Älteres Update"));
   assert.match(renderUpdates([]), /Noch keine veröffentlichten Änderungen/);
 });
 
@@ -83,7 +85,7 @@ test("malformed JSON aborts a direct Pages build before replacing previous outpu
   } finally { await rm(temp, { recursive: true, force: true }); }
 });
 
-test("build emits a static history, matching timestamp and working project-site links", async () => {
+test("build emits a compact static timeline, matching feed timestamp and a legacy redirect", async () => {
   const temp = await mkdtemp(path.join(os.tmpdir(), "appshelf-updates-build-"));
   try {
     const run = spawnSync(process.execPath, ["scripts/build-catalog.mjs", "--out", temp], { cwd: root, encoding: "utf8", env: { ...process.env, CI: "true", GITHUB_REPOSITORY: "der-programmer1/AppShelf" } });
@@ -100,11 +102,13 @@ test("build emits a static history, matching timestamp and working project-site 
     assert.equal(source.generatedAt, undefined);
     const home = await readFile(path.join(temp, "index.html"), "utf8");
     const history = await readFile(path.join(temp, "updates/index.html"), "utf8");
-    assert.ok(home.includes('href="updates/"'));
-    assert.ok(history.includes('<base href="../">'));
-    assert.ok(history.includes('href="./"'));
-    assert.ok(!home.includes("<!-- LATEST_UPDATE -->"));
-    assert.ok(!history.includes("<!-- UPDATES_HISTORY -->"));
+    assert.ok(!home.includes('href="updates/"'));
+    assert.equal(home.match(/class="activity-item"/g).length, Math.min(built.entries.length, 3));
+    assert.ok(home.includes('id="aktivitaet"'));
+    assert.ok(home.includes('href="https://github.com/der-programmer1/AppShelf/commits/main/"'));
+    assert.ok(history.includes('content="0; url=../#aktivitaet"'));
+    assert.ok(history.includes('href="../#aktivitaet"'));
+    assert.ok(!history.includes("activity-item"));
     assert.ok(!history.includes("<script"));
     assert.equal(new URL("assets/style.css", new URL("../", "https://example.org/AppShelf/updates/")).pathname, "/AppShelf/assets/style.css");
     for (const update of built.entries) {

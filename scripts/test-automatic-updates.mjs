@@ -32,6 +32,15 @@ test("same-version APK, guide and screenshot changes each produce real news", ()
   const entries = collect(); assert.equal(entries.length, 4); assert.match(entries[0].title, /Vorschauen/); assert.match(entries[1].title, /Anleitung/); assert.match(entries[2].summary, /Versionsnummer bleibt 1\.0\.0/);
 }));
 
+test("card presentation metadata alone does not announce an app update", () => fixture(({ write, commit, collect }) => {
+  write(manifest, app); commit();
+  const presentation = { techStack: ["Kotlin"], preview: "01.png", sourcePath: "projects/Testapp" };
+  write(manifest, { ...app, ...presentation }); commit();
+  assert.equal(collect().filter((entry) => entry.appSlug === app.slug).length, 1);
+  write(manifest, { ...app, ...presentation, description: "Eine überarbeitete Beschreibung." }); commit();
+  assert.equal(collect().filter((entry) => entry.appSlug === app.slug).length, 2);
+}));
+
 test("source-only development never claims a newly available APK", () => fixture(({ write, commit, collect }) => {
   write(manifest, app); commit(); write("projects/Testapp/app/Main.kt", "source update"); commit();
   assert.match(collect()[0].title, /Projekt weiterentwickelt/); assert.match(collect()[0].details, /nicht automatisch.*neue APK/);

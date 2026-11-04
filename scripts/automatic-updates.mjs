@@ -82,6 +82,11 @@ export function collectAutomaticUpdates(root, apps, manualEntries, { history = r
       const current = snapshot(commit.sha, prefix + "app.json");
       if (!current || current.status === "draft") continue;
       const before = snapshot(previous, prefix + "app.json");
+      if (before && paths.length === 1 && paths[0] === prefix + "app.json") {
+        const presentation = new Set(["preview", "techStack", "sourcePath", "repositoryUrl"]);
+        const fields = new Set([...Object.keys(current), ...Object.keys(before)]);
+        if ([...fields].every((field) => presentation.has(field) || JSON.stringify(current[field]) === JSON.stringify(before[field]))) continue;
+      }
       const name = safeText(current.name, app.name, 100);
       const version = safeText(current.version, "ohne Versionsangabe", 60);
       const description = safeText(current.description, "Funktionen, Downloads und Hinweise findest du auf der App-Seite.");

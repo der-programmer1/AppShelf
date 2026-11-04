@@ -42,28 +42,17 @@ export async function loadUpdates(file) {
 
 export const escapeHtml = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 
-export function renderUpdate(entry, { details = false } = {}) {
+export function renderUpdates(entries, commitsUrl) {
+  if (!entries.length) return "<p>Noch keine veröffentlichten Änderungen.</p>";
   const text = escapeHtml;
-  const date = new Intl.DateTimeFormat("de-DE", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${entry.date}T00:00:00Z`));
-  const source = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/commit\/[a-f0-9]{40}$/.test(entry.sourceUrl || "")
-    ? `<a class="update-source" href="${text(entry.sourceUrl)}" target="_blank" rel="noopener">Änderung auf GitHub <span aria-hidden="true">↗</span></a>` : "";
-  return `<article class="update-card"${entry.id ? ` id="${text(entry.id)}"` : ""}>
-    <div class="update-meta"><span class="update-category">${text(entry.category)}</span><time datetime="${text(entry.date)}">${text(date)}</time></div>
-    <h3>${text(entry.title)}</h3>
-    <p>${text(entry.summary)}</p>
-    ${details ? `<p class="update-details">${text(entry.details)}</p>` : ""}
-    <p class="update-project">${text(entry.app)}${entry.appSlug === "appshelf" ? "" : ` · Version ${text(entry.version)}`}</p>
-    <div class="update-actions"><a class="update-link" href="${text(entry.href)}">${text(entry.linkLabel)} <span aria-hidden="true">→</span></a>${details ? source : ""}</div>
-  </article>`;
-}
-
-export function renderUpdates(entries, { latest = false } = {}) {
-  if (!entries.length) return '<p class="updates-empty">Noch keine veröffentlichten Änderungen. Neue Fortschritte erscheinen hier nach ihrer Veröffentlichung.</p>';
-  if (latest) return renderUpdate(entries[0]);
-  const days = new Map();
-  for (const entry of entries) { if (!days.has(entry.date)) days.set(entry.date, []); days.get(entry.date).push(entry); }
-  return [...days].map(([day, items]) => {
-    const label = new Intl.DateTimeFormat("de-DE", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
-    return `<section class="updates-day" aria-labelledby="day-${escapeHtml(day)}"><h2 id="day-${escapeHtml(day)}">${escapeHtml(label)}</h2><div class="updates-day-list">${items.map((entry) => renderUpdate(entry, { details: true })).join("\n")}</div></section>`;
-  }).join("\n");
+  const date = new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
+  const items = entries.slice(0, 3).map((entry) => {
+    const source = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/commit\/[a-f0-9]{40}$/.test(entry.sourceUrl || "") ? entry.sourceUrl : commitsUrl;
+    const href = entry.href === "updates/" ? source : entry.href;
+    return `<li class="activity-item">
+      <div class="activity-date"><time datetime="${text(entry.date)}">${date.format(new Date(`${entry.date}T00:00:00Z`))}</time><br>${text(entry.category)}</div>
+      <div><a href="${text(href)}">${text(entry.title)}</a><p>${text(entry.summary)}</p></div>
+    </li>`;
+  });
+  return `<ol class="activity-list">${items.join("\n")}</ol>`;
 }

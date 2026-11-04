@@ -5,6 +5,9 @@
   "version": "1.0.0",
   "description": "Lokaler Trainings-Musik-Countdown: pausiert die aktuelle MediaSession und startet sie nach der Vorbereitung wieder.",
   "category": "Produktivität",
+  "sourcePath": "web-apps/gymdelay",
+  "techStack": ["Kotlin", "Jetpack Compose", "JavaScript", "PWA"],
+  "preview": "02-web.png",
   "tags": [
     "Musik",
     "Workout",

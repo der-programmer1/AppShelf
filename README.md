@@ -1,9 +1,9 @@
 # AppShelf
 
 AppShelf is a GitHub-Pages project library for apps, web apps, games, tools,
-APKs and source archives. It is intentionally buildless: GitHub Actions uses
-Node.js to scan `apps/inbox/`, create a searchable catalogue and deploy the
-generated `dist/` folder to GitHub Pages.
+APKs and source archives. GitHub Actions uses Node.js to scan `apps/inbox/`,
+render the catalogue and detail pages as static HTML, and deploy `dist/` to
+GitHub Pages. Search and sorting operate on the rendered cards in the browser.
 
 It is a personal archive for independent projects, not an official app store.
 Each project entry can contain its own description, screenshots, APK/AAB, source
@@ -11,8 +11,8 @@ downloads and an optional browser demo.
 
 ## Add an app
 
-Create a folder under `apps/inbox/` and add an `app.json`, a README, optional
-screenshots and the files visitors should download:
+Create a folder under `apps/inbox/` and add an `app.json`, a README, at least
+one screenshot for a published project, and the files visitors should download:
 
 ```text
 apps/inbox/my-app/
@@ -49,6 +49,11 @@ The minimum manifest is:
 `projectType` can be `app`, `web-app`, `game` or `tool`. Existing manifests
 without this field remain compatible and are treated as `app` entries.
 
+Set `techStack` to an array of technology labels, and optionally use `preview`
+to select the catalogue image by filename. The first screenshot is the default.
+Use `sourcePath` for a project directory in this repository or `repositoryUrl`
+for a separate GitHub repository. The default source link is the app's inbox folder.
+
 Push the folder to GitHub. The workflow validates every project and, for
 published Android entries, checks that a readable APK and source ZIP are
 present. It then creates or
@@ -70,17 +75,17 @@ python3 -m http.server 8080 --directory dist
 
 Open `http://localhost:8080` to preview the generated catalogue locally.
 
-The build copies each app preview into the Pages artifact and creates an SVG
-QR code for the app detail page. In GitHub Actions, the QR target is derived
-automatically from `GITHUB_REPOSITORY`.
+The build copies screenshots, writes APK SHA-256 digests, and creates SVG QR
+codes for web launches and APK downloads. In CI, APK codes point directly to the
+versioned GitHub Release asset. Set `PAGES_BASE_URL` when previewing on a phone
+or deploying to a custom domain. Otherwise the base is derived from
+`GITHUB_REPOSITORY` in Actions and defaults to `http://localhost:8080` locally.
 
-## Fortschritt & Neuigkeiten
+## Activity timeline
 
-The **Neuigkeiten** button on the homepage and app detail pages opens `updates/`:
-new apps, new versions, changes without a version bump, browser demos, guides,
-screenshots and website changes. The complete history is grouped by date, newest
-first. The homepage shows the latest change. Both are generated as static HTML,
-readable without JavaScript, signup, email addresses or tracking.
+The homepage shows the three latest published changes and links to the
+repository's commit history. The old `updates/` address redirects to this
+section.
 
 Every successful publication rebuilds the history from Git's first-parent
 history. A merged PR appears once, without intermediate work from unmerged
@@ -115,11 +120,7 @@ branches and generated output. Direct `npm run build` / Pages builds also reject
 an invalid feed. The build writes `dist/updates.json` with the combined history,
 stable entry IDs, an `automatic` flag and an
 automatic `generatedAt` timestamp matching `catalog.json`; do not add that
-timestamp to the source. No Android app version changes when only the changelog
-is updated. Every push to `main` triggers the existing publication workflow,
-including changes outside app directories. The history becomes visible with its
-successful deployment. To roll back the feature, revert its complete PR rather than removing
-only the JSON file required by the build.
+timestamp to the source. Every push to `main` triggers the publication workflow.
 
 ## GitHub Pages setup
 

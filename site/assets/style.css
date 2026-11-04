@@ -28,9 +28,11 @@ h1, h2, h3, p, dl, dd, figure { margin: 0; }
 .shell { width: min(72rem, calc(100% - 3rem)); margin-inline: auto; }
 .topbar, .footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1.25rem; }
 .topbar { min-height: 4.25rem; border-bottom: 1px solid var(--line); padding: .45rem 0; }
-.topbar nav { display: flex; flex-wrap: wrap; gap: 0 1.2rem; }
+.topbar nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0 1.2rem; }
 .topbar nav a, .footer a { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; color: var(--muted); font-size: .875rem; }
 .topbar nav a:hover, .footer a:hover { color: var(--accent); }
+.topbar nav .button-feedback { color: var(--text); }
+.topbar nav .button-feedback:hover { color: var(--accent-text); background: var(--accent); border-color: var(--accent); }
 .brand { display: inline-flex; min-height: 44px; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.25rem; text-decoration: none; }
 .brand span { font: 700 .9rem var(--mono); color: var(--accent); }
 .skip-link { position: fixed; z-index: 6; top: .75rem; left: .75rem; padding: .75rem 1rem; background: var(--accent); color: var(--accent-text); }

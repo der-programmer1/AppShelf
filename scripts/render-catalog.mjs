@@ -49,30 +49,47 @@ function qrDisclosure(targets, prefix = "") {
 const webTarget = (app) => ({ code: app.demoQrCode, label: "Web-App öffnen", href: app.demoHref });
 const apkTarget = (file) => ({ code: file.qrCode, label: isUnsigned(file) ? "Unsignierte APK" : "APK laden", href: file.href });
 
+function cardOptions(app, webIsSecondary, qr) {
+  const links = [
+    webIsSecondary && `<a href="${html(app.demoHref)}">Web-App öffnen</a>`,
+    app.githubUrl && `<a href="${html(app.githubUrl)}">Quellcode auf GitHub ${arrow}</a>`,
+  ].filter(Boolean);
+  if (!links.length && !qr) return "";
+  return `<details class="card-options" name="card-options">
+    <summary aria-label="Weitere Optionen für ${html(app.name)}">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="4" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="16" cy="10" r="1.6"/></svg>
+    </summary>
+    <div class="card-option-panel">
+      ${links.length ? `<div class="card-option-links">${links.join("")}</div>` : ""}
+      ${qr ? `<figure>
+        <img src="${html(qr.code.href)}" alt="QR-Code: ${html(qr.label)}" width="112" height="112" loading="lazy">
+        <figcaption>Am Smartphone scannen</figcaption>
+      </figure>` : ""}
+    </div>
+  </details>`;
+}
+
 function renderCard(app) {
   const name = html(app.name);
   const href = projectHref(app);
   const icon = app.iconHref
-    ? `<img src="${html(app.iconHref)}" alt="" width="44" height="44" decoding="async">`
+    ? `<img src="${html(app.iconHref)}" alt="" width="46" height="46" decoding="async">`
     : `<span class="icon-letter" aria-hidden="true">${html([...app.name][0] || "?")}</span>`;
   const apk = app.files.find((file) => file.kind === "apk" && !isUnsigned(file));
   const file = apk ?? (app.demoHref ? undefined : app.files.find((entry) => entry.kind !== "readme"));
   const primaryHref = file?.href || app.demoHref || href;
   const primaryLabel = file?.kind === "apk" ? (isUnsigned(file) ? "APK (unsigniert)" : "APK laden")
     : app.demoHref ? "Web-App öffnen" : file ? "Datei laden" : "Projektdetails";
-  const qrTargets = [...(file?.qrCode ? [apkTarget(file)] : []), ...(app.demoHref ? [webTarget(app)] : [])];
+  const qr = file?.qrCode ? apkTarget(file) : !file && app.demoQrCode ? webTarget(app) : null;
   return `<article class="app-card" aria-labelledby="title-${app.slug}">
-    <h2 id="title-${app.slug}" class="card-title"><a href="${href}">${icon}<span>${name}</span></a></h2>
-    <p class="card-description">${html(app.cardDescription)}</p>
-    ${badges(app.techStack.slice(0, 3), "Technologien")}
-    <div class="card-actions">
-      <div class="card-download${qrTargets.length ? " has-qr" : ""}">
+    <div class="card-cover">${icon}<span class="card-category">${html(app.category)}</span></div>
+    <div class="card-content">
+      <h3 id="title-${app.slug}" class="card-title"><a href="${href}">${name}</a></h3>
+      <p class="card-description">${html(app.cardDescription)}</p>
+      ${badges(app.techStack.slice(0, 3), "Technologien")}
+      <div class="card-actions">
         <a class="button primary" href="${html(primaryHref)}"${file ? " download" : ""}>${primaryLabel}</a>
-        ${qrDisclosure(qrTargets)}
-      </div>
-      <div class="card-links">
-        ${apk && app.demoHref ? `<a href="${html(app.demoHref)}">Web-App</a>` : ""}
-        <a href="${html(app.sourceUrl)}" aria-label="${name}: Quellcode auf GitHub">GitHub</a>
+        ${cardOptions(app, Boolean(apk && app.demoHref), qr)}
       </div>
     </div>
   </article>`;
@@ -113,7 +130,7 @@ export function renderDetail(template, app) {
       <div class="detail-meta"><span class="version">v${html(app.version)}</span>${dateLabel(app.updatedAt)}<span>${html(app.platform.join(" · "))}</span></div>
       <p class="intro">${html(app.description)}</p>
       ${badges(app.techStack, "Technologien")}
-      <a class="source-link" href="${html(app.sourceUrl)}">Quellcode auf GitHub ${arrow}</a>
+      ${app.githubUrl ? `<a class="source-link" href="${html(app.githubUrl)}">Quellcode auf GitHub ${arrow}</a>` : ""}
     </header>
     <section class="detail-section" aria-labelledby="download-title">
       <h2 id="download-title">Öffnen &amp; herunterladen</h2>

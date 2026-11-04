@@ -3,20 +3,43 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Unabhängige Apps zum Ausprobieren und Herunterladen.">
-    <title>AppShelf — Unabhängige Apps</title>
+    <meta name="description" content="Persönliches Archiv für eigene Android-Apps, Web-Tools und Software-Projekte.">
+    <title>AppShelf — Digitaler Werkstatt-Schrank</title>
     <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
   </head>
   <body>
-    <main class="shell">
-      <header class="hero">
-        <h1>App<span>Shelf</span></h1>
-        <p>Unabhängige Apps zum Ausprobieren und Herunterladen.</p>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="AppShelf Startseite">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span>App<span class="brand-accent">Shelf</span></span>
+        </a>
+        <span class="topbar-meta">Eigenes App-Archiv</span>
       </header>
-      <section id="catalog-title" class="app-grid" aria-label="Projekte">
-        <!-- PROJECT_CARDS -->
-      </section>
-    </main>
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div>
+            <p class="eyebrow">Dein digitaler Werkstatt-Schrank</p>
+            <h1 id="hero-title">Viele Ideen.<br><em>Ein klarer Ort.</em></h1>
+            <p class="hero-lede">AppShelf ist mein persönliches Archiv für eigene Android-Apps, Web-Tools und Software-Projekte. Hier kannst du sie ausprobieren und herunterladen.</p>
+            <a class="button primary hero-action" href="#catalog-title">Apps entdecken</a>
+          </div>
+          <div class="hero-orbit" aria-hidden="true">
+            <span class="orbit-line orbit-line-one"></span>
+            <span class="orbit-line orbit-line-two"></span>
+            <span class="orbit-card orbit-card-main">APK<br><strong>bereit</strong></span>
+            <span class="orbit-card orbit-card-small">01<br><strong>Idee</strong></span>
+          </div>
+        </section>
+        <section class="catalog-section" aria-labelledby="catalog-title">
+          <p class="eyebrow">Die Sammlung</p>
+          <h2 id="catalog-title" tabindex="-1">Alle Projekte</h2>
+          <div class="app-grid">
+            <!-- PROJECT_CARDS -->
+          </div>
+        </section>
+      </main>
+    </div>
   </body>
 </html>

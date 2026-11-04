@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { publicGithubUrl } from "./github-url.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const inboxDir = path.join(root, "apps", "inbox");
@@ -38,6 +39,7 @@ for (const folder of folders) {
   const status = String(manifest.status || "published").trim();
   if (folder.name !== "_template" && slug !== folder.name) fail(`${folder.name} must use the same slug in app.json`);
   if (!slugPattern.test(slug)) fail(`${folder.name} has an invalid slug: ${slug}`);
+  publicGithubUrl(manifest, slug);
   if (status !== "draft" && slugs.has(slug)) fail(`duplicate slug: ${slug}`);
   if (status !== "draft") slugs.add(slug);
   if (!String(manifest.name || "").trim()) fail(`${slug} is missing name`);

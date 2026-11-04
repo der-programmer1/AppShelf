@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { renderHome, renderDetail } from "./render-catalog.mjs";
+import { publicGithubUrl } from "./github-url.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(root, "site");
@@ -18,7 +19,6 @@ const projectTypes = new Set(["app", "web-app", "game", "tool"]);
 const repository = process.env.GITHUB_REPOSITORY || "der-programmer1/AppShelf";
 const repositoryUrl = `https://github.com/${repository}`;
 const publishReleaseAssets = process.env.CI === "true" && Boolean(process.env.GITHUB_REPOSITORY);
-const branch = process.env.GITHUB_BASE_REF || (process.env.GITHUB_REF_TYPE === "branch" ? process.env.GITHUB_REF_NAME : "") || "main";
 
 const githubPagesBaseUrl = (value) => {
   const [owner, repo] = value.split("/", 2);
@@ -79,22 +79,6 @@ async function collectFiles(dir, demoDirName, relative = "") {
   return result;
 }
 
-async function readSourceUrl(manifest, slug) {
-  if (manifest.repositoryUrl !== undefined) {
-    if (typeof manifest.repositoryUrl !== "string" || !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(manifest.repositoryUrl)) {
-      throw new Error(`${slug}: repositoryUrl must point to a GitHub repository`);
-    }
-    return manifest.repositoryUrl;
-  }
-  const source = manifest.sourcePath ?? `apps/inbox/${slug}`;
-  const segments = typeof source === "string" ? source.split("/") : [];
-  if (!segments.length || segments.some((part) => !/^[a-z0-9][a-z0-9._-]*$/i.test(part))
-      || !(await stat(path.join(root, ...segments)).catch(() => null))?.isDirectory()) {
-    throw new Error(`${slug}: sourcePath must point to a directory in this repository`);
-  }
-  return `${repositoryUrl}/tree/${encodeURIComponent(branch)}/${segments.map(encodeURIComponent).join("/")}`;
-}
-
 async function sha256(file) {
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(file)) hash.update(chunk);
@@ -109,6 +93,7 @@ async function readApp(dirName) {
   const name = String(manifest.name || dirName).trim();
   const slug = String(manifest.slug || dirName).trim();
   if (!slugPattern.test(slug)) throw new Error(`Invalid slug for ${dirName}: ${slug}`);
+  const githubUrl = publicGithubUrl(manifest, slug);
   const projectType = String(manifest.projectType || "app").trim();
   if (!projectTypes.has(projectType)) throw new Error(`Invalid projectType for ${dirName}: ${projectType}`);
   const description = String(manifest.description || await readDescription(dir)).trim();
@@ -169,7 +154,7 @@ async function readApp(dirName) {
     notes: manifest.notes || "",
     webDescription: manifest.webDescription || "",
     techStack: [...new Set(techStack.map((tech) => tech.trim()))],
-    sourceUrl: await readSourceUrl(manifest, slug),
+    ...(githubUrl ? { githubUrl } : {}),
     preview,
     qrCode: makeQr(slug, "app-page", `apps/${encodeURIComponent(slug)}/`),
     demoHref,

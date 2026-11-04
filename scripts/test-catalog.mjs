@@ -5,6 +5,8 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
+import { publicGithubUrl } from "./github-url.mjs";
+import { renderHome, renderDetail } from "./render-catalog.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const result = spawnSync(process.execPath, [path.join(root, "scripts", "build-catalog.mjs"), "--out", "dist-test"], {
@@ -44,17 +46,21 @@ for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
   await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
 }
 for (const app of catalog.apps) {
-  assert.match(app.sourceUrl, /^https:\/\/github\.com\//);
+  const manifest = JSON.parse(await readFile(path.join(root, "apps", "inbox", app.slug, "app.json"), "utf8"));
+  const githubUrl = publicGithubUrl(manifest, app.slug);
+  assert.equal(app.githubUrl, githubUrl || undefined);
+  assert.ok(!Object.hasOwn(app, "sourceUrl"));
   if (app.iconHref) {
     assert.ok(home.includes(`src="${app.iconHref}"`));
     await access(path.join(out, app.iconHref));
   }
   assert.ok(!home.includes(`src="${app.preview.href}"`));
-  assert.ok(home.includes(`href="${app.sourceUrl}"`));
+  if (githubUrl) assert.ok(home.includes(`href="${githubUrl}">Quellcode auf GitHub`));
   const preferredApk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
   if (preferredApk) assert.ok(home.includes(`href="${preferredApk.href}" download>APK laden`));
   const detail = await readFile(path.join(out, "apps", app.slug, "index.html"), "utf8");
   assert.ok(detail.includes(`<h1>${app.name}</h1>`));
+  assert.equal(detail.includes("Quellcode auf GitHub"), Boolean(githubUrl));
   assert.doesNotMatch(detail, /<script|<!-- [A-Z_]+ -->/);
   for (const file of app.files.filter((file) => file.kind === "apk")) {
     const bytes = await readFile(path.join(root, "apps", "inbox", app.slug, file.relative));
@@ -73,5 +79,30 @@ for (const app of catalog.apps) {
     assert.ok(detail.includes(app.demoHref));
   }
 }
+
+const publicRepo = "https://github.com/example/public-project";
+const privateRepo = "https://github.com/example/private-project";
+const homeTemplate = await readFile(path.join(root, "site", "index.html"), "utf8");
+const detailTemplate = await readFile(path.join(root, "site", "app.html"), "utf8");
+for (const [manifest, expected] of [
+  [{}, ""],
+  [{ sourcePath: "projects/Legacy", repositoryUrl: publicRepo }, ""],
+  [{ githubUrl: privateRepo, githubPrivate: true }, ""],
+  [{ githubUrl: publicRepo }, publicRepo],
+]) {
+  const githubUrl = publicGithubUrl(manifest, first.slug);
+  assert.equal(githubUrl, expected);
+  const app = { ...first, githubUrl };
+  for (const markup of [renderHome(homeTemplate, [app]), renderDetail(detailTemplate, app)]) {
+    assert.equal(markup.includes("Quellcode auf GitHub"), Boolean(expected));
+    assert.equal(markup.includes(`href="${publicRepo}"`), Boolean(expected));
+    assert.ok(!markup.includes(privateRepo));
+  }
+}
+for (const bad of ["javascript:alert(1)", "https://github.com.evil.invalid/a/b", "https://github.com/example/.."]) {
+  assert.throws(() => publicGithubUrl({ githubUrl: bad }, first.slug), /githubUrl/);
+}
+assert.throws(() => publicGithubUrl({ githubPrivate: "true", githubUrl: privateRepo }, first.slug), /githubPrivate/);
+
 await rm(path.join(root, "dist-test"), { recursive: true, force: true });
-console.log(`AppShelf tests passed: ${catalog.count} static projects, screenshots, QR targets and APK checksums verified.`);
+console.log(`AppShelf tests passed: ${catalog.count} static projects, repository visibility, QR targets and APK checksums verified.`);

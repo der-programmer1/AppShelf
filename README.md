@@ -52,8 +52,10 @@ without this field remain compatible and are treated as `app` entries.
 Set `cardDescription` to a short line for the catalogue card and `techStack`
 to an array of technology labels in priority order. The card shows up to three
 labels and uses `demo/icon.svg` when available.
-Use `sourcePath` for a project directory in this repository or `repositoryUrl`
-for a separate GitHub repository. The default source link is the app's inbox folder.
+Set `githubUrl` only for a public GitHub repository that should be linked.
+Omit it for projects without public source code. If `githubPrivate` is
+`true`, the build excludes the URL from the catalogue and detail pages even
+when one is present in the manifest. Legacy source-path fields do not add links.
 
 Push the folder to GitHub. The workflow validates every project and, for
 published Android entries, checks that a readable APK and source ZIP are

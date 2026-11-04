@@ -45,8 +45,12 @@ try {
       const plain = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 850 } });
       const page = await plain.newPage();
       await page.goto(base);
-      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "app-grid"]);
-      assert.equal(await page.getByRole("heading", { name: "AppShelf", level: 1 }).count(), 1);
+      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "catalog-section"]);
+      assert.equal(await page.getByRole("link", { name: "AppShelf Startseite" }).count(), 1);
+      assert.equal(await page.locator(".hero-orbit").getAttribute("aria-hidden"), "true");
+      assert.match(await page.locator(".hero-lede").textContent(), /persönliches Archiv für eigene Android-Apps, Web-Tools und Software-Projekte/);
+      await page.getByRole("link", { name: "Apps entdecken" }).click();
+      await page.waitForURL(url("#catalog-title"));
       assert.equal(await page.locator(".app-card").count(), apps.length);
       assert.equal(await page.locator("nav, footer, script, form").count(), 0);
       assert.equal((await plain.request.get(url("updates/"))).status(), 404);
@@ -56,34 +60,43 @@ try {
         const description = card.locator(".card-description");
         assert.equal(await description.textContent(), app.cardDescription);
         if (app.iconHref) {
-          const image = card.locator(".card-title img");
+          const image = card.locator(".card-cover img");
           await image.evaluate((node) => node.decode());
           assert.equal(await image.getAttribute("src"), app.iconHref);
         }
-        assert.equal(await card.getByRole("link", { name: /Quellcode auf GitHub/ }).getAttribute("href"), app.sourceUrl);
         assert.deepEqual(await card.locator(".badges li").allTextContents(), app.techStack.slice(0, 3));
+        assert.equal(await card.locator(".card-actions a:visible").count(), 1);
+        assert.equal(await card.locator(".card-actions .button.primary").count(), 1);
+        assert.equal(await card.locator(".card-option-panel details").count(), 0);
         const apk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
         if (apk) {
           assert.equal(await card.getByRole("link", { name: "APK laden", exact: true }).getAttribute("href"), apk.href);
-          assert.equal(await card.locator(".qr-targets a").first().getAttribute("href"), apk.href);
+          assert.equal(await card.locator(".card-option-panel img").getAttribute("src"), apk.qrCode.href);
         }
-        if (app.demoHref) assert.equal(await card.locator(`a[href="${app.demoHref}"]:visible`).count(), 1);
+        const github = card.locator(".card-option-links a").filter({ hasText: "Quellcode auf GitHub" });
+        assert.equal(await github.count(), app.githubUrl ? 1 : 0);
+        if (app.githubUrl) assert.equal(await github.getAttribute("href"), app.githubUrl);
+        if (apk && app.demoHref) assert.equal(await card.locator(`a[href="${app.demoHref}"]:visible`).count(), 0);
       }
       const card = page.getByRole("article", { name: first.name, exact: true });
       const box = (node) => [node.offsetTop, node.offsetLeft, node.offsetWidth, node.offsetHeight];
       const cardBox = await card.evaluate(box);
-      await card.locator("summary").press("Space");
-      const qr = card.locator(".qr-panel");
-      assert.equal(await qr.isVisible(), true);
+      const toggle = card.locator(".card-options summary");
+      await toggle.press("Space");
+      const options = card.locator(".card-option-panel");
+      assert.equal(await options.isVisible(), true);
       assert.deepEqual(await card.evaluate(box), cardBox);
-      for (const image of await qr.locator("img").all()) await image.evaluate((node) => node.decode());
-      assert.ok(await qr.getByRole("link", { name: /Web-App öffnen/ }).isVisible());
+      for (const image of await options.locator("img").all()) await image.evaluate((node) => node.decode());
+      assert.ok(await options.getByRole("link", { name: "Web-App öffnen" }).isVisible());
       await noOverflow(page);
-      await card.locator("summary").press("Space");
+      await toggle.press("Space");
+      assert.equal(await options.isVisible(), false);
       await card.getByRole("link", { name: first.name, exact: true }).click();
       await page.getByRole("heading", { name: first.name, exact: true }).waitFor();
       assert.equal(await page.locator("script").count(), 0);
-      assert.equal(await page.getByRole("link", { name: "Quellcode auf GitHub" }).getAttribute("href"), first.sourceUrl);
+      const source = page.getByRole("link", { name: "Quellcode auf GitHub" });
+      assert.equal(await source.count(), first.githubUrl ? 1 : 0);
+      if (first.githubUrl) assert.equal(await source.getAttribute("href"), first.githubUrl);
       const apks = first.files.filter((file) => file.kind === "apk");
       assert.equal(await page.locator(".checksum").count(), apks.length);
       for (const [index, file] of apks.entries()) {
@@ -121,7 +134,11 @@ try {
         await view.goto(base);
         await noOverflow(view);
         await view.locator(".app-card").last().scrollIntoViewIfNeeded();
-        for (const image of await view.locator(".card-title img").all()) await image.evaluate((node) => node.decode());
+        for (const image of await view.locator(".card-cover img").all()) await image.evaluate((node) => node.decode());
+        assert.equal(await view.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), "rgb(244, 241, 232)");
+        if (width === 1280) {
+          assert.match(await view.locator(".hero").evaluate((node) => getComputedStyle(node).gridTemplateColumns), / 390px$/);
+        }
         assert.ok(await view.locator(".card-description").evaluateAll((nodes) => nodes.every((node) => node.scrollWidth <= node.clientWidth + 1)));
         assert.equal(await view.evaluate(() => window.catalogLayoutShift), 0);
         if (screenshots && engine === "chromium" && [390, 1280].includes(width)) {
@@ -132,12 +149,15 @@ try {
       assert.deepEqual(errors, []);
       for (const app of apps.filter((project) => project.demoHref)) {
         await view.goto(base);
+        const project = view.getByRole("article", { name: app.name, exact: true });
+        const link = project.locator(`a[href="${app.demoHref}"]`);
+        if (!(await link.isVisible())) await project.locator(".card-options summary").click();
         const response = view.waitForResponse(url(app.demoHref));
-        await view.getByRole("article", { name: app.name, exact: true }).locator(`a[href="${app.demoHref}"]:visible`).click();
+        await link.click();
         assert.equal((await response).status(), 200);
       }
       await context.close();
-      console.log(`PASS ${engine}: two-section catalogue, direct downloads, QR, checksums and layout at four widths`);
+      console.log(`PASS ${engine}: workshop layout, one primary action, opt-in GitHub, QR and static rendering at four widths`);
     } finally {
       await browser.close();
     }

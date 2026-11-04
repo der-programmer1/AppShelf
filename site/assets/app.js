@@ -34,16 +34,23 @@ const renderCard = (app) => {
     : `<span class="app-card-mark">${escapeHtml((app.name || "A").slice(0, 1).toUpperCase())}</span>`;
   const tags = (app.tags || []).slice(0, 3).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   const projectType = projectTypeLabels[app.projectType || "app"] || "Projekt";
-  const demo = app.demoHref ? `<span class="card-action">Web-App ↗</span>` : "";
-  return `<a class="app-card" href="apps/${encodeURIComponent(app.slug)}/">
-    <div class="app-card-visual">${visual}<span class="app-card-category">${escapeHtml(app.category || "App")}</span></div>
-    <div class="app-card-body">
-      <h3 class="app-card-title">${escapeHtml(app.name)}</h3>
-      <p class="app-card-description">${escapeHtml(app.description || "Noch keine Beschreibung hinterlegt.")}</p>
-      <div class="tag-row"><span class="tag tag-type">${escapeHtml(projectType)}</span>${tags}</div>
-      <div class="app-card-meta"><span>v${escapeHtml(app.version || "—")}</span><span>${escapeHtml(formatDate(app.updatedAt))} · Öffnen →</span>${demo}</div>
-    </div>
-  </a>`;
+  const slug = encodeURIComponent(app.slug);
+  const name = escapeHtml(app.name);
+  const demo = app.demoHref
+    ? `<a class="button button-outline app-card-demo" href="${escapeHtml(app.demoHref)}" aria-label="${name} als Web-App öffnen">Web-App öffnen →</a>`
+    : "";
+  return `<article class="app-card">
+    <a class="app-card-detail" href="apps/${slug}/" aria-labelledby="app-title-${slug}">
+      <div class="app-card-visual">${visual}<span class="app-card-category">${escapeHtml(app.category || "App")}</span></div>
+      <div class="app-card-body">
+        <h3 class="app-card-title" id="app-title-${slug}">${name}</h3>
+        <p class="app-card-description">${escapeHtml(app.description || "Noch keine Beschreibung hinterlegt.")}</p>
+        <div class="tag-row"><span class="tag tag-type">${escapeHtml(projectType)}</span>${tags}</div>
+        <div class="app-card-meta"><span>v${escapeHtml(app.version || "—")}</span><span>${escapeHtml(formatDate(app.updatedAt))} · Details →</span></div>
+      </div>
+    </a>
+    ${demo}
+  </article>`;
 };
 
 const render = () => {

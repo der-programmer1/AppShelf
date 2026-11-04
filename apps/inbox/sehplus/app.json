@@ -5,6 +5,7 @@
   "version": "1.6.2",
   "description": "Offline-first Alltagshilfe für Menschen mit Rot-Grün-Schwäche oder erschwerter Farbdifferenzierung – mit Kamera, Farbfiltern, Pipette, Testlabor und lokaler PWA.",
   "category": "Barrierefreiheit",
+  "cardDescription": "Farben mit der Kamera erkennen.",
   "sourcePath": "web-apps/sehplus",
   "techStack": ["Java", "Camera2", "JavaScript", "PWA"],
   "preview": "02-web.png",

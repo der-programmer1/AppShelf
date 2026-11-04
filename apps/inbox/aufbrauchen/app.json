@@ -6,6 +6,7 @@
   "version": "1.0.0",
   "description": "Erst aufbrauchen, dann nachkaufen: Behalte Lebensmittel und Mengen im Blick, sieh bald erreichte Datumsangaben und übernimm gekaufte Artikel wieder in deinen Vorrat. Vollständig lokal, offline und ohne Konto – auf Android und im Browser.",
   "category": "Alltag",
+  "cardDescription": "Vorräte im Blick behalten.",
   "sourcePath": "projects/Aufbrauchen",
   "techStack": ["Kotlin", "Jetpack Compose", "JavaScript", "PWA"],
   "preview": "01-web.png",

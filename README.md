@@ -3,7 +3,7 @@
 AppShelf is a GitHub-Pages project library for apps, web apps, games, tools,
 APKs and source archives. GitHub Actions uses Node.js to scan `apps/inbox/`,
 render the catalogue and detail pages as static HTML, and deploy `dist/` to
-GitHub Pages. Search and sorting operate on the rendered cards in the browser.
+GitHub Pages. The catalogue renders and its download controls work without JavaScript.
 
 It is a personal archive for independent projects, not an official app store.
 Each project entry can contain its own description, screenshots, APK/AAB, source
@@ -49,8 +49,9 @@ The minimum manifest is:
 `projectType` can be `app`, `web-app`, `game` or `tool`. Existing manifests
 without this field remain compatible and are treated as `app` entries.
 
-Set `techStack` to an array of technology labels, and optionally use `preview`
-to select the catalogue image by filename. The first screenshot is the default.
+Set `cardDescription` to a short line for the catalogue card and `techStack`
+to an array of technology labels in priority order. The card shows up to three
+labels and uses `demo/icon.svg` when available.
 Use `sourcePath` for a project directory in this repository or `repositoryUrl`
 for a separate GitHub repository. The default source link is the app's inbox folder.
 
@@ -80,47 +81,6 @@ codes for web launches and APK downloads. In CI, APK codes point directly to the
 versioned GitHub Release asset. Set `PAGES_BASE_URL` when previewing on a phone
 or deploying to a custom domain. Otherwise the base is derived from
 `GITHUB_REPOSITORY` in Actions and defaults to `http://localhost:8080` locally.
-
-## Activity timeline
-
-The homepage shows the three latest published changes and links to the
-repository's commit history. The old `updates/` address redirects to this
-section.
-
-Every successful publication rebuilds the history from Git's first-parent
-history. A merged PR appears once, without intermediate work from unmerged
-branches. Entries have stable identities, dates, app links and optional links to
-the actual change on GitHub. Source-only work does not claim a new APK. Draft apps
-are excluded. Re-imports are not repeatedly announced as a new app. A rebuild
-alone does not create another announcement.
-
-For a detailed, reader-friendly feature description, optionally edit
-`site/updates.json` in the same PR. Its root is
-`{ "schemaVersion": 1, "entries": [...] }`. Each entry requires `date` (a real
-`YYYY-MM-DD` date), `category`, `title`, `summary`, `details`, `app`, `appSlug`,
-`version`, `href` and `linkLabel`. Supported categories are `Neue App`,
-`Verbesserung`, `Web-Version`, `Qualität` and `Wartung`. Use a local
-`apps/<appSlug>/` detail-page link or `updates/` for an AppShelf-wide change.
-Keep newest dates first and do not duplicate an existing change. Do not add
-speculative announcements, failed builds, personal data or internal file paths.
-An editorial story replaces the generic announcement for that app in the same
-publication; later changes are still detected automatically. No manual entry is
-required for the automatic history to update.
-An entry prepared in an open PR becomes public only after merge and deployment.
-
-Builds need a full Git checkout (`fetch-depth: 0` in Actions). For a shallow local
-clone, run `git fetch --unshallow` first. Missing history fails clearly instead of
-fabricating announcements. Git is the change record, not proof that every old
-commit was deployed separately: a successful Pages deployment presents the
-history accumulated in its published project state.
-
-`npm test` validates the feed and tests invalid JSON, dates, order, duplicates,
-links, escaped text, real temporary Git histories, same-version updates, merged
-branches and generated output. Direct `npm run build` / Pages builds also reject
-an invalid feed. The build writes `dist/updates.json` with the combined history,
-stable entry IDs, an `automatic` flag and an
-automatic `generatedAt` timestamp matching `catalog.json`; do not add that
-timestamp to the source. Every push to `main` triggers the publication workflow.
 
 ## GitHub Pages setup
 

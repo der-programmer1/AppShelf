@@ -6,6 +6,7 @@
   "version": "0.1.0",
   "description": "Ein weitergeleitetes Foto, ein kurzer Clip oder ein direkter öffentlicher Bildlink: Prüfe zunächst lokal technische Signale und erhalte nach ausdrücklicher Zustimmung eine vorsichtige Cloud-Einschätzung zur möglichen Herkunft. Kein Herkunftsbeweis; ein eigenes HTTPS-Analyse-Backend wird benötigt.",
   "category": "Werkzeuge",
+  "cardDescription": "Herkunftshinweise in Fotos und Clips.",
   "sourcePath": "projects/OriginCheck",
   "techStack": ["Kotlin", "Jetpack Compose", "Node.js", "PWA"],
   "preview": "01-preview.png",

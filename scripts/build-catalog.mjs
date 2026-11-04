@@ -4,8 +4,6 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
-import { loadUpdates } from "./updates.mjs";
-import { readPublicationHistory, collectAutomaticUpdates } from "./automatic-updates.mjs";
 import { renderHome, renderDetail } from "./render-catalog.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -114,12 +112,17 @@ async function readApp(dirName) {
   const projectType = String(manifest.projectType || "app").trim();
   if (!projectTypes.has(projectType)) throw new Error(`Invalid projectType for ${dirName}: ${projectType}`);
   const description = String(manifest.description || await readDescription(dir)).trim();
+  const cardDescription = manifest.cardDescription ?? description;
+  if (typeof cardDescription !== "string" || !cardDescription.trim() || /[\r\n]/.test(cardDescription)) {
+    throw new Error(`${slug}: cardDescription must be a single line of text`);
+  }
   const version = String(manifest.version || "0.1.0");
   const demoDirName = String(manifest.demoDir || (projectType === "web-app" ? "demo" : "")).trim();
   if (demoDirName && !/^[a-z0-9][a-z0-9_-]*$/i.test(demoDirName)) throw new Error(`${slug}: invalid demo directory`);
   const demoDir = demoDirName ? path.join(dir, demoDirName) : "";
   const hasDemo = Boolean(demoDir && await exists(path.join(demoDir, "index.html")));
   const demoHref = hasDemo ? `apps/${encodeURIComponent(slug)}/demo/` : "";
+  const iconName = hasDemo && await exists(path.join(demoDir, "icon.svg")) ? "icon.svg" : "";
   const techStack = manifest.techStack ?? [];
   if (!Array.isArray(techStack) || techStack.some((tech) => typeof tech !== "string" || !tech.trim() || tech.length > 36)) {
     throw new Error(`${slug}: techStack must contain short technology names`);
@@ -157,6 +160,7 @@ async function readApp(dirName) {
     projectType,
     version,
     description,
+    cardDescription: cardDescription.trim(),
     category: deriveCategory(manifest, description),
     tags: Array.isArray(manifest.tags) ? manifest.tags.map(String) : [],
     platform: Array.isArray(manifest.platform) ? manifest.platform.map(String) : [],
@@ -169,6 +173,7 @@ async function readApp(dirName) {
     preview,
     qrCode: makeQr(slug, "app-page", `apps/${encodeURIComponent(slug)}/`),
     demoHref,
+    iconHref: iconName ? demoHref + iconName : "",
     demoQrCode: hasDemo ? makeQr(slug, "web", demoHref) : null,
     demoSourceDir: hasDemo ? demoDir : "",
     files,
@@ -199,9 +204,6 @@ async function copyLocalAssets(apps) {
   }
 }
 
-// Validate before replacing the previous output, including direct Pages builds.
-const updates = await loadUpdates(path.join(siteDir, "updates.json"));
-const publicationHistory = readPublicationHistory(root);
 const generatedAt = new Date().toISOString();
 const homeTemplate = await readFile(path.join(siteDir, "index.html"), "utf8");
 const appPageTemplate = await readFile(path.join(siteDir, "app.html"), "utf8");
@@ -213,16 +215,10 @@ for (const entry of entries) {
 }
 apps.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)) || a.name.localeCompare(b.name, "de"));
 const publicApps = apps.map(({ demoSourceDir, ...app }) => app);
-const newsEntries = collectAutomaticUpdates(root, publicApps, updates.entries, { history: publicationHistory, repository });
-for (const update of updates.entries) {
-  if (update.href !== "updates/" && !publicApps.some((app) => app.slug === update.appSlug)) throw new Error(`Updates link points to an unpublished app: ${update.appSlug}`);
-}
-
-const home = renderHome(homeTemplate, publicApps, newsEntries, repositoryUrl, branch);
+const home = renderHome(homeTemplate, publicApps);
 await rm(outDir, { recursive: true, force: true });
 await mkdir(outDir, { recursive: true });
 await cp(path.join(siteDir, "assets"), path.join(outDir, "assets"), { recursive: true });
-await cp(path.join(siteDir, "updates"), path.join(outDir, "updates"), { recursive: true });
 await writeFile(path.join(outDir, "index.html"), home, "utf8");
 await copyLocalAssets(apps);
 for (const app of apps) {
@@ -230,7 +226,6 @@ for (const app of apps) {
   await mkdir(pageDir, { recursive: true });
   await writeFile(path.join(pageDir, "index.html"), renderDetail(appPageTemplate, app), "utf8");
 }
-await writeFile(path.join(outDir, "updates.json"), JSON.stringify({ ...updates, entries: newsEntries, generatedAt, automatic: true }, null, 2), "utf8");
 const catalog = { schemaVersion: 2, generatedAt, count: publicApps.length, apps: publicApps };
 await writeFile(path.join(outDir, "catalog.json"), JSON.stringify(catalog, null, 2), "utf8");
 await writeFile(path.join(outDir, "build-report.json"), JSON.stringify({ generatedAt: catalog.generatedAt, apps: publicApps.map((app) => ({ slug: app.slug, projectType: app.projectType, files: app.files.length, screenshots: app.screenshots.length, demo: Boolean(app.demoHref) })) }, null, 2), "utf8");

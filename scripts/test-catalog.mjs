@@ -1,4 +1,4 @@
-import { readFile, rm } from "node:fs/promises";
+import { access, readFile, rm } from "node:fs/promises";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
@@ -39,15 +39,20 @@ if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset w
 const out = path.join(root, "dist-test");
 const home = await readFile(path.join(out, "index.html"), "utf8");
 assert.equal((home.match(/<article class="app-card"/g) || []).length, catalog.count);
-assert.ok(home.includes(`id="stat-projects">${catalog.count}</dd>`));
-assert.ok(home.includes(`id="stat-categories">${new Set(catalog.apps.map((app) => app.category)).size}</dd>`));
-assert.match(home, /id="stat-updated"><time datetime="\d{4}-\d{2}-\d{2}"/);
-assert.doesNotMatch(home, /Katalog wird geladen|<!-- [A-Z_]+ -->/);
-assert.doesNotMatch(await readFile(path.join(out, "assets", "filters.js"), "utf8"), /fetch\(|XMLHttpRequest|catalog\.json/);
+assert.doesNotMatch(home, /Katalog wird geladen|<script|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
+for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
+  await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
+}
 for (const app of catalog.apps) {
   assert.match(app.sourceUrl, /^https:\/\/github\.com\//);
-  assert.ok(home.includes(`src="${app.preview.href}"`));
+  if (app.iconHref) {
+    assert.ok(home.includes(`src="${app.iconHref}"`));
+    await access(path.join(out, app.iconHref));
+  }
+  assert.ok(!home.includes(`src="${app.preview.href}"`));
   assert.ok(home.includes(`href="${app.sourceUrl}"`));
+  const preferredApk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
+  if (preferredApk) assert.ok(home.includes(`href="${preferredApk.href}" download>APK laden`));
   const detail = await readFile(path.join(out, "apps", app.slug, "index.html"), "utf8");
   assert.ok(detail.includes(`<h1>${app.name}</h1>`));
   assert.doesNotMatch(detail, /<script|<!-- [A-Z_]+ -->/);

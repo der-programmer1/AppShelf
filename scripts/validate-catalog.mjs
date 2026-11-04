@@ -1,7 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadUpdates } from "./updates.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const inboxDir = path.join(root, "apps", "inbox");
@@ -76,8 +75,4 @@ for (const folder of folders) {
   if (invalidDownloads.length) fail(`${slug} contains unsupported downloadable file(s): ${invalidDownloads.join(", ")}`);
 }
 
-const updates = await loadUpdates(path.join(root, "site", "updates.json"));
-for (const update of updates.entries) {
-  if (update.href !== "updates/" && !slugs.has(update.appSlug)) fail(`update links to unpublished app: ${update.appSlug}`);
-}
-console.log(`Catalogue validation passed: ${folders.length} project folder(s), ${slugs.size} unique slug(s), ${updates.entries.length} update(s).`);
+console.log(`Catalogue validation passed: ${folders.length} project folder(s), ${slugs.size} unique slug(s).`);

@@ -3,52 +3,20 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Unabhängige Apps, Web-Apps und Tools mit Screenshots, Downloads und Quellcode.">
-    <title>AppShelf — Digitale Werkstatt</title>
+    <meta name="description" content="Unabhängige Apps zum Ausprobieren und Herunterladen.">
+    <title>AppShelf — Unabhängige Apps</title>
     <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
-    <noscript><style>.catalog-controls { display: none }</style></noscript>
-    <script src="assets/filters.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#main-content">Zum Inhalt</a>
-    <header class="topbar shell">
-      <a class="brand" href="./" aria-label="AppShelf Startseite"><span aria-hidden="true">[ ]</span> AppShelf</a>
-      <nav aria-label="Hauptnavigation">
-        <a href="#catalog-title">Projekte</a>
-        <a href="<!-- REPOSITORY_URL -->">GitHub <span aria-hidden="true">↗</span></a>
-        <a class="button button-feedback" href="https://docs.google.com/forms/d/e/1FAIpQLSfJ87oi4RKHLdpADJJDSWYxP89kB7_6vRgHfsW7cfQtNuRYMA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" aria-label="Feedback über Google Forms (öffnet in einem neuen Tab)">Feedback <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
-      </nav>
-    </header>
-    <main id="main-content" class="shell">
-      <section class="hero" aria-labelledby="page-title">
-        <div>
-          <p class="eyebrow"><span aria-hidden="true">// </span>DIGITALE WERKSTATT</p>
-          <h1 id="page-title">Ein Regal für<br><em>eigene Projekte.</em></h1>
-          <p class="intro">Apps, Web-Apps und Tools zum Ausprobieren. Mit Downloads und Einblick in den Quellcode.</p>
-          <a class="button primary" href="#catalog-title">Projekte entdecken <span aria-hidden="true">↓</span></a>
-        </div>
-        <div class="inventory">
-          <p class="inventory-label"><span aria-hidden="true"></span> AppShelf / Inventar</p>
-          <!-- INVENTORY -->
-        </div>
+    <main class="shell">
+      <header class="hero">
+        <h1>App<span>Shelf</span></h1>
+        <p>Unabhängige Apps zum Ausprobieren und Herunterladen.</p>
+      </header>
+      <section id="catalog-title" class="app-grid" aria-label="Projekte">
+        <!-- PROJECT_CARDS -->
       </section>
-      <section class="catalog" aria-labelledby="catalog-title">
-        <div class="section-heading">
-          <div><p class="eyebrow"><span aria-hidden="true">01 / </span>SAMMLUNG</p><h2 id="catalog-title">Projekte</h2></div>
-          <p id="catalog-count" class="result-count" role="status"><!-- PROJECT_COUNT --></p>
-        </div>
-        <!-- CATALOG_CONTROLS -->
-        <div id="app-grid" class="app-grid">
-          <!-- PROJECT_CARDS -->
-        </div>
-        <div id="empty-state" class="empty-state" hidden>
-          <p>Keine passenden Projekte gefunden.</p>
-          <button id="reset-filters" class="button" type="button">Filter zurücksetzen</button>
-        </div>
-      </section>
-      <!-- ACTIVITY -->
     </main>
-    <footer class="footer shell"><span>AppShelf · Unabhängige Projekte</span><a href="<!-- REPOSITORY_URL -->">GitHub <span aria-hidden="true">↗</span></a></footer>
   </body>
 </html>

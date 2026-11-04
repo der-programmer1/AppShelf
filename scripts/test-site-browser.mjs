@@ -45,22 +45,29 @@ try {
       const plain = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 850 } });
       const page = await plain.newPage();
       await page.goto(base);
-      assert.equal(await page.locator("#stat-projects").textContent(), String(apps.length));
-      assert.equal(await page.locator("#stat-categories").textContent(), String(new Set(apps.map((app) => app.category)).size));
-      assert.equal(await page.locator("#stat-updated time").getAttribute("datetime"), first.updatedAt.slice(0, 10));
+      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "app-grid"]);
+      assert.equal(await page.getByRole("heading", { name: "AppShelf", level: 1 }).count(), 1);
       assert.equal(await page.locator(".app-card").count(), apps.length);
-      assert.equal(await page.locator(".catalog-controls").isVisible(), false);
-      assert.ok(await page.locator(".activity-item").count() <= 3);
-      assert.match(await page.getByRole("link", { name: "Commit-Historie" }).getAttribute("href"), /github\.com\/.+\/commits\//);
+      assert.equal(await page.locator("nav, footer, script, form").count(), 0);
+      assert.equal((await plain.request.get(url("updates/"))).status(), 404);
+      assert.equal((await plain.request.get(url("updates.json"))).status(), 404);
       for (const app of apps) {
         const card = page.getByRole("article", { name: app.name, exact: true });
-        const image = card.locator(".screen-frame img");
-        await image.scrollIntoViewIfNeeded();
-        await image.evaluate((node) => node.decode());
-        assert.equal(await image.getAttribute("src"), app.preview.href);
-        assert.equal(await card.getByRole("link", { name: "Quellcode auf GitHub" }).getAttribute("href"), app.sourceUrl);
-        assert.deepEqual(await card.locator(".badges li").allTextContents(), app.techStack);
-        if (app.demoHref) assert.equal(await card.getByRole("link", { name: "Web-App öffnen" }).getAttribute("href"), app.demoHref);
+        const description = card.locator(".card-description");
+        assert.equal(await description.textContent(), app.cardDescription);
+        if (app.iconHref) {
+          const image = card.locator(".card-title img");
+          await image.evaluate((node) => node.decode());
+          assert.equal(await image.getAttribute("src"), app.iconHref);
+        }
+        assert.equal(await card.getByRole("link", { name: /Quellcode auf GitHub/ }).getAttribute("href"), app.sourceUrl);
+        assert.deepEqual(await card.locator(".badges li").allTextContents(), app.techStack.slice(0, 3));
+        const apk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
+        if (apk) {
+          assert.equal(await card.getByRole("link", { name: "APK laden", exact: true }).getAttribute("href"), apk.href);
+          assert.equal(await card.locator(".qr-targets a").first().getAttribute("href"), apk.href);
+        }
+        if (app.demoHref) assert.equal(await card.locator(`a[href="${app.demoHref}"]:visible`).count(), 1);
       }
       const card = page.getByRole("article", { name: first.name, exact: true });
       const box = (node) => [node.offsetTop, node.offsetLeft, node.offsetWidth, node.offsetHeight];
@@ -90,8 +97,6 @@ try {
         await noOverflow(page);
         await row.locator(".qr summary").click();
       }
-      await page.goto(url("updates/"));
-      await page.waitForURL(url("#aktivitaet"));
       await plain.close();
 
       const context = await browser.newContext({ serviceWorkers: "block" });
@@ -106,7 +111,7 @@ try {
       const dataRequests = [];
       const errors = [];
       view.on("request", (request) => {
-        if (["fetch", "xhr"].includes(request.resourceType())) dataRequests.push(request.url());
+        if (["fetch", "xhr", "script"].includes(request.resourceType())) dataRequests.push(request.url());
       });
       view.on("pageerror", (error) => errors.push(error.message));
       const screenshots = process.env.APPSHELF_SITE_SCREENSHOTS;
@@ -116,35 +121,23 @@ try {
         await view.goto(base);
         await noOverflow(view);
         await view.locator(".app-card").last().scrollIntoViewIfNeeded();
-        for (const image of await view.locator(".screen-frame img").all()) await image.evaluate((node) => node.decode());
+        for (const image of await view.locator(".card-title img").all()) await image.evaluate((node) => node.decode());
+        assert.ok(await view.locator(".card-description").evaluateAll((nodes) => nodes.every((node) => node.scrollWidth <= node.clientWidth + 1)));
         assert.equal(await view.evaluate(() => window.catalogLayoutShift), 0);
         if (screenshots && engine === "chromium" && [390, 1280].includes(width)) {
           await view.screenshot({ path: path.join(screenshots, `catalogue-${width}.png`), fullPage: true });
         }
       }
-      const search = view.getByRole("searchbox", { name: "Suchen" });
-      await search.fill(first.name);
-      assert.equal(await view.locator(".app-card:visible").count(), 1);
-      await search.fill("absichtlich-kein-projekt");
-      assert.equal(await view.locator(".app-card:visible").count(), 0);
-      await view.getByRole("button", { name: "Filter zurücksetzen" }).click();
-      assert.equal(await view.locator(".app-card:visible").count(), apps.length);
-      assert.equal(await search.evaluate((node) => node === document.activeElement), true);
-      await view.getByLabel("Kategorie").selectOption(first.category);
-      assert.equal(await view.locator(".app-card:visible").count(), apps.filter((app) => app.category === first.category).length);
-      await view.getByLabel("Kategorie").selectOption("");
-      await view.getByLabel("Sortieren").selectOption("name");
-      assert.deepEqual(await view.locator(".card-title h3").allTextContents(), apps.map((app) => app.name).sort((a, b) => a.localeCompare(b, "de")));
       assert.deepEqual(dataRequests, []);
       assert.deepEqual(errors, []);
       for (const app of apps.filter((project) => project.demoHref)) {
         await view.goto(base);
         const response = view.waitForResponse(url(app.demoHref));
-        await view.getByRole("article", { name: app.name, exact: true }).getByRole("link", { name: "Web-App öffnen", exact: true }).click();
+        await view.getByRole("article", { name: app.name, exact: true }).locator(`a[href="${app.demoHref}"]:visible`).click();
         assert.equal((await response).status(), 200);
       }
       await context.close();
-      console.log(`PASS ${engine}: static HTML, QR, checksums, source, filters, links and layout at four widths`);
+      console.log(`PASS ${engine}: two-section catalogue, direct downloads, QR, checksums and layout at four widths`);
     } finally {
       await browser.close();
     }

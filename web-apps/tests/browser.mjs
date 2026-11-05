@@ -162,10 +162,11 @@ try {
       await check(
         `${engine}: every current app has a Web-App link on its detail page`,
         async () => {
-          for (const slug of ["gymdelay", "sehplus", "weiter", "origincheck"]) {
+          const { apps } = JSON.parse(await readFile(path.join(root, "catalog.json"), "utf8"));
+          for (const { slug } of apps.filter((app) => app.demoHref)) {
             await page.goto(base + `apps/${slug}/`);
             const link = page.getByRole("link", {
-              name: "Web-App öffnen ↗",
+              name: "Web-App öffnen",
               exact: true,
             });
             await link.waitFor();
@@ -898,3 +899,4 @@ try {
   disconnect = false;
   await new Promise((resolve) => server.close(resolve));
 }
+

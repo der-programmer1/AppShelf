@@ -1,0 +1,78 @@
+name: Validate AufgabenPilot
+on:
+  pull_request:
+    branches: [main, codex/catalog-previews-dark-mode-2026-11-05]
+    paths:
+      - projects/AufgabenPilot/**
+      - apps/inbox/aufgabenpilot/**
+      - .github/workflows/aufgabenpilot.yml
+permissions:
+  contents: read
+concurrency:
+  group: aufgabenpilot-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  web-api:
+    name: AufgabenPilot API and browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: projects/AufgabenPilot/backend/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install -r projects/AufgabenPilot/backend/requirements.txt
+          npm ci --ignore-scripts
+      - name: API contracts, real PDF rendering, limits, cleanup and access controls
+        working-directory: projects/AufgabenPilot/backend
+        run: python -m unittest discover -s tests -v
+      - name: Verify complete source package and linked frontend
+        run: python projects/AufgabenPilot/scripts/package.py --check
+      - name: Install real browser engines
+        run: npx playwright install --with-deps chromium webkit
+      - name: Real frontend and API workflow with an explicitly fake external provider
+        run: node projects/AufgabenPilot/tests/browser.mjs
+      - name: Preserve current appearance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aufgabenpilot-appearance
+          path: projects/AufgabenPilot/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Build standalone hosting image
+        run: docker build -t aufgabenpilot-ci projects/AufgabenPilot
+      - name: Verify actual container serves UI without a secret or a fabricated answer
+        run: |
+          docker run -d --name aufgabenpilot-ci -p 127.0.0.1:8088:8000 aufgabenpilot-ci
+          python - <<'PY'
+          import json, time, urllib.request, urllib.error
+          for attempt in range(60):
+              try:
+                  with urllib.request.urlopen("http://127.0.0.1:8088/health") as response:
+                      assert json.load(response)["status"] == "configuration_required"
+                  break
+              except OSError:
+                  time.sleep(.5)
+          else:
+              raise SystemExit("Container did not start")
+          with urllib.request.urlopen("http://127.0.0.1:8088/") as response:
+              assert b"AufgabenPilot" in response.read()
+          request = urllib.request.Request("http://127.0.0.1:8088/api/plan", data=b'{"consent":true,"text":"3x+5=20"}', headers={"Content-Type":"application/json"})
+          try:
+              urllib.request.urlopen(request)
+              raise AssertionError("Missing key must not produce an answer")
+          except urllib.error.HTTPError as error:
+              assert error.code == 503
+          PY
+      - name: Stop test container
+        if: always()
+        run: docker rm -f aufgabenpilot-ci || true

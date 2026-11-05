@@ -1,0 +1,24 @@
+services:
+  api:
+    build: .
+    env_file: backend/.env
+    restart: unless-stopped
+    expose: ["8000"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m"]
+    mem_limit: 768m
+    cpus: 1.0
+  https:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      PUBLIC_HOSTNAME: ${PUBLIC_HOSTNAME:?Set the real backend hostname}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  caddy_data:
+  caddy_config:

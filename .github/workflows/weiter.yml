@@ -63,6 +63,7 @@ jobs:
           arch: x86_64
           target: default
           profile: pixel_2
+          disk-size: 2048M
           working-directory: projects/Weiter
           emulator-options: -no-window -gpu swiftshader -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
@@ -71,3 +72,4 @@ jobs:
         run: python3 scripts/check-test-results.py
       - name: Verify complete source handoff
         run: python3 scripts/package.py --check
+

@@ -121,6 +121,7 @@ jobs:
           arch: x86_64
           target: default
           profile: pixel_2
+          disk-size: 2048M
           working-directory: projects/OriginCheck/android
           emulator-options: -no-window -gpu swiftshader -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true

@@ -51,11 +51,18 @@ without this field remain compatible and are treated as `app` entries.
 
 Set `cardDescription` to a short line for the catalogue card and `techStack`
 to an array of technology labels in priority order. The card shows up to three
-labels and uses `demo/icon.svg` when available.
+labels and shows the project's screenshot preview above its description.
+Set `preview` to a screenshot filename to choose the cover; otherwise the first
+screenshot is used. Selecting the preview opens the project details.
 Set `githubUrl` only for a public GitHub repository that should be linked.
 Omit it for projects without public source code. If `githubPrivate` is
 `true`, the build excludes the URL from the catalogue and detail pages even
 when one is present in the manifest. Legacy source-path fields do not add links.
+
+The catalogue and detail pages offer a **Dunkelmodus** toggle. They follow the
+system appearance until a visitor selects a mode, then remember that selection
+locally across pages and visits. Without JavaScript, the catalogue, previews and
+downloads remain available and the colour scheme follows the system setting.
 
 Push the folder to GitHub. The workflow validates every project and, for
 published Android entries, checks that a readable APK and source ZIP are
@@ -94,3 +101,4 @@ or deploying to a custom domain. Otherwise the base is derived from
 The workflow uses the repository's built-in `GITHUB_TOKEN`; no personal token
 is embedded in the website. APKs and source archives are linked from GitHub
 Releases so the Pages output stays small.
+

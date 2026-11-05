@@ -58,7 +58,17 @@ jobs:
       - name: Install Chromium and WebKit
         run: npx playwright install --with-deps chromium webkit
       - name: Navigation, phone layout, keyboard and static history
+        env:
+          APPSHELF_SITE_SCREENSHOTS: test-results/catalogue
         run: npm run test:browser
+      - name: Save catalogue appearance screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogue-appearance
+          path: test-results/catalogue
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Real app workflows, persistence, media and offline mode in Chromium and WebKit
         run: npm run test:web:browser
 
@@ -119,3 +129,4 @@ jobs:
         # but do not require or restore an intentionally removed download archive.
         if: hashFiles('apps/inbox/leistenplan/app.json') != ''
         run: python3 scripts/package.py --check
+

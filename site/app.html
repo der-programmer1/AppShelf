@@ -6,12 +6,20 @@
     <meta name="description" content="<!-- PROJECT_DESCRIPTION -->">
     <title><!-- PROJECT_NAME --> · AppShelf</title>
     <link rel="icon" href="../../assets/logo-mark.svg" type="image/svg+xml">
+    <script src="../../assets/theme.js"></script>
     <link rel="stylesheet" href="../../assets/style.css">
   </head>
   <body>
     <main class="detail-page shell">
-      <a class="back-link" href="../../#catalog-title">← Alle Projekte</a>
+      <div class="detail-topbar">
+        <a class="back-link" href="../../#catalog-title">← Alle Projekte</a>
+        <button class="button theme-toggle" id="theme-toggle" type="button" aria-pressed="false" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>
+          <span>Dunkelmodus</span>
+        </button>
+      </div>
       <!-- PROJECT_DETAIL -->
     </main>
   </body>
 </html>
+

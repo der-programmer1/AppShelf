@@ -41,7 +41,11 @@ if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset w
 const out = path.join(root, "dist-test");
 const home = await readFile(path.join(out, "index.html"), "utf8");
 assert.equal((home.match(/<article class="app-card"/g) || []).length, catalog.count);
-assert.doesNotMatch(home, /Katalog wird geladen|<script|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
+assert.doesNotMatch(home, /Katalog wird geladen|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
+assert.equal((home.match(/<script\b/g) || []).length, 1);
+assert.ok(home.includes('<script src="assets/theme.js"></script>'));
+assert.ok(home.indexOf('src="assets/theme.js"') < home.indexOf('href="assets/style.css"'));
+await access(path.join(out, "assets/theme.js"));
 for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
   await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
 }
@@ -50,18 +54,17 @@ for (const app of catalog.apps) {
   const githubUrl = publicGithubUrl(manifest, app.slug);
   assert.equal(app.githubUrl, githubUrl || undefined);
   assert.ok(!Object.hasOwn(app, "sourceUrl"));
-  if (app.iconHref) {
-    assert.ok(home.includes(`src="${app.iconHref}"`));
-    await access(path.join(out, app.iconHref));
-  }
-  assert.ok(!home.includes(`src="${app.preview.href}"`));
+  assert.ok(home.includes(`src="${app.preview.href}"`));
+  await access(path.join(out, app.preview.href));
   if (githubUrl) assert.ok(home.includes(`href="${githubUrl}">Quellcode auf GitHub`));
   const preferredApk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
   if (preferredApk) assert.ok(home.includes(`href="${preferredApk.href}" download>APK laden`));
   const detail = await readFile(path.join(out, "apps", app.slug, "index.html"), "utf8");
   assert.ok(detail.includes(`<h1>${app.name}</h1>`));
   assert.equal(detail.includes("Quellcode auf GitHub"), Boolean(githubUrl));
-  assert.doesNotMatch(detail, /<script|<!-- [A-Z_]+ -->/);
+  assert.doesNotMatch(detail, /<!-- [A-Z_]+ -->/);
+  assert.equal((detail.match(/<script\b/g) || []).length, 1);
+  assert.ok(detail.includes('<script src="../../assets/theme.js"></script>'));
   for (const file of app.files.filter((file) => file.kind === "apk")) {
     const bytes = await readFile(path.join(root, "apps", "inbox", app.slug, file.relative));
     assert.equal(file.sha256, createHash("sha256").update(bytes).digest("hex"));
@@ -106,3 +109,4 @@ assert.throws(() => publicGithubUrl({ githubPrivate: "true", githubUrl: privateR
 
 await rm(path.join(root, "dist-test"), { recursive: true, force: true });
 console.log(`AppShelf tests passed: ${catalog.count} static projects, repository visibility, QR targets and APK checksums verified.`);
+

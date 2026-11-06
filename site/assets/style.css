@@ -135,3 +135,11 @@ h1 { font-size: clamp(48px, 7vw, 86px); line-height: .94; letter-spacing: -.08em
   .app-grid, .download-row { grid-template-columns: minmax(0, 1fr); }
   .screenshots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.updates-preview { padding: 24px 0; border-top: 1px solid var(--line); }
+.updates-history { max-width: 72ch; padding: 32px 0 48px; }
+.updates-history h1 { font-size: clamp(28px, 5vw, 48px); overflow-wrap: anywhere; }
+.update-card { max-width: 72ch; padding: 16px; margin: 12px 0; border: 1px solid var(--line); border-radius: 14px; background: var(--white); overflow-wrap: anywhere; }
+.update-card h2, .update-card h3 { margin: 8px 0; line-height: 1.25; }
+.update-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--ink-soft); }
+.update-project { font-size: 14px; color: var(--ink-soft); }

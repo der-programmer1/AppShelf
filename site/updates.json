@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "date": "2026-11-06",
+      "category": "Verbesserung",
+      "title": "Neuigkeiten im Katalog wieder sichtbar",
+      "summary": "Die Startseite zeigt die jüngste veröffentlichte Änderung.",
+      "details": "Unter Fortschritt & Neuigkeiten findest du die Änderungshistorie. Die Übersicht ist ohne JavaScript lesbar.",
+      "app": "AppShelf",
+      "appSlug": "appshelf",
+      "version": "Website",
+      "href": "updates/",
+      "linkLabel": "Fortschritte ansehen"
+    }
+  ]
+}

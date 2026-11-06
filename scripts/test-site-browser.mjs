@@ -45,7 +45,7 @@ try {
       const plain = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 850 } });
       const page = await plain.newPage();
       await page.goto(base);
-      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "catalog-section"]);
+      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "updates-preview", "catalog-section"]);
       assert.equal(await page.getByRole("link", { name: "AppShelf Startseite" }).count(), 1);
       assert.equal(await page.locator(".hero-orbit").getAttribute("aria-hidden"), "true");
       assert.match(await page.locator(".hero-lede").textContent(), /persönliches Archiv für eigene Android-Apps, Web-Tools und Software-Projekte/);
@@ -53,8 +53,16 @@ try {
       await page.waitForURL(url("#catalog-title"));
       assert.equal(await page.locator(".app-card").count(), apps.length);
       assert.equal(await page.locator("nav, footer, script, form").count(), 0);
-      assert.equal((await plain.request.get(url("updates/"))).status(), 404);
-      assert.equal((await plain.request.get(url("updates.json"))).status(), 404);
+      await page.getByRole("link", { name: "Alle Neuigkeiten", exact: true }).click();
+      await page.waitForURL(url("updates/"));
+      assert.equal(await page.getByRole("heading", { name: "Fortschritt & Neuigkeiten", level: 1 }).count(), 1);
+      const updateResponse = await plain.request.get(url("updates.json"));
+      assert.equal(updateResponse.status(), 200);
+      const feed = await updateResponse.json();
+      assert.equal(await page.locator(".update-card").count(), feed.entries.length);
+      await noOverflow(page);
+      await page.getByRole("link", { name: "Zur Sammlung", exact: true }).click();
+      await page.waitForURL(base);
       for (const app of apps) {
         const card = page.getByRole("article", { name: app.name, exact: true });
         const description = card.locator(".card-description");

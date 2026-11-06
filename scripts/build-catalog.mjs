@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { renderHome, renderDetail } from "./render-catalog.mjs";
 import { publicGithubUrl } from "./github-url.mjs";
+import { loadUpdates, renderUpdates } from "./updates.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(root, "site");
@@ -200,11 +201,23 @@ for (const entry of entries) {
 }
 apps.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)) || a.name.localeCompare(b.name, "de"));
 const publicApps = apps.map(({ demoSourceDir, ...app }) => app);
-const home = renderHome(homeTemplate, publicApps);
+const updates = await loadUpdates(path.join(siteDir, "updates.json"));
+const publishedSlugs = new Set(publicApps.map((app) => app.slug));
+for (const entry of updates.entries) {
+  if (entry.href !== "updates/" && !publishedSlugs.has(entry.appSlug)) {
+    throw new Error(`Updates link points to an unpublished app: ${entry.appSlug}`);
+  }
+}
+const historyTemplate = await readFile(path.join(siteDir, "updates.html"), "utf8");
+const home = renderHome(homeTemplate.replace("<!-- LATEST_UPDATE -->", () => renderUpdates(updates.entries, { latest: true })), publicApps);
+const history = historyTemplate.replace("<!-- UPDATES_HISTORY -->", () => renderUpdates(updates.entries));
 await rm(outDir, { recursive: true, force: true });
 await mkdir(outDir, { recursive: true });
 await cp(path.join(siteDir, "assets"), path.join(outDir, "assets"), { recursive: true });
 await writeFile(path.join(outDir, "index.html"), home, "utf8");
+await mkdir(path.join(outDir, "updates"), { recursive: true });
+await writeFile(path.join(outDir, "updates", "index.html"), history, "utf8");
+await writeFile(path.join(outDir, "updates.json"), JSON.stringify({ ...updates, generatedAt }, null, 2) + "\n", "utf8");
 await copyLocalAssets(apps);
 for (const app of apps) {
   const pageDir = path.join(outDir, "apps", app.slug);

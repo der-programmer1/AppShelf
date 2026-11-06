@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { publicGithubUrl } from "./github-url.mjs";
 import { renderHome, renderDetail } from "./render-catalog.mjs";
+import { escapeHtml, loadUpdates, renderUpdates } from "./updates.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const result = spawnSync(process.execPath, [path.join(root, "scripts", "build-catalog.mjs"), "--out", "dist-test"], {
@@ -41,9 +42,19 @@ if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset w
 const out = path.join(root, "dist-test");
 const home = await readFile(path.join(out, "index.html"), "utf8");
 assert.equal((home.match(/<article class="app-card"/g) || []).length, catalog.count);
-assert.doesNotMatch(home, /Katalog wird geladen|<script|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
-for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
-  await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
+assert.doesNotMatch(home, /Katalog wird geladen|<script|<nav|<footer|<!-- [A-Z_]+ -->/);
+await assert.rejects(access(path.join(out, "assets/filters.js")), { code: "ENOENT" });
+const updates = await loadUpdates(path.join(root, "site", "updates.json"));
+const feed = JSON.parse(await readFile(path.join(out, "updates.json"), "utf8"));
+assert.deepEqual(feed, { ...updates, generatedAt: catalog.generatedAt });
+assert.ok(home.includes('href="updates/">Alle Neuigkeiten'));
+assert.ok(home.includes(renderUpdates(updates.entries, { latest: true })));
+const history = await readFile(path.join(out, "updates", "index.html"), "utf8");
+assert.ok(history.includes(renderUpdates(updates.entries)));
+assert.doesNotMatch(history, /<script|<!-- [A-Z_]+ -->/);
+for (const entry of feed.entries) {
+  assert.ok(history.includes(escapeHtml(entry.title)));
+  if (entry.href !== "updates/") await access(path.join(out, entry.href, "index.html"));
 }
 for (const app of catalog.apps) {
   const manifest = JSON.parse(await readFile(path.join(root, "apps", "inbox", app.slug, "app.json"), "utf8"));
@@ -93,7 +104,7 @@ for (const [manifest, expected] of [
   const githubUrl = publicGithubUrl(manifest, first.slug);
   assert.equal(githubUrl, expected);
   const app = { ...first, githubUrl };
-  for (const markup of [renderHome(homeTemplate, [app]), renderDetail(detailTemplate, app)]) {
+  for (const markup of [renderHome(homeTemplate.replace("<!-- LATEST_UPDATE -->", ""), [app]), renderDetail(detailTemplate, app)]) {
     assert.equal(markup.includes("Quellcode auf GitHub"), Boolean(expected));
     assert.equal(markup.includes(`href="${publicRepo}"`), Boolean(expected));
     assert.ok(!markup.includes(privateRepo));

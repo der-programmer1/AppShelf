@@ -33,8 +33,15 @@ jobs:
       - name: Build catalogue without publishing
         env:
           CF_PAGES: "1"
-          CF_PAGES_URL: https://preview.example.test
+          PAGES_BASE_URL: http://localhost:8080
         run: npm run build
+      - name: Save the complete testable website build
+        uses: actions/upload-artifact@v4
+        with:
+          name: appshelf-web-preview
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
 
   catalogue-browser:
     name: AppShelf catalogue browser tests

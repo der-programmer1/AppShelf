@@ -79,6 +79,12 @@ python3 -m http.server 8080 --directory dist
 
 Open `http://localhost:8080` to preview the generated catalogue locally.
 
+The pull-request catalogue job also uploads `appshelf-web-preview` under its
+Actions artifacts. Download and unpack it, then run `python3 -m http.server 8080`
+inside the unpacked folder. This preview includes the four apps and their local
+downloads; its QR codes use `http://localhost:8080`. Production builds use the
+configured Cloudflare URL instead.
+
 The build copies screenshots, writes APK SHA-256 digests, and creates SVG QR
 codes for web launches and APK downloads. Cloudflare builds serve downloads
 from the same site, including for private GitHub repositories. The build uses

@@ -94,3 +94,9 @@ builds default to `http://localhost:8080`.
   Preview builds can use the injected `CF_PAGES_URL`.
 - Each published file must fit within the
   [Cloudflare Pages asset limit](https://developers.cloudflare.com/pages/platform/limits/#file-size).
+
+The existing GitHub Pages workflow is retained. Its release publication and
+Pages deployment run only when the repository variable
+`APPSHELF_GITHUB_PAGES_ENABLED` is set to `true`; the Cloudflare migration does
+not automatically activate a second production deployment. Pull-request
+validation remains active.

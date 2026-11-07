@@ -82,6 +82,13 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+      - name: Free space for Android emulator data
+        if: runner.environment == 'github-hosted'
+        run: |
+          df -h "$HOME"
+          # These jobs install a separate pinned SDK and do not use the runner NDKs.
+          sudo rm -rf -- /usr/local/lib/android/sdk/ndk
+          df -h "$HOME"
       - name: Install checksum-verified Android command line tools
         run: |
           task_sdk_root="$RUNNER_TEMP/origincheck-sdk"

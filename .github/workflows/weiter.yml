@@ -29,6 +29,13 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+      - name: Free space for Android emulator data
+        if: runner.environment == 'github-hosted'
+        run: |
+          df -h "$HOME"
+          # These jobs install a separate pinned SDK and do not use the runner NDKs.
+          sudo rm -rf -- /usr/local/lib/android/sdk/ndk
+          df -h "$HOME"
       - name: Install checksum-verified Android command line tools
         run: |
           task_sdk_root="$RUNNER_TEMP/appshelf-sdk"
@@ -63,11 +70,23 @@ jobs:
           arch: x86_64
           target: default
           profile: pixel_2
+          disk-size: 2048M
           working-directory: projects/Weiter
           emulator-options: -no-window -gpu swiftshader -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
-          script: ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest
+          script: ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest --info
+      - name: Save Android device test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weiter-device-test-reports
+          path: |
+            projects/Weiter/app/build/reports/androidTests/connected/
+            projects/Weiter/app/build/outputs/androidTest-results/connected/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Require real passing tests without skipped or empty runs
         run: python3 scripts/check-test-results.py
       - name: Verify complete source handoff
         run: python3 scripts/package.py --check
+

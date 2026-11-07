@@ -30,4 +30,4 @@ Marketing wird zunächst nur als Entwurf vorbereitet. Automatische Posts, Direkt
 
 ## Veröffentlichung
 
-Nach einem erfolgreichen Merge übernimmt `.github/workflows/pages.yml` die Releases und den GitHub-Pages-Deploy. Die Automation selbst braucht dafür eine Cloud-Umgebung mit GitHub-Zugriff; dieser Repository-Ordner aktiviert keine externe Codex-Schedule allein.
+Nach einem erfolgreichen Merge baut Cloudflare Pages den Katalog und veröffentlicht `dist/`. Downloads werden aus dem statischen Build ausgeliefert. Die Automation braucht eine Cloud-Umgebung mit GitHub-Zugriff für Branch und Pull Request. Dieser Repository-Ordner aktiviert keine externe Codex-Schedule.

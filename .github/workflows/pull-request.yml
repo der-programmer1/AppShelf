@@ -32,12 +32,19 @@ jobs:
         run: npm test
       - name: Build catalogue without publishing
         env:
-          CI: "true"
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          CF_PAGES: "1"
+          PAGES_BASE_URL: http://localhost:8080
         run: npm run build
+      - name: Save the complete testable website build
+        uses: actions/upload-artifact@v4
+        with:
+          name: appshelf-web-preview
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
 
-  news-browser:
-    name: AppShelf news browser tests
+  catalogue-browser:
+    name: AppShelf catalogue browser tests
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -52,13 +59,23 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Build the real project-site layout
         env:
-          CI: "true"
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          CF_PAGES: "1"
+          CF_PAGES_URL: https://preview.example.test
         run: npm run build
       - name: Install Chromium and WebKit
         run: npx playwright install --with-deps chromium webkit
-      - name: Navigation, phone layout, keyboard and static history
+      - name: Navigation, phone layout, keyboard and static rendering
+        env:
+          APPSHELF_SITE_SCREENSHOTS: test-results/catalogue
         run: npm run test:browser
+      - name: Save catalogue appearance screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogue-appearance
+          path: test-results/catalogue
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Real app workflows, persistence, media and offline mode in Chromium and WebKit
         run: npm run test:web:browser
 
@@ -78,6 +95,13 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+      - name: Free space for Android emulator data
+        if: runner.environment == 'github-hosted'
+        run: |
+          df -h "$HOME"
+          # This job installs a separate pinned SDK and does not use the runner NDKs.
+          sudo rm -rf -- /usr/local/lib/android/sdk/ndk
+          df -h "$HOME"
       - name: Install checksum-verified Android command line tools
         run: |
           task_sdk_root="$RUNNER_TEMP/appshelf-sdk"
@@ -110,6 +134,7 @@ jobs:
           arch: x86_64
           target: default
           profile: pixel_2
+          disk-size: 2048M
           working-directory: projects/LeistenPlan
           emulator-options: -no-window -gpu swiftshader -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true

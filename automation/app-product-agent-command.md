@@ -83,7 +83,7 @@ Prüfe außerdem:
 - Erstelle einen Pull Request mit Problembeleg, Entscheidung, Änderungen und Testergebnis.
 - Wenn alle Prüfungen grün sind, darf der Pull Request automatisch gemergt werden.
 - Offene kritische Fehler verhindern eine Veröffentlichung. Dokumentiere Ursache und Korrektur im Pull Request. Ein fehlgeschlagener Zwischenversuch sperrt einen später funktionierenden Build nicht: Nach der Korrektur müssen die betroffenen und abschließend alle Pflichtprüfungen für den finalen Stand erfolgreich sein.
-- Nach dem Merge übernimmt .github/workflows/pages.yml Releases und GitHub-Pages-Deployment.
+- Nach dem Merge baut und veröffentlicht Cloudflare Pages den statischen Katalog einschließlich der Downloads.
 
 8. MARKETING NUR VORBEREITEN
 Erstelle noch keine automatischen Posts und kontaktiere niemanden. Bereite nur vor:

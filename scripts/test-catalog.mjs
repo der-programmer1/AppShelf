@@ -12,7 +12,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const result = spawnSync(process.execPath, [path.join(root, "scripts", "build-catalog.mjs"), "--out", "dist-test"], {
   cwd: root,
   encoding: "utf8",
-  env: { ...process.env, CI: "true" },
+  env: {
+    ...process.env,
+    CI: "true",
+    CF_PAGES: "1",
+    CF_PAGES_URL: "https://preview.example.test",
+    GITHUB_REPOSITORY: "example/private-catalog",
+    PAGES_BASE_URL: "",
+  },
 });
 if (result.status !== 0) throw new Error(result.stderr || result.stdout);
 const catalog = JSON.parse(await readFile(path.join(root, "dist-test", "catalog.json"), "utf8"));
@@ -24,8 +31,7 @@ const first = catalog.apps[0];
 if (!first.slug || !first.name || !first.description) throw new Error("Catalogue entry is incomplete");
 if (!first.screenshots.length) throw new Error("Screenshot asset was not indexed");
 if (!first.screenshots[0].href.startsWith("media/")) throw new Error("Screenshot URL is not rooted at the catalogue output");
-const validDownloadHref = (href) => href.startsWith("downloads/") || /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/download\//.test(href);
-if (!first.files.every((file) => validDownloadHref(file.href))) throw new Error("Download URL is neither rooted at the catalogue output nor a GitHub Release URL");
+await access(path.join(root, "dist-test", "404.html"));
 if (!first.qrCode?.href.startsWith("media/") || !first.qrCode.target.startsWith("http")) throw new Error("QR metadata is incomplete");
 const page = await readFile(path.join(root, "dist-test", "apps", first.slug, "index.html"), "utf8");
 if (!page.includes(first.slug)) throw new Error("Detail page did not receive its slug");
@@ -41,27 +47,37 @@ if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset w
 const out = path.join(root, "dist-test");
 const home = await readFile(path.join(out, "index.html"), "utf8");
 assert.equal((home.match(/<article class="app-card"/g) || []).length, catalog.count);
-assert.doesNotMatch(home, /Katalog wird geladen|<script|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
+assert.doesNotMatch(home, /Katalog wird geladen|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
+assert.equal((home.match(/<script\b/g) || []).length, 1);
+assert.ok(home.includes('<script src="assets/theme.js"></script>'));
+assert.ok(home.indexOf('src="assets/theme.js"') < home.indexOf('href="assets/style.css"'));
+await access(path.join(out, "assets/theme.js"));
 for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
   await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
 }
 for (const app of catalog.apps) {
+  assert.equal(app.qrCode.target, `https://preview.example.test/apps/${app.slug}/`);
+  for (const file of app.files) {
+    assert.ok(file.href.startsWith(`downloads/${app.slug}/`));
+    await access(path.join(out, decodeURIComponent(file.href)));
+    if (file.qrCode) assert.equal(file.qrCode.target, `https://preview.example.test/${file.href}`);
+  }
+  if (app.iconHref) await access(path.join(out, decodeURIComponent(app.iconHref)));
   const manifest = JSON.parse(await readFile(path.join(root, "apps", "inbox", app.slug, "app.json"), "utf8"));
   const githubUrl = publicGithubUrl(manifest, app.slug);
   assert.equal(app.githubUrl, githubUrl || undefined);
   assert.ok(!Object.hasOwn(app, "sourceUrl"));
-  if (app.iconHref) {
-    assert.ok(home.includes(`src="${app.iconHref}"`));
-    await access(path.join(out, app.iconHref));
-  }
-  assert.ok(!home.includes(`src="${app.preview.href}"`));
+  assert.ok(home.includes(`src="${app.preview.href}"`));
+  await access(path.join(out, app.preview.href));
   if (githubUrl) assert.ok(home.includes(`href="${githubUrl}">Quellcode auf GitHub`));
   const preferredApk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
   if (preferredApk) assert.ok(home.includes(`href="${preferredApk.href}" download>APK laden`));
   const detail = await readFile(path.join(out, "apps", app.slug, "index.html"), "utf8");
   assert.ok(detail.includes(`<h1>${app.name}</h1>`));
   assert.equal(detail.includes("Quellcode auf GitHub"), Boolean(githubUrl));
-  assert.doesNotMatch(detail, /<script|<!-- [A-Z_]+ -->/);
+  assert.doesNotMatch(detail, /<!-- [A-Z_]+ -->/);
+  assert.equal((detail.match(/<script\b/g) || []).length, 1);
+  assert.ok(detail.includes('<script src="../../assets/theme.js"></script>'));
   for (const file of app.files.filter((file) => file.kind === "apk")) {
     const bytes = await readFile(path.join(root, "apps", "inbox", app.slug, file.relative));
     assert.equal(file.sha256, createHash("sha256").update(bytes).digest("hex"));

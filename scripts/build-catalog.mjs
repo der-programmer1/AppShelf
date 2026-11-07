@@ -18,7 +18,8 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const projectTypes = new Set(["app", "web-app", "game", "tool"]);
 const repository = process.env.GITHUB_REPOSITORY || "der-programmer1/AppShelf";
 const repositoryUrl = `https://github.com/${repository}`;
-const publishReleaseAssets = process.env.CI === "true" && Boolean(process.env.GITHUB_REPOSITORY);
+const cloudflarePages = process.env.CF_PAGES === "1";
+const publishReleaseAssets = !cloudflarePages && process.env.CI === "true" && Boolean(process.env.GITHUB_REPOSITORY);
 
 const githubPagesBaseUrl = (value) => {
   const [owner, repo] = value.split("/", 2);
@@ -28,7 +29,7 @@ const githubPagesBaseUrl = (value) => {
     : `https://${owner}.github.io/${repo}`;
 };
 
-const pagesBaseUrl = String(process.env.PAGES_BASE_URL || githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || "") || "http://localhost:8080")
+const pagesBaseUrl = String(process.env.PAGES_BASE_URL || process.env.CF_PAGES_URL || (!cloudflarePages && githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || "")) || "http://localhost:8080")
   .trim().replace(/\/+$/, "");
 const makeQr = (slug, name, href) => ({
   href: `media/${encodeURIComponent(slug)}/qr-${name}.svg`,
@@ -204,6 +205,7 @@ const home = renderHome(homeTemplate, publicApps);
 await rm(outDir, { recursive: true, force: true });
 await mkdir(outDir, { recursive: true });
 await cp(path.join(siteDir, "assets"), path.join(outDir, "assets"), { recursive: true });
+await cp(path.join(siteDir, "404.html"), path.join(outDir, "404.html"));
 await writeFile(path.join(outDir, "index.html"), home, "utf8");
 await copyLocalAssets(apps);
 for (const app of apps) {

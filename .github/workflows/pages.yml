@@ -41,7 +41,7 @@ jobs:
 
   releases:
     name: Publish app files
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.APPSHELF_GITHUB_PAGES_ENABLED == 'true'
     permissions:
       contents: write
     needs: validate
@@ -76,7 +76,7 @@ jobs:
 
   pages:
     name: Build GitHub Pages
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.APPSHELF_GITHUB_PAGES_ENABLED == 'true'
     permissions:
       contents: read
       pages: write

@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { chromium, webkit } from "playwright";
 
 const root = fileURLToPath(new URL("../dist/", import.meta.url));
-const mount = "/AppShelf/";
+const mount = "/";
 const mime = {
   ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
   ".svg": "image/svg+xml", ".png": "image/png", ".json": "application/json",
@@ -31,7 +31,7 @@ const base = live || `http://127.0.0.1:${server.address().port}${mount}`;
 const url = (relative) => new URL(relative, base).href;
 const noOverflow = async (page) => assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "horizontal overflow");
 const themeKey = "appshelf-theme";
-const themeColour = { light: "rgb(244, 241, 232)", dark: "rgb(16, 26, 21)" };
+const themeColour = { light: "rgb(244, 241, 232)", dark: "rgb(13, 15, 18)" };
 const assertTheme = async (page, theme) => {
   await page.waitForFunction((expected) => document.documentElement.dataset.theme === expected, theme);
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), themeColour[theme]);
@@ -71,7 +71,7 @@ try {
     ? await (await fetch(url("catalog.json"), { cache: "no-store" })).json()
     : JSON.parse(await readFile(path.join(root, "catalog.json"), "utf8"));
   const { apps } = catalogue;
-  const first = apps[0];
+  const first = apps.find((app) => app.demoHref && app.files.some((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk")));
   assert.ok(first?.demoHref);
 
   for (const [engine, launcher] of Object.entries({ chromium, webkit })) {
@@ -267,4 +267,3 @@ try {
 } finally {
   if (server) await new Promise((resolve) => server.close(resolve));
 }
-

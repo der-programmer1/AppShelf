@@ -1,9 +1,8 @@
 # AppShelf
 
-AppShelf is a GitHub-Pages project library for apps, web apps, games, tools,
-APKs and source archives. GitHub Actions uses Node.js to scan `apps/inbox/`,
-render the catalogue and detail pages as static HTML, and deploy `dist/` to
-GitHub Pages. The catalogue renders and its download controls work without JavaScript.
+AppShelf is a project library for apps, web apps, games, tools, APKs and source
+archives. Cloudflare Pages builds the site from `apps/inbox/` and serves the
+static output in `dist/`. The catalogue and its downloads work without JavaScript.
 
 It is a personal archive for independent projects, not an official app store.
 Each project entry can contain its own description, screenshots, APK/AAB, source
@@ -51,24 +50,19 @@ without this field remain compatible and are treated as `app` entries.
 
 Set `cardDescription` to a short line for the catalogue card and `techStack`
 to an array of technology labels in priority order. The card shows up to three
-labels and shows the project's screenshot preview above its description.
-Set `preview` to a screenshot filename to choose the cover; otherwise the first
-screenshot is used. Selecting the preview opens the project details.
+labels and shows the screenshot selected by `preview`, or the first screenshot.
+Selecting the preview opens the project details.
 Set `githubUrl` only for a public GitHub repository that should be linked.
 Omit it for projects without public source code. If `githubPrivate` is
 `true`, the build excludes the URL from the catalogue and detail pages even
 when one is present in the manifest. Legacy source-path fields do not add links.
 
 The catalogue and detail pages offer a **Dunkelmodus** toggle. They follow the
-system appearance until a visitor selects a mode, then remember that selection
-locally across pages and visits. Without JavaScript, the catalogue, previews and
-downloads remain available and the colour scheme follows the system setting.
+system appearance until a visitor chooses a mode, then remember it locally.
+Without JavaScript the catalogue remains usable and follows the system setting.
 
-Push the folder to GitHub. The workflow validates every project and, for
-published Android entries, checks that a readable APK and source ZIP are
-present. It then creates or
-updates a release for its APK/AAB/source assets, builds the catalogue and
-deploys Pages. The repository also contains the instructions for an optional
+Open a pull request with the project folder. The catalogue checks require a
+readable APK and source ZIP for published Android entries. The repository also contains the instructions for an optional
 Codex night automation under [`automation/app-product-agent-command.md`](automation/app-product-agent-command.md).
 That command researches real everyday problems, builds at most one project per
 run and prepares marketing drafts without posting them automatically.
@@ -86,19 +80,17 @@ python3 -m http.server 8080 --directory dist
 Open `http://localhost:8080` to preview the generated catalogue locally.
 
 The build copies screenshots, writes APK SHA-256 digests, and creates SVG QR
-codes for web launches and APK downloads. In CI, APK codes point directly to the
-versioned GitHub Release asset. Set `PAGES_BASE_URL` when previewing on a phone
-or deploying to a custom domain. Otherwise the base is derived from
-`GITHUB_REPOSITORY` in Actions and defaults to `http://localhost:8080` locally.
+codes for web launches and APK downloads. Cloudflare builds serve downloads
+from the same site, including for private GitHub repositories. The build uses
+`CF_PAGES_URL` for QR codes, or `PAGES_BASE_URL` when explicitly set. Local
+builds default to `http://localhost:8080`.
 
-## GitHub Pages setup
+## Cloudflare Pages setup
 
-1. Put the contents of this ZIP into a GitHub repository.
-2. In the repository settings, enable Pages with **GitHub Actions** as source.
-3. Push to the `main` branch.
-4. Add app packages under `apps/inbox/` and push again.
-
-The workflow uses the repository's built-in `GITHUB_TOKEN`; no personal token
-is embedded in the website. APKs and source archives are linked from GitHub
-Releases so the Pages output stays small.
-
+- Connect the repository and use `main` as the production branch.
+- Build command: `npm run build`. Output directory: `dist`.
+- Set `PAGES_BASE_URL` to the stable production URL in the production
+  environment if QR codes should point to a custom domain or a stable URL.
+  Preview builds can use the injected `CF_PAGES_URL`.
+- Each published file must fit within the
+  [Cloudflare Pages asset limit](https://developers.cloudflare.com/pages/platform/limits/#file-size).

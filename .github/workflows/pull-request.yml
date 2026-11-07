@@ -32,12 +32,12 @@ jobs:
         run: npm test
       - name: Build catalogue without publishing
         env:
-          CI: "true"
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          CF_PAGES: "1"
+          CF_PAGES_URL: https://preview.example.test
         run: npm run build
 
-  news-browser:
-    name: AppShelf news browser tests
+  catalogue-browser:
+    name: AppShelf catalogue browser tests
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -52,12 +52,12 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Build the real project-site layout
         env:
-          CI: "true"
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          CF_PAGES: "1"
+          CF_PAGES_URL: https://preview.example.test
         run: npm run build
       - name: Install Chromium and WebKit
         run: npx playwright install --with-deps chromium webkit
-      - name: Navigation, phone layout, keyboard and static history
+      - name: Navigation, phone layout, keyboard and static rendering
         env:
           APPSHELF_SITE_SCREENSHOTS: test-results/catalogue
         run: npm run test:browser
@@ -130,4 +130,3 @@ jobs:
         # but do not require or restore an intentionally removed download archive.
         if: hashFiles('apps/inbox/leistenplan/app.json') != ''
         run: python3 scripts/package.py --check
-

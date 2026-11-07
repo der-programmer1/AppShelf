@@ -12,7 +12,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const result = spawnSync(process.execPath, [path.join(root, "scripts", "build-catalog.mjs"), "--out", "dist-test"], {
   cwd: root,
   encoding: "utf8",
-  env: { ...process.env, CI: "true" },
+  env: {
+    ...process.env,
+    CI: "true",
+    CF_PAGES: "1",
+    CF_PAGES_URL: "https://preview.example.test",
+    GITHUB_REPOSITORY: "example/private-catalog",
+    PAGES_BASE_URL: "",
+  },
 });
 if (result.status !== 0) throw new Error(result.stderr || result.stdout);
 const catalog = JSON.parse(await readFile(path.join(root, "dist-test", "catalog.json"), "utf8"));
@@ -24,8 +31,7 @@ const first = catalog.apps[0];
 if (!first.slug || !first.name || !first.description) throw new Error("Catalogue entry is incomplete");
 if (!first.screenshots.length) throw new Error("Screenshot asset was not indexed");
 if (!first.screenshots[0].href.startsWith("media/")) throw new Error("Screenshot URL is not rooted at the catalogue output");
-const validDownloadHref = (href) => href.startsWith("downloads/") || /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/download\//.test(href);
-if (!first.files.every((file) => validDownloadHref(file.href))) throw new Error("Download URL is neither rooted at the catalogue output nor a GitHub Release URL");
+await access(path.join(root, "dist-test", "404.html"));
 if (!first.qrCode?.href.startsWith("media/") || !first.qrCode.target.startsWith("http")) throw new Error("QR metadata is incomplete");
 const page = await readFile(path.join(root, "dist-test", "apps", first.slug, "index.html"), "utf8");
 if (!page.includes(first.slug)) throw new Error("Detail page did not receive its slug");
@@ -50,6 +56,13 @@ for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
   await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
 }
 for (const app of catalog.apps) {
+  assert.equal(app.qrCode.target, `https://preview.example.test/apps/${app.slug}/`);
+  for (const file of app.files) {
+    assert.ok(file.href.startsWith(`downloads/${app.slug}/`));
+    await access(path.join(out, decodeURIComponent(file.href)));
+    if (file.qrCode) assert.equal(file.qrCode.target, `https://preview.example.test/${file.href}`);
+  }
+  if (app.iconHref) await access(path.join(out, decodeURIComponent(app.iconHref)));
   const manifest = JSON.parse(await readFile(path.join(root, "apps", "inbox", app.slug, "app.json"), "utf8"));
   const githubUrl = publicGithubUrl(manifest, app.slug);
   assert.equal(app.githubUrl, githubUrl || undefined);
@@ -109,4 +122,3 @@ assert.throws(() => publicGithubUrl({ githubPrivate: "true", githubUrl: privateR
 
 await rm(path.join(root, "dist-test"), { recursive: true, force: true });
 console.log(`AppShelf tests passed: ${catalog.count} static projects, repository visibility, QR targets and APK checksums verified.`);
-

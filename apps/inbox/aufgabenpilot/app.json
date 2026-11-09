@@ -1,0 +1,18 @@
+{
+  "name": "AufgabenPilot",
+  "slug": "aufgabenpilot",
+  "projectType": "web-app",
+  "version": "0.1.0",
+  "description": "Hausaufgaben fotografieren oder als PDF/Text hochladen. Ein eigenes Codex-Backend erstellt einen FA2-Bearbeitungsplan mit Zeitblöcken, Hinweisen und erklärten Lösungen. Benötigt Internet und ein eingerichtetes Backend mit OpenAI-API-Zugang.",
+  "cardDescription": "Hausaufgaben erfassen. Mit Plan und Lösungen lernen.",
+  "category": "Lernen",
+  "tags": ["Hausaufgaben", "Schule", "KI"],
+  "platform": ["Web"],
+  "techStack": ["Python", "JavaScript", "Codex Agents API"],
+  "status": "draft",
+  "updatedAt": "2026-11-05",
+  "demoDir": "demo",
+  "preview": "01-web.png",
+  "notes": "Entwurf bis Backend, API-Schlüssel und echter KI-Ablauf eingerichtet und geprüft sind. Keine Offline-KI-Auswertung.",
+  "webDescription": "Fotos, PDFs oder Text in Zeitblöcke, Hinweise und aufklappbare Lösungen verwandeln. Der Betreiber muss zuerst das separate Codex-Backend einrichten."
+}

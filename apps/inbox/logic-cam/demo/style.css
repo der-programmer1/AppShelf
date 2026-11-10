@@ -1849,3 +1849,277 @@ dialog > .button {
   line-height: 1.8;
   color: #e4ca97;
 }
+
+/* Capture controls stay inside the fullscreen element, including on mobile Safari. */
+.capture-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.capture-tools select,
+.dc-tools select,
+.dc-selection select {
+  border: 1px solid #3c5145;
+  border-radius: 6px;
+  background: #1a2720;
+  color: #cfe5d5;
+  font-size: 11px;
+  padding: 8px;
+  max-width: 100%;
+}
+.fullscreen-controls {
+  display: none;
+}
+.workspace.camera-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: #101619;
+}
+.workspace.camera-fullscreen .work-area {
+  flex: 1;
+  min-height: 0;
+  height: auto !important;
+  max-height: none;
+}
+.workspace.camera-fullscreen .canvas-wrap {
+  height: 100%;
+  min-height: 0;
+}
+.workspace.camera-fullscreen .workspace-header,
+.workspace.camera-fullscreen .workspace-footer,
+.workspace.camera-fullscreen .input-bar {
+  flex-shrink: 0;
+}
+.workspace.camera-fullscreen .fullscreen-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 10px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #2e3e34;
+  flex-shrink: 0;
+  background: #19271e;
+}
+.workspace.camera-fullscreen .fullscreen-controls button {
+  font-size: 11px;
+  min-height: 34px;
+}
+.workspace.camera-fullscreen .dc-panel {
+  max-height: 31dvh;
+  overflow: auto;
+  flex-shrink: 0;
+}
+.camera-expanded {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.camera-expanded .toast {
+  z-index: 2100;
+}
+.dc-mode .laboratory {
+  grid-template-columns: minmax(0, 1fr);
+}
+.dc-mode #coach-panel,
+.dc-mode #coach-toggle,
+.dc-mode #manual-toggle,
+.dc-mode .tool-rail,
+.dc-mode .input-bar,
+.dc-mode .workspace-actions,
+.dc-mode .signal-legend {
+  display: none !important;
+}
+.dc-mode .work-area {
+  height: min(60vh, 640px);
+  min-height: 320px;
+}
+.dc-mode .canvas-wrap {
+  width: 100%;
+}
+.dc-panel {
+  background: #17211b;
+  border-top: 1px solid #344a3a;
+  padding: 13px 18px;
+  color: #bed7c4;
+}
+.dc-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dc-summary strong {
+  font-size: 14px;
+  font-weight: 550;
+  color: #e1b4b8;
+}
+.dc-summary strong[data-lit="true"] {
+  color: #fff18a;
+}
+.dc-switches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.dc-switch {
+  border: 1px solid #7b6543;
+  background: #332b1e;
+  color: #ffcf8a;
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 11px;
+  min-height: 37px;
+}
+.dc-switch.closed {
+  background: #213a29;
+  border-color: #4e845f;
+  color: #9bf0b8;
+}
+.dc-warnings {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #e5bd82;
+  margin: 7px 0;
+}
+.dc-warnings:empty {
+  display: none;
+}
+.dc-edit summary {
+  font-size: 10px;
+  cursor: pointer;
+  padding: 8px 0;
+  color: #9fb8a6;
+}
+.dc-edit p {
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 8px 0;
+}
+.dc-tools,
+.dc-selection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.dc-tools label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+}
+.dc-action {
+  font-size: 10px;
+  border: 1px solid #4f6958;
+  padding: 9px 11px;
+  border-radius: 6px;
+  min-height: 34px;
+  color: #d0e8d8;
+}
+.dc-selection {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #354b3d;
+  font-size: 11px;
+}
+.dc-note {
+  color: #93ac9a;
+}
+@media (max-width: 1190px) {
+  .workspace-meta #engine-status {
+    display: none;
+  }
+  .workspace-header {
+    gap: 7px;
+  }
+  .capture-tools select {
+    max-width: 120px;
+    font-size: 10px;
+  }
+  .capture-tools .icon-button {
+    width: 30px;
+  }
+}
+@media (max-width: 600px) {
+  .workspace-header {
+    height: auto;
+    min-height: 58px;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+  }
+  .capture-tools {
+    gap: 2px;
+  }
+  .capture-tools select {
+    max-width: 110px;
+    font-size: 9px;
+    padding: 7px 4px;
+  }
+  .capture-tools .icon-button {
+    width: 28px;
+    height: 34px;
+  }
+  .workspace-meta {
+    display: none;
+  }
+  .mode-tab {
+    padding: 0 8px;
+  }
+  .dc-panel {
+    padding: 10px 12px;
+  }
+  .dc-summary strong {
+    font-size: 12px;
+  }
+  .dc-tools select {
+    max-width: 170px;
+  }
+  .control-bar {
+    grid-template-columns: 1fr auto;
+  }
+  .control-cluster {
+    gap: 10px;
+  }
+  .control-button#open-photo-control span {
+    display: none;
+  }
+  .workspace.camera-fullscreen .fullscreen-controls button {
+    font-size: 9px;
+  }
+  .workspace.camera-fullscreen .tool-rail {
+    display: none;
+  }
+  .workspace.camera-fullscreen .board-bottom > span {
+    max-width: 53%;
+  }
+}
+@media (max-width: 370px) {
+  .capture-tools select {
+    max-width: 96px;
+  }
+  .mode-tab {
+    font-size: 9px;
+    padding: 0 6px;
+  }
+  .mode-tab svg {
+    width: 11px;
+  }
+  .workspace-header {
+    padding: 7px;
+  }
+  .dc-summary {
+    gap: 7px;
+  }
+}

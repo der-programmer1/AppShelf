@@ -1,3 +1,9 @@
+import {
+  connectedComponents,
+  traceWirePath as wirePath,
+} from "./pixelGraph.js";
+import { ElectricalDetector } from "./dcVision.js";
+export { connectedComponents } from "./pixelGraph.js";
 import { pinCount } from "./logicEngine.js";
 
 /** Small, deterministic CV pipeline for upright, standard outlined paper symbols.
@@ -131,41 +137,6 @@ export function templatePolygon(type) {
   return points;
 }
 
-export function connectedComponents(mask, width, height) {
-  const labels = new Int32Array(mask.length),
-    queue = new Int32Array(mask.length);
-  let count = 0;
-  for (let i = 0; i < mask.length; i++) {
-    if (!mask[i] || labels[i]) continue;
-    let head = 0,
-      tail = 0;
-    queue[tail++] = i;
-    labels[i] = ++count;
-    while (head < tail) {
-      const p = queue[head++],
-        x = p % width,
-        y = Math.floor(p / width);
-      for (let dy = -1; dy <= 1; dy++)
-        for (let dx = -1; dx <= 1; dx++) {
-          if (
-            (dx === 0 && dy === 0) ||
-            x + dx < 0 ||
-            x + dx >= width ||
-            y + dy < 0 ||
-            y + dy >= height
-          )
-            continue;
-          const next = p + dy * width + dx;
-          if (mask[next] && !labels[next]) {
-            labels[next] = count;
-            queue[tail++] = next;
-          }
-        }
-    }
-  }
-  return labels;
-}
-
 function samplePort(labels, width, height, node, pin, output) {
   const r = node.rect,
     y =
@@ -185,50 +156,6 @@ function samplePort(labels, width, height, node, pin, output) {
       if (label && (!best || score < best.score)) best = { label, at, score };
     }
   return best;
-}
-
-function wirePath(labels, width, height, start, end) {
-  const parents = new Int32Array(labels.length);
-  parents.fill(-1);
-  const queue = new Int32Array(labels.length);
-  let head = 0,
-    tail = 1;
-  queue[0] = start;
-  parents[start] = start;
-  while (head < tail && parents[end] === -1) {
-    const p = queue[head++],
-      x = p % width,
-      y = Math.floor(p / width);
-    for (let dy = -1; dy <= 1; dy++)
-      for (let dx = -1; dx <= 1; dx++) {
-        if (
-          (!dx && !dy) ||
-          x + dx < 0 ||
-          x + dx >= width ||
-          y + dy < 0 ||
-          y + dy >= height
-        )
-          continue;
-        const n = p + dy * width + dx;
-        if (labels[n] === labels[start] && parents[n] === -1) {
-          parents[n] = p;
-          queue[tail++] = n;
-        }
-      }
-  }
-  if (parents[end] === -1) return [];
-  const reversed = [];
-  let p = end,
-    limit = labels.length;
-  while (p !== start && limit--) {
-    reversed.push({ x: p % width, y: Math.floor(p / width) });
-    p = parents[p];
-  }
-  reversed.push({ x: start % width, y: Math.floor(start / width) });
-  reversed.reverse();
-  return reversed
-    .filter((_, i) => i === 0 || i === reversed.length - 1 || i % 5 === 0)
-    .slice(0, 300);
 }
 
 export function buildWireGraph(nodes, binary, width, height, map = (p) => p) {
@@ -543,6 +470,25 @@ export class VisionDetector {
   }
 }
 
+export function recognizeFrame(logic, electrical, source, options = {}) {
+  if (options.model === "circuit" || options.model === "auto") {
+    const result = electrical.detect(source, options);
+    if (
+      options.model === "circuit" ||
+      (result.graph.nodes.some((n) => n.type === "BATTERY") &&
+        result.graph.nodes.some((n) => n.type === "LAMP"))
+    )
+      return result;
+  }
+  return {
+    ...logic.detect(source, {
+      threshold: options.threshold,
+      adaptive: options.adaptive,
+    }),
+    domain: "logic",
+  };
+}
+
 /** Prefer a dedicated worker. The same pipeline remains available without Worker support. */
 export class VisionService {
   static async create(onStatus = () => {}) {
@@ -585,6 +531,9 @@ export class VisionService {
   constructor(worker, detector) {
     this.worker = worker;
     this.detector = detector;
+    this.electricalDetector = detector
+      ? new ElectricalDetector(detector.cv)
+      : null;
     this.pending = new Map();
     this.sequence = 0;
     if (worker) {
@@ -609,40 +558,54 @@ export class VisionService {
     }
   }
   async detect(canvas, options = {}) {
-    if (this.detector) return this.detector.detect(canvas, options);
-    const image = canvas
-        .getContext("2d", { willReadFrequently: true })
-        .getImageData(0, 0, canvas.width, canvas.height),
-      id = ++this.sequence;
-    const result = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        this.pending.delete(id);
-        reject(
-          new Error(
-            "Bildanalyse dauert zu lange. Verwende die manuelle Sandbox.",
-          ),
-        );
-      }, 10000);
-      this.pending.set(id, { resolve, reject, timeout });
-      this.worker.postMessage(
-        {
-          type: "detect",
-          id,
-          width: image.width,
-          height: image.height,
-          buffer: image.data.buffer,
-          threshold: options.threshold,
-          adaptive: options.adaptive,
-        },
-        [image.data.buffer],
+    let result;
+    if (this.detector)
+      result = recognizeFrame(
+        this.detector,
+        this.electricalDetector,
+        canvas,
+        options,
       );
-    });
+    else {
+      const image = canvas
+          .getContext("2d", { willReadFrequently: true })
+          .getImageData(0, 0, canvas.width, canvas.height),
+        id = ++this.sequence;
+      result = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          this.pending.delete(id);
+          reject(
+            new Error(
+              "Bildanalyse dauert zu lange. Verwende die manuelle Sandbox.",
+            ),
+          );
+        }, 10000);
+        this.pending.set(id, { resolve, reject, timeout });
+        this.worker.postMessage(
+          {
+            type: "detect",
+            id,
+            width: image.width,
+            height: image.height,
+            buffer: image.data.buffer,
+            threshold: options.threshold,
+            adaptive: options.adaptive,
+            model: options.model,
+            ink: options.ink,
+            hints: options.hints,
+            excluded: options.excluded,
+          },
+          [image.data.buffer],
+        );
+      });
+    }
     const map = options.map ?? ((p) => p);
     result.graph.nodes = result.graph.nodes.map((node) => ({
       ...node,
       ...map(node),
       width: node.width * (options.scaleX ?? 1),
       height: node.height * (options.scaleY ?? 1),
+      ...(node.terminals ? { terminals: node.terminals.map(map) } : {}),
     }));
     result.graph.edges.forEach((edge) => {
       edge.points = edge.points.map(map);

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="964" viewBox="0 0 1280 964">
+  <defs><pattern id="grid" width="45" height="47" patternUnits="userSpaceOnUse"><path d="M45 0H0V47" fill="none" stroke="#aaa79a" stroke-width="1.4"/></pattern><linearGradient id="paper"><stop stop-color="#e6dfcc"/><stop offset=".3" stop-color="#c4bda9"/><stop offset="1" stop-color="#d7cfbd"/></linearGradient></defs>
+  <rect width="1280" height="964" fill="url(#paper)"/><rect width="1280" height="964" fill="url(#grid)"/>
+  <g stroke="#252e70" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M248 559 245 270 661 258 667 384M249 659 255 813 677 811 672 665M664 461 671 609M625 398 664 461"/>
+    <circle cx="250" cy="610" r="49"/><path d="M211 584 290 638M285 578 216 645M625 612H712M651 662H697M593 612H610M601 604V621M625 654V670"/>
+  </g>
+  <text x="70" y="915" fill="#5e5a51" font-family="monospace" font-size="16">Logic-Cam · Beispielzeichnung: Batterie, offener Schalter, Lampe.</text>
+</svg>

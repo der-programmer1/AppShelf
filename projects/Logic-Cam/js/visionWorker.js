@@ -19,11 +19,12 @@
       else if (self.cv) self.cv.onRuntimeInitialized = () => ready(self.cv);
       else reject(new Error("OpenCV nicht verfügbar."));
     });
-    const { VisionDetector } = await import("./vision.js");
+    const { VisionDetector, recognizeFrame } = await import("./vision.js");
+    const { ElectricalDetector } = await import("./dcVision.js");
     const detector = new VisionDetector(self.cv);
+    const electrical = new ElectricalDetector(self.cv);
     self.onmessage = (event) => {
-      const { type, id, buffer, width, height, threshold, adaptive } =
-        event.data;
+      const { type, id, buffer, width, height, ...options } = event.data;
       if (type !== "detect") return;
       let mat;
       try {
@@ -32,7 +33,7 @@
           width,
           height,
         });
-        const result = detector.detect(mat, { threshold, adaptive });
+        const result = recognizeFrame(detector, electrical, mat, options);
         self.postMessage({ type: "result", id, result });
       } catch (error) {
         self.postMessage({

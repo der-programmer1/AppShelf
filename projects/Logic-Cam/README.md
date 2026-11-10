@@ -2,6 +2,20 @@
 
 **Dein Papier. Deine Logik.** Ein vollständig clientseitiges Labor für digitale Logik: Live-Kamera, Neon-Signale, Touch-Sandbox und ein lokaler Logic Coach. HTML, CSS und ES-Module; kein Build und kein Backend für den Betrieb.
 
+## Neu in 1.1: Kamera-Vollbild und einfache Stromkreise
+
+- **Vollbild:** Das Symbol mit den vier Ecken neben „Foto öffnen“ vergrößert die gesamte Kamera-/AR-Fläche. Kamerawechsel, Erkennung und „Vollbild beenden“ bleiben erreichbar. Unterstützte Browser verwenden die Fullscreen API; andernfalls füllt die Ansicht den Browser-Viewport. Der Kamerastream läuft weiter. Hochformat, Querformat und Bildschirmwechsel behalten dieselbe Bild-/Touch-Zuordnung.
+- **Foto öffnen:** Das Ordnersymbol oder der Button unter der Fläche lädt ein Bild direkt vom Gerät. Es wird lokal verkleinert und analysiert. Es gibt keinen Bild-Upload; die Fotoansicht ist ausdrücklich als Foto gekennzeichnet.
+- **Schaltungsart:** „Auto erkennen“ unterscheidet Logikgatter von einem einfachen Stromkreis mit Batterie und Lampe. Mit „Stromkreis“ oder „Logikgatter“ lässt sich die Erkennung festlegen.
+- **Stromkreis wie eine einfache Schulzeichnung:** Batterie aus zwei ungleichen parallelen Strichen, Lampe als Kreis mit Kreuz, offener Schalter mit sichtbarem Kontaktabstand. Blaue Tinte wird vor der Erkennung vom grauen Karo-Papier und von Schatten getrennt. Schwarze Tinte funktioniert am besten auf unbedrucktem Papier.
+- **Schalter antippen:** Ein erkannter offener Schalter lässt sich auf dem Bild oder über den beschrifteten Button virtuell schließen. Bei einem gültig erkannten Kreis leuchtet dann die virtuelle Lampe. Das gezeichnete Papier selbst wird dadurch nicht verändert.
+- **Korrekturen:** „Erkennung prüfen und korrigieren“ aufklappen. Einen Treffer antippen, um seinen Typ zu ändern oder ihn auszublenden. Fehlende Bauteile lassen sich über zwei Anschlüsse markieren; beide Punkte direkt an den Leitungen außerhalb des Bauteils setzen. Die Live-Erkennung pausiert bei solchen Korrekturen.
+- **Beispiel:** Im Stromkreis-Modus lädt „Beispiel mit Lampe“ eine lokal gebündelte Zeichnung zum Ausprobieren. Sie ist eine rekonstruierte Testzeichnung, kein automatisch erkannter Ersatz für ein geöffnetes Nutzerfoto.
+
+Das Stromkreis-Modell unterstützt **eine Batterie, ideale Leitungen, ideale Schalter und Lampen mit gleicher positiver Modellresistenz**. Ein kleiner Knotenspannungslöser bestimmt ausschließlich Ein/Aus. Reale Spannungen, Ströme, Bauteilwerte, Dioden, Kondensatoren, Motoren und Wechselstrom werden nicht berechnet. Kurzschlüsse und fehlende Zuordnungen sind sichtbar. Ein unbestimmtes Modell wird nicht als sicher gelöst angezeigt. Ein geschlossener Schalter ohne gezeichnete Kontakte kann optisch wie ein einfacher Draht aussehen; die App erfindet dafür kein zusätzliches Bauteil. Türkise Pfade zeigen erkannte Leitungen und sind keine Strommessung.
+
+Die Erkennung ist weiter heuristisch. Vor dem Experimentieren Bauteile und Leitungen prüfen. Das Originalfoto aus dem Chat war nicht als lokale Bilddatei zugänglich; die automatisierten Bildtests verwenden eine nachgebildete Geometrie mit blauer Tinte und grauem Raster sowie ein gedrehtes Testbild.
+
 ## In diesem AppShelf-Repository
 
 Die bearbeitbare App liegt unter `projects/Logic-Cam/`. Der AppShelf-Eintrag unter `apps/inbox/logic-cam/` enthält die Web-Demo, Screenshots und das vollständige Quellcode-ZIP. Nach einem erfolgreichen Pages-Deployment ist die Demo unter `https://der-programmer1.github.io/AppShelf/apps/logic-cam/demo/` erreichbar.
@@ -102,7 +116,7 @@ OpenCV liegt **lokal im Paket** (`vendor/opencv.js`, rund 10,5 MB, WASM eingebet
 
 Der Service Worker speichert beim ersten erfolgreichen HTTPS-/localhost-Besuch die lokalen App-Dateien einschließlich OpenCV. Warte bis das Laden abgeschlossen ist, bevor du offline gehst. Danach funktionieren Sandbox, lokaler Coach und lokale Erkennung offline, sofern Browser und Betriebssystem den Cache behalten und Kamerazugriff im jeweiligen Kontext erlauben. Beim allerersten Besuch ist Netz oder ein eigener lokaler Server notwendig.
 
-Bei Updates **`CACHE` in `sw.js` ändern**. Die neue Version wird nach erfolgreicher Installation und dem Schließen alter App-Tabs aktiv. GitHub-Pages-Inhalte sind öffentlich, wenn dein Repository/Pages-Angebot öffentlich ist; private Kamerabilder und lokal gespeicherte Schaltungen werden dadurch nicht veröffentlicht.
+Bei Updates **`CACHE` in `sw.js` ändern**. Die neue Version aktiviert sich erst nach dem vollständigen Speichern ihrer Dateien. Ein bereits geöffneter Tab muss neu geladen werden, um die neue Oberfläche zu zeigen. GitHub-Pages-Inhalte sind öffentlich, wenn dein Repository/Pages-Angebot öffentlich ist; private Kamerabilder und lokal gespeicherte Schaltungen werden dadurch nicht veröffentlicht.
 
 ## Repository-Struktur
 
@@ -116,9 +130,16 @@ js/
   visionWorker.js          isolierte OpenCV/WASM-Bildanalyse
   logicEngine.js           Validierung, SCC-Zyklenerkennung, DAG, dreiwertige Logik
   aiCoach.js               lokale Fragen, kontrafaktische Auswertung, Punkte
+  dcEngine.js              Kontinuitätsmodell für Batterie, Schalter und Lampen
+  dcVision.js              Tintentrennung, elektrische Symbole und Leitungsnetze
+  dcMode.js                Foto-/Kamera-Interaktion und manuelle Bauteilkorrektur
+  dcRenderer.js            bildgleiche Stromkreis-Überlagerungen
+  fullscreen.js            natives Vollbild und mobiler Viewport-Fallback
+  pixelGraph.js            gemeinsam genutzte Pixelpfade und Zusammenhangskomponenten
 assets/
   icon.svg                 App-Icon
   print-template.svg       druckbare Schaltung zum Einstieg
+  circuit-example.svg      Stromkreis-Beispiel mit offenem Schalter
 vendor/
   opencv.js                gebündeltes OpenCV mit eingebettetem WASM
   OPENCV-LICENSE.txt        OpenCV-Lizenz
@@ -145,6 +166,14 @@ npm run check
 Die Tests prüfen sämtliche Wahrheitstabellen, unbekannte Werte, Eingangsänderungen, Floating Pins, Mehrfachtreiber, Rückkopplungen, Graphimporte, Coach-Antworten, Kamera-Lebenszyklus und **echte OpenCV-Erkennung aller sechs gedruckten Gatter einschließlich Leitungen**. Synthetische Fixtures sind reproduzierbare Basistests; sie ersetzen keine Aufnahmen von echter Handschrift.
 
 Zusätzlich wurde die App in Chromium über den späteren verschachtelten Pages-Pfad geprüft: Eingangsschalter, Coach-Rückmeldung, Gatterkorrektur, Platzieren und Rückgängig, 390-Pixel-Touch-Layout, echter OpenCV-Worker, Kamera-Fehlerbehandlung und Offline-Neuladen mit Service Worker funktionieren im Test. Screenshots im AppShelf-Eintrag zeigen die echte Browserdarstellung. Eine Prüfung auf einem physischen Smartphone mit echten Kamerabildern steht noch aus. Vor dem Einsatz im Unterricht: auf dem Zielgerät Druckvorlage scannen, 0/1 umschalten, Kamerawechsel, Bildschirmrotation und Offline-Neustart prüfen.
+
+Der zusätzliche Test `tests/browser.mjs` prüft Fotoerkennung, virtuelle Schalter, manuelle Korrekturen, natives Vollbild, einen erzwungenen Fallback ohne Fullscreen API, gedrehte Fotos und Zeigerzuordnung nach Größenänderung, simulierten Kamerastream und Offline-Neuladen. Er benötigt Playwright (im AppShelf-Repository über `npm ci` verfügbar). Beispiel mit installiertem Chromium:
+
+```sh
+CHROMIUM_PATH=/usr/bin/chromium node projects/Logic-Cam/tests/browser.mjs
+```
+
+Mit `LOGIC_CAM_ROOT=apps/inbox/logic-cam/demo` kann stattdessen das erzeugte AppShelf-Paket geprüft werden. Ohne `CHROMIUM_PATH` wird der von Playwright installierte Chromium verwendet. Außerhalb von AppShelf lässt sich Playwright separat als Entwicklungswerkzeug installieren; die App und ihre Node-Modultests benötigen es nicht.
 
 ## Häufige Fragen
 

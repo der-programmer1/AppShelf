@@ -1,5 +1,5 @@
 /* Version the cache when publishing changes. All paths are relative for project GitHub Pages. */
-const CACHE = "logic-cam-v1.0.0";
+const CACHE = "logic-cam-v1.1.0";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,14 +10,35 @@ const ASSETS = [
   "./js/visionWorker.js",
   "./js/logicEngine.js",
   "./js/aiCoach.js",
+  "./js/pixelGraph.js",
+  "./js/dcEngine.js",
+  "./js/dcVision.js",
+  "./js/dcMode.js",
+  "./js/dcRenderer.js",
+  "./js/fullscreen.js",
   "./assets/icon.svg",
   "./assets/print-template.svg",
+  "./assets/circuit-example.svg",
   "./manifest.webmanifest",
   "./vendor/opencv.js",
   "./README.md",
 ];
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) =>
+        cache.addAll(
+          ASSETS.map(
+            (asset) =>
+              new Request(new URL(asset, self.registration.scope), {
+                cache: "reload",
+              }),
+          ),
+        ),
+      )
+      .then(() => self.skipWaiting()),
+  );
 });
 self.addEventListener("activate", (event) => {
   event.waitUntil(

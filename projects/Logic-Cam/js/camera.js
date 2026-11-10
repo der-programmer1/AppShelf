@@ -1,4 +1,5 @@
 import { WORLD, portPosition, pinCount } from "./logicEngine.js";
+import { drawElectrical } from "./dcRenderer.js";
 
 export const COLORS = {
   high: "#78f9ac",
@@ -87,8 +88,10 @@ export class Camera {
 }
 
 export function videoRect(video) {
-  const width = video.videoWidth || WORLD.width,
-    height = video.videoHeight || WORLD.height;
+  const width =
+      video.videoWidth || video.naturalWidth || video.width || WORLD.width,
+    height =
+      video.videoHeight || video.naturalHeight || video.height || WORLD.height;
   const scale = Math.min(WORLD.width / width, WORLD.height / height);
   return {
     x: (WORLD.width - width * scale) / 2,
@@ -147,8 +150,19 @@ export class ARRenderer {
       canvas.width = this.pixelWidth;
       canvas.height = this.pixelHeight;
     }
+    const state = this.getState(),
+      source =
+        state.mode === "photo"
+          ? state.photo
+          : state.mode === "camera" && this.video.readyState >= 2
+            ? this.video
+            : null;
+    const view = source
+      ? videoRect(source)
+      : { width: WORLD.width, height: WORLD.height };
+    this.viewKey = source ? `${view.width}:${view.height}` : "sandbox";
     this.scale =
-      Math.min(this.pixelWidth / WORLD.width, this.pixelHeight / WORLD.height) *
+      Math.min(this.pixelWidth / view.width, this.pixelHeight / view.height) *
       this.zoom;
     this.offset = {
       x: (this.pixelWidth - WORLD.width * this.scale) / 2,
@@ -199,6 +213,15 @@ export class ARRenderer {
   render(time) {
     const state = this.getState(),
       { ctx, ar } = this;
+    const source =
+      state.mode === "photo"
+        ? state.photo
+        : state.mode === "camera" && this.video.readyState >= 2
+          ? this.video
+          : null;
+    const view = source && videoRect(source),
+      viewKey = view ? `${view.width}:${view.height}` : "sandbox";
+    if (viewKey !== this.viewKey) this.resize();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#11151a";
     ctx.fillRect(0, 0, this.pixelWidth, this.pixelHeight);
@@ -206,10 +229,10 @@ export class ARRenderer {
     ar.clearRect(0, 0, this.pixelWidth, this.pixelHeight);
     this.transform(ctx);
     this.transform(ar);
-    if (state.mode === "camera" && this.video.readyState >= 2) {
-      const r = videoRect(this.video);
-      ctx.drawImage(this.video, r.x, r.y, r.width, r.height);
-      ctx.fillStyle = "rgba(5,12,15,.12)";
+    if (source) {
+      const r = videoRect(source);
+      ctx.drawImage(source, r.x, r.y, r.width, r.height);
+      ctx.fillStyle = "rgba(5,12,15,.05)";
       ctx.fillRect(r.x, r.y, r.width, r.height);
     } else {
       ctx.fillStyle = "#2c333b";
@@ -246,78 +269,83 @@ export class ARRenderer {
       );
       ctx.stroke();
     }
-    const byId = new Map(state.graph.nodes.map((n) => [n.id, n]));
-    for (const edge of state.graph.edges) {
-      const from = byId.get(edge.from),
-        to = byId.get(edge.to);
-      if (!from || !to) continue;
-      const start = portPosition(from, 0, true),
-        end = portPosition(to, edge.pin),
-        color = signalColor(state.result.values.get(edge.from));
-      const points =
-        edge.points?.length > 1
-          ? edge.points
-          : [
-              start,
-              { x: (start.x + end.x) / 2, y: start.y },
-              { x: (start.x + end.x) / 2, y: end.y },
-              end,
-            ];
-      const path = () => {
-        ar.beginPath();
-        points.forEach((p, i) =>
-          i ? ar.lineTo(p.x, p.y) : ar.moveTo(p.x, p.y),
+    if (state.electrical) drawElectrical(ar, state.electrical);
+    else {
+      const byId = new Map(state.graph.nodes.map((n) => [n.id, n]));
+      for (const edge of state.graph.edges) {
+        const from = byId.get(edge.from),
+          to = byId.get(edge.to);
+        if (!from || !to) continue;
+        const start = portPosition(from, 0, true),
+          end = portPosition(to, edge.pin),
+          color = signalColor(state.result.values.get(edge.from));
+        const points =
+          edge.points?.length > 1
+            ? edge.points
+            : [
+                start,
+                { x: (start.x + end.x) / 2, y: start.y },
+                { x: (start.x + end.x) / 2, y: end.y },
+                end,
+              ];
+        const path = () => {
+          ar.beginPath();
+          points.forEach((p, i) =>
+            i ? ar.lineTo(p.x, p.y) : ar.moveTo(p.x, p.y),
+          );
+        };
+        if (state.selectedEdge === edge.id) {
+          path();
+          ar.strokeStyle = COLORS.accent;
+          ar.lineWidth = 9;
+          ar.globalAlpha = 0.4;
+          ar.stroke();
+          ar.globalAlpha = 1;
+        }
+        ar.lineJoin = "round";
+        ar.lineCap = "round";
+        ar.setLineDash(
+          state.result.values.get(edge.from) == null ? [7, 6] : [],
         );
-      };
-      if (state.selectedEdge === edge.id) {
         path();
-        ar.strokeStyle = COLORS.accent;
-        ar.lineWidth = 9;
-        ar.globalAlpha = 0.4;
-        ar.stroke();
-        ar.globalAlpha = 1;
-      }
-      ar.lineJoin = "round";
-      ar.lineCap = "round";
-      ar.setLineDash(state.result.values.get(edge.from) == null ? [7, 6] : []);
-      path();
-      ar.strokeStyle = color;
-      ar.lineWidth = 3;
-      ar.shadowColor = color;
-      ar.shadowBlur = state.mode === "camera" ? 12 : 8;
-      ar.stroke();
-      ar.shadowBlur = 0;
-      if (state.result.values.get(edge.from) === 1 && !this.reduced) {
-        path();
-        ar.setLineDash([3, 37]);
-        ar.lineDashOffset = -time * 0.035;
-        ar.strokeStyle = "#eafff2";
+        ar.strokeStyle = color;
         ar.lineWidth = 3;
+        ar.shadowColor = color;
+        ar.shadowBlur = state.mode === "camera" ? 12 : 8;
         ar.stroke();
-        ar.lineDashOffset = 0;
-      }
-      ar.setLineDash([]);
-      // Direction marker makes static screenshots readable as well.
-      ar.fillStyle = color;
-      ar.beginPath();
-      ar.moveTo(end.x - 12, end.y - 4);
-      ar.lineTo(end.x - 6, end.y);
-      ar.lineTo(end.x - 12, end.y + 4);
-      ar.fill();
-    }
-    for (const node of state.graph.nodes) this.drawNode(ar, node, state);
-    if (state.wireStart) {
-      const node = byId.get(state.wireStart),
-        p = node && portPosition(node, 0, true);
-      if (p && state.pointer) {
-        ar.beginPath();
-        ar.moveTo(p.x, p.y);
-        ar.lineTo(state.pointer.x, state.pointer.y);
-        ar.strokeStyle = COLORS.accent;
-        ar.lineWidth = 2;
-        ar.setLineDash([7, 6]);
-        ar.stroke();
+        ar.shadowBlur = 0;
+        if (state.result.values.get(edge.from) === 1 && !this.reduced) {
+          path();
+          ar.setLineDash([3, 37]);
+          ar.lineDashOffset = -time * 0.035;
+          ar.strokeStyle = "#eafff2";
+          ar.lineWidth = 3;
+          ar.stroke();
+          ar.lineDashOffset = 0;
+        }
         ar.setLineDash([]);
+        // Direction marker makes static screenshots readable as well.
+        ar.fillStyle = color;
+        ar.beginPath();
+        ar.moveTo(end.x - 12, end.y - 4);
+        ar.lineTo(end.x - 6, end.y);
+        ar.lineTo(end.x - 12, end.y + 4);
+        ar.fill();
+      }
+      for (const node of state.graph.nodes) this.drawNode(ar, node, state);
+      if (state.wireStart) {
+        const node = byId.get(state.wireStart),
+          p = node && portPosition(node, 0, true);
+        if (p && state.pointer) {
+          ar.beginPath();
+          ar.moveTo(p.x, p.y);
+          ar.lineTo(state.pointer.x, state.pointer.y);
+          ar.strokeStyle = COLORS.accent;
+          ar.lineWidth = 2;
+          ar.setLineDash([7, 6]);
+          ar.stroke();
+          ar.setLineDash([]);
+        }
       }
     }
     this.frames++;

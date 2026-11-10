@@ -130,7 +130,8 @@
         <section class="intro">
           <div>
             <div class="eyebrow">
-              <span class="tiny-line"></span> AUGMENTED REALITY · DIGITALE LOGIK
+              <span class="tiny-line"></span> AUGMENTED REALITY · LOGIK &amp;
+              STROMKREISE
             </div>
             <h1>
               Dein Papier.<br class="mobile-break" />
@@ -147,7 +148,7 @@
           </button>
         </section>
         <section class="laboratory" aria-label="Interaktives Logiklabor">
-          <div class="workspace">
+          <div class="workspace" id="camera-stage">
             <div class="workspace-header">
               <div class="mode-tabs" role="group" aria-label="Arbeitsmodus">
                 <button
@@ -160,11 +161,46 @@
                   <svg><use href="#i-camera" /></svg>Kamera AR
                 </button>
               </div>
+              <div class="capture-tools">
+                <label for="scan-kind" class="sr-only">Schaltungsart</label>
+                <select id="scan-kind" aria-label="Schaltungsart">
+                  <option value="auto">Auto erkennen</option>
+                  <option value="logic">Logikgatter</option>
+                  <option value="circuit">Stromkreis</option>
+                </select>
+                <button
+                  class="icon-button"
+                  id="photo-open"
+                  title="Foto öffnen"
+                  aria-label="Foto öffnen"
+                >
+                  <svg><use href="#i-folder" /></svg>
+                </button>
+                <button
+                  class="icon-button"
+                  id="fullscreen-toggle"
+                  aria-label="Kamera im Vollbild"
+                  title="Vollbild"
+                  aria-pressed="false"
+                >
+                  <svg><use href="#i-fit" /></svg>
+                </button>
+                <input type="file" id="photo-file" accept="image/*" hidden />
+              </div>
               <div class="workspace-meta">
                 <span class="status-dot" id="engine-dot"></span
                 ><span id="engine-status">ENGINE BEREIT</span
                 ><span class="meta-divider"></span><span id="fps">– FPS</span>
               </div>
+            </div>
+            <div class="fullscreen-controls">
+              <button id="stage-scan" class="control-button">
+                <svg><use href="#i-flash" /></svg>Jetzt erkennen</button
+              ><button id="stage-camera" class="control-button">
+                <svg><use href="#i-camera" /></svg>Kamera wechseln</button
+              ><button id="stage-exit" class="control-button">
+                <svg><use href="#i-close" /></svg>Vollbild beenden
+              </button>
             </div>
             <div class="work-area">
               <aside class="tool-rail" aria-label="Werkzeuge und Gatter">
@@ -357,6 +393,70 @@
               class="diagnostics hidden"
               role="status"
             ></div>
+            <section
+              id="dc-panel"
+              class="dc-panel hidden"
+              aria-label="Einfacher Stromkreis"
+            >
+              <div class="dc-summary">
+                <strong id="dc-state" role="status">Stromkreis scannen</strong
+                ><button id="dc-example" class="text-button compact">
+                  Beispiel mit Lampe
+                </button>
+              </div>
+              <div
+                id="dc-switches"
+                class="dc-switches"
+                aria-label="Erkannte Schalter"
+              ></div>
+              <p id="dc-warnings" class="dc-warnings" role="status"></p>
+              <details class="dc-edit">
+                <summary>Erkennung prüfen und korrigieren</summary>
+                <p id="dc-mark-status">
+                  Erkennungsvorschlag: Bauteile und Leitungen bitte prüfen.
+                </p>
+                <div class="dc-tools">
+                  <label
+                    >Tinte
+                    <select id="dc-ink">
+                      <option value="auto">Automatisch</option>
+                      <option value="blue">Blau · Raster ausblenden</option>
+                      <option value="dark">Schwarz</option>
+                    </select></label
+                  ><label
+                    >Bauteil
+                    <select id="dc-add-kind">
+                      <option value="LAMP">Lampe</option>
+                      <option value="BATTERY">Batterie</option>
+                      <option value="SWITCH">Schalter</option>
+                    </select></label
+                  ><button id="dc-mark" class="dc-action">
+                    2 Anschlüsse markieren</button
+                  ><button id="dc-cancel-mark" class="dc-action hidden">
+                    Abbrechen</button
+                  ><button id="dc-clear" class="dc-action">
+                    Korrekturen zurücksetzen
+                  </button>
+                </div>
+                <div id="dc-selection" class="dc-selection hidden">
+                  <span id="dc-selected-name"></span
+                  ><label class="sr-only" for="dc-selected-type"
+                    >Bauteiltyp korrigieren</label
+                  ><select id="dc-selected-type">
+                    <option value="LAMP">Lampe</option>
+                    <option value="BATTERY">Batterie</option>
+                    <option value="SWITCH">Schalter</option></select
+                  ><button id="dc-remove" class="dc-action">
+                    Treffer ausblenden
+                  </button>
+                </div>
+                <p class="dc-note">
+                  Eine Batterie, ideale Leitungen und Lampen. Ein/Aus-Modell
+                  ohne Messwerte. Türkis zeigt erkannte Leitungen. Beim Antippen
+                  wird nur der virtuelle Schalter geändert.
+                </p>
+              </details>
+            </section>
           </div>
           <aside
             class="coach-panel"
@@ -437,7 +537,7 @@
         </section>
         <div class="control-bar">
           <div class="control-cluster">
-            <button class="control-button" id="camera-switch">
+            <button class="control-button" id="camera-switch" aria-label="Kamera wechseln">
               <svg><use href="#i-camera" /></svg
               ><span>Kamera wechseln</span></button
             ><span class="control-divider"></span
@@ -451,6 +551,9 @@
               ><span>Erkennung</span></button
             ><button class="control-button" id="scan-button">
               <svg><use href="#i-flash" /></svg><span>Zeichnung erkennen</span>
+            </button>
+            <button class="control-button" id="open-photo-control" aria-label="Foto öffnen" title="Foto öffnen">
+              <svg><use href="#i-folder" /></svg><span>Foto öffnen</span>
             </button>
           </div>
           <div class="control-cluster">

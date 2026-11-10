@@ -11,6 +11,8 @@ import {
 import { Camera, ARRenderer, videoRect } from "./camera.js";
 import { VisionService } from "./vision.js";
 import { AICoach } from "./aiCoach.js";
+import { ElectricalMode } from "./dcMode.js";
+import { FullscreenStage } from "./fullscreen.js";
 
 const $ = (id) => document.getElementById(id);
 const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
@@ -32,6 +34,8 @@ const state = {
   strokes: [],
   wireStart: null,
   pointer: null,
+  photo: null,
+  frameEpoch: 0,
 };
 let detector = null,
   visionLoading = null,
@@ -46,6 +50,8 @@ let toastTimer = null,
   questionSignature = "",
   cameraBusy = false,
   coachEnabled = true;
+let rescanAfter = false,
+  photoLoadEpoch = 0;
 const history = [],
   overrides = new Map();
 const scanCanvas = document.createElement("canvas"),
@@ -58,6 +64,23 @@ const renderer = new ARRenderer(
   (fps) => {
     $("fps").textContent = `${fps} FPS`;
   },
+);
+const physical = new ElectricalMode({
+  state,
+  renderer,
+  onRescan: () => {
+    if (state.mode === "photo" || state.mode === "camera") scanCamera(true);
+  },
+  onRender: () => renderUI(),
+  onExample: () =>
+    openPhoto(new URL("../assets/circuit-example.svg", import.meta.url).href),
+  pauseLive: pauseLiveForEdit,
+  toast,
+});
+const fullscreen = new FullscreenStage(
+  $("camera-stage"),
+  $("fullscreen-toggle"),
+  () => renderer.resize(),
 );
 
 function readSaved() {
@@ -118,6 +141,10 @@ function refresh({ persist = true, question = true } = {}) {
   return true;
 }
 function renderUI(question = true) {
+  if (physical.active) {
+    physical.renderUI();
+    return;
+  }
   $("node-count").textContent = state.graph.nodes.length;
   $("edge-count").textContent = state.graph.edges.length;
   $("solve-time").textContent = state.result.elapsed.toFixed(2);
@@ -146,19 +173,21 @@ function renderUI(question = true) {
     state.tool !== "draw";
   $("board-empty").classList.toggle("hidden", !empty);
   $("empty-title").textContent =
-    state.mode === "camera"
+    state.mode !== "sandbox"
       ? "Papier wird zur Schaltung."
       : "Dein nächster Aha-Moment.";
   $("empty-description").textContent =
-    state.mode === "camera"
-      ? "Nutze klare, waagerechte Gattersymbole oder die Druckvorlage. Unsichere Treffer kannst du manuell korrigieren."
+    state.mode !== "sandbox"
+      ? "Erkenne Logikgatter oder einen einfachen Stromkreis mit Batterie, Schalter und Lampe. Unsichere Treffer bitte prüfen."
       : "Platziere links ein Gatter, zeichne mit dem Stift oder lade die Beispielschaltung.";
   $("empty-camera").textContent =
     state.mode === "camera"
       ? camera.stream
         ? "Jetzt erkennen"
         : "Kamera aktivieren"
-      : "Beispiel laden";
+      : state.mode === "photo"
+        ? "Foto erneut erkennen"
+        : "Beispiel laden";
   const inputs = $("input-switches");
   inputs.replaceChildren();
   for (const node of state.graph.nodes.filter((n) => n.type === "INPUT")) {
@@ -354,29 +383,42 @@ function setTool(tool, placing = null) {
   renderUI(false);
 }
 function setMode(mode) {
-  if (mode === "sandbox") {
+  state.frameEpoch++;
+  if (mode !== "camera") {
     camera.stop();
     clearTimeout(scanTimer);
     cameraBusy = false;
     $("camera-start").disabled = false;
     $("camera-start").querySelector("span").textContent = "Kamera starten";
   }
+  if (mode !== "photo") state.photo = null;
+  if (mode === "sandbox") {
+    photoLoadEpoch++;
+    $("scan-kind").value = "auto";
+    physical.newSource();
+  }
   state.mode = mode;
   renderer.setZoom(1);
   $("zoom-value").textContent = "100%";
   $("mode-sandbox").classList.toggle("active", mode === "sandbox");
-  $("mode-camera").classList.toggle("active", mode === "camera");
+  $("mode-camera").classList.toggle("active", mode !== "sandbox");
   $("mode-sandbox").setAttribute("aria-pressed", String(mode === "sandbox"));
-  $("mode-camera").setAttribute("aria-pressed", String(mode === "camera"));
-  $("canvas-wrap").classList.toggle("camera-active", mode === "camera");
+  $("mode-camera").setAttribute("aria-pressed", String(mode !== "sandbox"));
+  $("canvas-wrap").classList.toggle("camera-active", mode !== "sandbox");
   $("board-label").textContent =
-    mode === "camera" ? "LOCAL VISION · LIVE" : "LIVE SIMULATION";
+    mode === "camera"
+      ? "LOCAL VISION · LIVE"
+      : mode === "photo"
+        ? "FOTO · LOKALE ERKENNUNG"
+        : "LIVE SIMULATION";
   $("camera-switch").disabled = mode !== "camera" || !camera.stream;
   document.body.classList.toggle("scan-pulse", mode === "camera");
   renderUI();
 }
 async function startCamera() {
   if (cameraBusy) return;
+  photoLoadEpoch++;
+  physical.newSource();
   cameraBusy = true;
   $("camera-start").disabled = true;
   $("camera-start").querySelector("span").textContent =
@@ -405,6 +447,48 @@ async function startCamera() {
     cameraBusy = false;
     $("camera-start").disabled = false;
     renderUI(false);
+  }
+}
+async function openPhoto(source) {
+  const epoch = ++photoLoadEpoch;
+  let objectURL = null;
+  try {
+    if (source instanceof File) {
+      if (source.size > 20 * 1024 * 1024)
+        throw new Error("Das Foto darf höchstens 20 MB groß sein.");
+      if (!source.type.startsWith("image/"))
+        throw new Error("Bitte ein Bild auswählen.");
+      objectURL = URL.createObjectURL(source);
+    }
+    const image = new Image();
+    image.decoding = "async";
+    image.src = objectURL ?? source;
+    await image.decode();
+    if (epoch !== photoLoadEpoch) return;
+    if (!image.naturalWidth || !image.naturalHeight)
+      throw new Error("Das Bild konnte nicht gelesen werden.");
+    const scale = Math.min(
+        1,
+        1800 / Math.max(image.naturalWidth, image.naturalHeight),
+      ),
+      photo = document.createElement("canvas");
+    photo.width = Math.round(image.naturalWidth * scale);
+    photo.height = Math.round(image.naturalHeight * scale);
+    photo.getContext("2d").drawImage(image, 0, 0, photo.width, photo.height);
+    physical.newSource();
+    state.photo = photo;
+    state.graph = { nodes: [], edges: [] };
+    state.strokes = [];
+    state.selected = null;
+    overrides.clear();
+    refresh({ persist: false });
+    setMode("photo");
+    renderer.resize();
+    await scanCamera(true);
+  } catch (error) {
+    toast(`Foto konnte nicht geöffnet werden: ${error.message}`, true);
+  } finally {
+    if (objectURL) URL.revokeObjectURL(objectURL);
   }
 }
 async function ensureVision() {
@@ -465,21 +549,32 @@ function mergeDetections(graph) {
   return graph;
 }
 async function scanCamera(force = false) {
+  const photoMode = state.mode === "photo";
+  if (scanBusy) {
+    if (force) rescanAfter = true;
+    return;
+  }
   if (
-    scanBusy ||
-    state.mode !== "camera" ||
-    !camera.stream ||
-    $("camera-video").readyState < 2
+    (!photoMode && state.mode !== "camera") ||
+    (photoMode
+      ? !state.photo
+      : !camera.stream || $("camera-video").readyState < 2)
   )
     return;
   scanBusy = true;
   try {
     const vision = await ensureVision();
-    if (state.mode !== "camera") return;
+    if (state.mode !== "camera" && state.mode !== "photo") return;
     const generation = camera.generation,
-      video = $("camera-video"),
-      width = 640,
-      height = Math.round((width * video.videoHeight) / video.videoWidth),
+      frameEpoch = state.frameEpoch,
+      physicalEpoch = physical.epoch,
+      video = state.mode === "photo" ? state.photo : $("camera-video"),
+      sourceWidth = video.videoWidth || video.width,
+      sourceHeight = video.videoHeight || video.height,
+      maximum = $("scan-kind").value === "logic" ? 640 : 960,
+      ratio = Math.min(1, maximum / Math.max(sourceWidth, sourceHeight)),
+      width = Math.max(1, Math.round(sourceWidth * ratio)),
+      height = Math.max(1, Math.round(sourceHeight * ratio)),
       r = videoRect(video);
     scanCanvas.width = width;
     scanCanvas.height = height;
@@ -488,6 +583,7 @@ async function scanCamera(force = false) {
       detection = await vision.detect(scanCanvas, {
         threshold: Number($("threshold").value),
         adaptive: $("adaptive-threshold").checked,
+        ...physical.options(r, width, height),
         map: (p) => ({
           x: r.x + (p.x * r.width) / width,
           y: r.y + (p.y * r.height) / height,
@@ -496,12 +592,22 @@ async function scanCamera(force = false) {
         scaleY: r.height / height,
       });
     if (
-      state.mode !== "camera" ||
-      !camera.stream ||
-      camera.generation !== generation
+      state.frameEpoch !== frameEpoch ||
+      physical.epoch !== physicalEpoch ||
+      (state.mode === "camera" &&
+        (!camera.stream || camera.generation !== generation))
     )
       return;
     const elapsed = performance.now() - started;
+    if (detection.domain === "electrical") {
+      physical.accept(detection);
+      $("board-label").textContent =
+        `${state.mode === "photo" ? "FOTO" : "KAMERA"} · STROMKREIS PRÜFEN`;
+      $("vision-status").textContent =
+        `${detection.candidates} Bauteile · ${Math.round(elapsed)} ms · ${detection.ink === "blue" ? "blaue Tinte, Raster unterdrückt" : "dunkle Tinte"}`;
+      return;
+    }
+    physical.leave();
     $("vision-status").textContent =
       `${detection.candidates} Symbole · ${Math.round(elapsed)} ms Analyse · Formähnlichkeit ${Math.round(detection.confidence * 100)} %`;
     if (!detection.candidates) {
@@ -528,17 +634,31 @@ async function scanCamera(force = false) {
     if (force || trackingFrames >= 2) {
       state.graph = mergeDetections(detection.graph);
       refresh({ persist: false });
-      $("board-label").textContent = "AR AKTIV · ERKENNUNG PRÜFEN";
+      $("board-label").textContent =
+        state.mode === "photo"
+          ? "FOTO · LOGIK PRÜFEN"
+          : "AR AKTIV · ERKENNUNG PRÜFEN";
     }
   } catch (error) {
     $("vision-status").textContent = error.message;
     if (force) toast(error.message, true);
   } finally {
     scanBusy = false;
+    if (rescanAfter) {
+      rescanAfter = false;
+      queueMicrotask(() => scanCamera(true));
+    }
   }
 }
 async function scanDrawing() {
-  if (state.mode === "camera") return scanCamera(true);
+  if (state.mode === "camera" || state.mode === "photo")
+    return scanCamera(true);
+  if (physical.active) {
+    toast(
+      "Öffne ein Foto, starte die Kamera oder lade das Stromkreis-Beispiel.",
+    );
+    return;
+  }
   if (!state.strokes.length) {
     toast(
       "Zeichne zuerst ein Gatter mit dem Stift oder platziere es über die Werkzeugleiste.",
@@ -758,6 +878,10 @@ function connectAt(p) {
 const canvas = $("ar-canvas");
 canvas.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
+  if (physical.active) {
+    physical.pointerDown(event);
+    return;
+  }
   canvas.focus({ preventScroll: true });
   const p = renderer.point(event);
   state.pointer = p;
@@ -800,6 +924,7 @@ canvas.addEventListener("pointerdown", (event) => {
   };
 });
 canvas.addEventListener("pointermove", (event) => {
+  if (physical.active) return;
   const p = renderer.point(event);
   state.pointer = p;
   if (!pointerSession || pointerSession.id !== event.pointerId) return;
@@ -836,6 +961,10 @@ canvas.addEventListener("pointermove", (event) => {
   }
 });
 function finishPointer(event, cancelled = false) {
+  if (physical.active) {
+    if (!cancelled) physical.pointerUp(event);
+    return;
+  }
   if (!pointerSession || pointerSession.id !== event.pointerId) return;
   const session = pointerSession;
   pointerSession = null;
@@ -940,6 +1069,21 @@ $("clear-button").addEventListener("click", () => {
   setTool("select");
 });
 $("camera-start").addEventListener("click", startCamera);
+$("photo-open").addEventListener("click", () => $("photo-file").click());
+$("open-photo-control").addEventListener("click", () =>
+  $("photo-file").click(),
+);
+$("photo-file").addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  if (file) await openPhoto(file);
+  event.target.value = "";
+});
+$("stage-scan").addEventListener("click", scanDrawing);
+$("stage-camera").addEventListener("click", () => {
+  if (camera.stream) $("camera-switch").click();
+  else startCamera();
+});
+$("stage-exit").addEventListener("click", () => fullscreen.exit());
 $("mode-camera").addEventListener("click", () => {
   if (state.mode !== "camera" || !camera.stream) startCamera();
 });
@@ -951,7 +1095,7 @@ $("mode-sandbox").addEventListener("click", () => {
 });
 $("empty-camera").addEventListener("click", () => {
   if (state.mode === "sandbox") reset();
-  else if (camera.stream) scanCamera(true);
+  else if (camera.stream || state.mode === "photo") scanCamera(true);
   else startCamera();
 });
 $("camera-switch").addEventListener("click", async () => {
@@ -959,6 +1103,7 @@ $("camera-switch").addEventListener("click", async () => {
   cameraBusy = true;
   $("camera-switch").disabled = true;
   try {
+    physical.newSource();
     state.graph = { nodes: [], edges: [] };
     refresh({ persist: false });
     await camera.switch();
@@ -1078,6 +1223,7 @@ $("print-button").addEventListener("click", () => {
   );
 });
 document.addEventListener("keydown", (event) => {
+  if (physical.active) return;
   if (
     ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName) ||
     $("help-dialog").open

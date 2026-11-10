@@ -46,10 +46,12 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
 }
 for (const match of html.matchAll(/<use href="#([^"]+)"/g))
   if (!idSet.has(match[1])) errors.push(`Missing SVG symbol: ${match[1]}`);
-for (const match of fs
-  .readFileSync(path.join(root, "js/app.js"), "utf8")
-  .matchAll(/\$\(['"]([^'"]+)['"]\)/g))
-  if (!idSet.has(match[1])) errors.push(`Missing HTML control: ${match[1]}`);
+for (const file of files("js"))
+  for (const match of fs
+    .readFileSync(path.join(root, file), "utf8")
+    .matchAll(/\$\(['"]([^'"]+)['"]\)/g))
+    if (!idSet.has(match[1]))
+      errors.push(`Missing HTML control in ${file}: ${match[1]}`);
 const sandbox = { self: { addEventListener() {} } };
 vm.runInNewContext(
   fs.readFileSync(path.join(root, "sw.js"), "utf8") +

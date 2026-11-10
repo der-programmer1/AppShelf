@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b0e11" />
+    <meta
+      name="description"
+      content="Logic-Cam: dein lokales Labor für digitale Logik. Schaltungen zeichnen, Signale sichtbar machen und mit dem Logic Coach lernen – direkt im Browser."
+    />
+    <title>Logic-Cam — Dein Papier. Deine Logik.</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Optional Tailwind CDN enhancement. All essential styling is also local in style.css. -->
+    <script
+      defer
+      src="https://cdn.tailwindcss.com/3.4.17"
+      onload="tailwind.config={corePlugins:{preflight:false}}"
+    ></script>
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body>
+    <svg
+      class="icon-library"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <symbol id="i-camera" viewBox="0 0 24 24">
+          <path
+            d="M8 5 10 3h4l2 2h4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
+          />
+          <circle cx="12" cy="12" r="4" />
+        </symbol>
+        <symbol id="i-cpu" viewBox="0 0 24 24">
+          <rect x="6" y="6" width="12" height="12" rx="3" />
+          <path d="M10 1v5m4-5v5M10 18v5m4-5v5M1 10h5m-5 4h5m12-4h5m-5 4h5" />
+          <path d="M10 10h4v4h-4z" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M4 12h16m-6-6 6 6-6 6" />
+        </symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12h14" />
+        </symbol>
+        <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" /></symbol>
+        <symbol id="i-pointer" viewBox="0 0 24 24">
+          <path d="m5 3 14 9-7 1-3 7Z" />
+        </symbol>
+        <symbol id="i-pen" viewBox="0 0 24 24">
+          <path d="m4 16-1 5 5-1L20 8l-4-4Zm9-9 4 4M16 4l2-2 4 4-2 2" />
+        </symbol>
+        <symbol id="i-wire" viewBox="0 0 24 24">
+          <circle cx="5" cy="5" r="2" />
+          <circle cx="19" cy="19" r="2" />
+          <path d="M5 7v5h14v5" />
+        </symbol>
+        <symbol id="i-reset" viewBox="0 0 24 24">
+          <path d="M4 9a8 8 0 1 1-1 6M4 3v6h6" />
+        </symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24">
+          <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7" />
+        </symbol>
+        <symbol id="i-help" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .5-1.5 1-1.5 2M12 16v1" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 24 24">
+          <path d="m5 12 4 4L19 6" />
+        </symbol>
+        <symbol id="i-close" viewBox="0 0 24 24">
+          <path d="m6 6 12 12M6 18 18 6" />
+        </symbol>
+        <symbol id="i-fit" viewBox="0 0 24 24">
+          <path d="M8 3H3v5m13-5h5v5M3 16v5h5m8 0h5v-5" />
+        </symbol>
+        <symbol id="i-download" viewBox="0 0 24 24">
+          <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+        </symbol>
+        <symbol id="i-print" viewBox="0 0 24 24">
+          <path d="M6 8V3h12v5M6 17H3V8h18v9h-3M6 14h12v7H6zM17 11h1" />
+        </symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24">
+          <path d="M4 7h16M4 17h16" />
+          <circle cx="9" cy="7" r="3" />
+          <circle cx="15" cy="17" r="3" />
+        </symbol>
+        <symbol id="i-undo" viewBox="0 0 24 24">
+          <path d="m9 4-6 6 6 6M3 10h11a7 7 0 0 1 7 7v3" />
+        </symbol>
+        <symbol id="i-flash" viewBox="0 0 24 24">
+          <path d="m13 2-9 12h7l-1 8 10-13h-7Z" />
+        </symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24">
+          <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z" />
+          <path d="m8 12 3 3 5-6" />
+        </symbol>
+        <symbol id="i-folder" viewBox="0 0 24 24">
+          <path d="M3 5h6l2 3h10v13H3Z" />
+        </symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24">
+          <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z" />
+        </symbol>
+      </defs>
+    </svg>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Logic-Cam Startseite"
+          ><span class="brand-mark"
+            ><svg><use href="#i-cpu" /></svg></span
+          ><span
+            >logic<span class="brand-dash">–</span>cam<span class="brand-dot"
+              >.</span
+            ></span
+          ><span class="version">LAB / 01</span></a
+        >
+        <div class="top-links">
+          <span class="privacy-badge"
+            ><span class="status-dot"></span>100% LOKAL</span
+          ><button class="text-button" id="help-button">
+            <svg><use href="#i-help" /></svg><span>Kurzanleitung</span></button
+          ><a
+            class="icon-button"
+            href="README.md"
+            aria-label="Dokumentation öffnen"
+            title="Dokumentation"
+            ><svg><use href="#i-folder" /></svg
+          ></a>
+        </div>
+      </header>
+      <main>
+        <section class="intro">
+          <div>
+            <div class="eyebrow">
+              <span class="tiny-line"></span> AUGMENTED REALITY · DIGITALE LOGIK
+            </div>
+            <h1>
+              Dein Papier.<br class="mobile-break" />
+              <span>Deine Logik.</span>
+            </h1>
+            <p>
+              Mach unsichtbare Signale sichtbar. Experimentiere, verstehe,
+              verbinde.
+            </p>
+          </div>
+          <button class="button button-primary" id="camera-start">
+            <svg><use href="#i-camera" /></svg><span>Kamera starten</span
+            ><svg class="button-arrow"><use href="#i-arrow" /></svg>
+          </button>
+        </section>
+        <section class="laboratory" aria-label="Interaktives Logiklabor">
+          <div class="workspace">
+            <div class="workspace-header">
+              <div class="mode-tabs" role="group" aria-label="Arbeitsmodus">
+                <button
+                  id="mode-sandbox"
+                  class="mode-tab active"
+                  aria-pressed="true"
+                >
+                  <svg><use href="#i-cpu" /></svg>Sandbox</button
+                ><button id="mode-camera" class="mode-tab" aria-pressed="false">
+                  <svg><use href="#i-camera" /></svg>Kamera AR
+                </button>
+              </div>
+              <div class="workspace-meta">
+                <span class="status-dot" id="engine-dot"></span
+                ><span id="engine-status">ENGINE BEREIT</span
+                ><span class="meta-divider"></span><span id="fps">– FPS</span>
+              </div>
+            </div>
+            <div class="work-area">
+              <aside class="tool-rail" aria-label="Werkzeuge und Gatter">
+                <div class="rail-group">
+                  <button
+                    class="tool-button active"
+                    data-tool="select"
+                    aria-label="Auswählen und verschieben"
+                    aria-pressed="true"
+                    title="Auswählen (V)"
+                  >
+                    <svg><use href="#i-pointer" /></svg></button
+                  ><button
+                    class="tool-button"
+                    data-tool="wire"
+                    aria-label="Leitung verbinden"
+                    aria-pressed="false"
+                    title="Verbinden (W)"
+                  >
+                    <svg><use href="#i-wire" /></svg></button
+                  ><button
+                    class="tool-button"
+                    data-tool="draw"
+                    aria-label="Freihand zeichnen"
+                    aria-pressed="false"
+                    title="Zeichnen (D)"
+                  >
+                    <svg><use href="#i-pen" /></svg>
+                  </button>
+                </div>
+                <div class="rail-divider"></div>
+                <span class="rail-label">GATES</span>
+                <div class="gate-tools">
+                  <button
+                    class="gate-button"
+                    data-gate="AND"
+                    title="AND platzieren"
+                  >
+                    AND</button
+                  ><button
+                    class="gate-button"
+                    data-gate="OR"
+                    title="OR platzieren"
+                  >
+                    OR</button
+                  ><button
+                    class="gate-button"
+                    data-gate="NOT"
+                    title="NOT platzieren"
+                  >
+                    NOT</button
+                  ><button
+                    class="gate-button"
+                    data-gate="XOR"
+                    title="XOR platzieren"
+                  >
+                    XOR</button
+                  ><button
+                    class="gate-button"
+                    data-gate="NAND"
+                    title="NAND platzieren"
+                  >
+                    NAND</button
+                  ><button
+                    class="gate-button"
+                    data-gate="NOR"
+                    title="NOR platzieren"
+                  >
+                    NOR
+                  </button>
+                </div>
+                <div class="rail-divider"></div>
+                <div class="rail-group">
+                  <button
+                    class="gate-button io-button"
+                    data-gate="INPUT"
+                    title="Eingang platzieren"
+                  >
+                    IN<span>+</span></button
+                  ><button
+                    class="gate-button io-button"
+                    data-gate="OUTPUT"
+                    title="Ausgang platzieren"
+                  >
+                    OUT<span>+</span>
+                  </button>
+                </div>
+              </aside>
+              <div class="canvas-wrap" id="canvas-wrap">
+                <canvas id="camera-canvas" aria-hidden="true"></canvas
+                ><canvas
+                  id="ar-canvas"
+                  tabindex="0"
+                  role="application"
+                  aria-label="Schaltungsfläche. Gatter über die Werkzeugleiste platzieren. Eingänge sind auch über die Schalter unter der Fläche bedienbar."
+                ></canvas>
+                <div class="board-label">
+                  <span class="status-dot"></span
+                  ><span id="board-label">LIVE SIMULATION</span>
+                </div>
+                <div class="signal-legend">
+                  <span><i class="legend-high"></i>HIGH / 1</span
+                  ><span><i class="legend-low"></i>LOW / 0</span
+                  ><span><i class="legend-unknown"></i>OFFEN / ?</span>
+                </div>
+                <div class="board-empty hidden" id="board-empty">
+                  <span class="empty-icon"
+                    ><svg><use href="#i-camera" /></svg
+                  ></span>
+                  <h2 id="empty-title">Papier wird zur Schaltung.</h2>
+                  <p id="empty-description">
+                    Richte die Kamera auf klare, waagerechte Gattersymbole. Oder
+                    platziere Gatter aus der Werkzeugleiste.
+                  </p>
+                  <button class="button button-primary" id="empty-camera">
+                    Kamera aktivieren
+                  </button>
+                </div>
+                <div class="board-bottom">
+                  <span id="tool-hint"
+                    >Tippe auf 0 oder 1, um ein Signal umzuschalten.</span
+                  >
+                  <div class="zoom-controls">
+                    <button id="zoom-out" aria-label="Verkleinern">
+                      <svg><use href="#i-minus" /></svg></button
+                    ><span id="zoom-value">100%</span
+                    ><button id="zoom-in" aria-label="Vergrößern">
+                      <svg><use href="#i-plus" /></svg></button
+                    ><button id="zoom-fit" aria-label="Ansicht einpassen">
+                      <svg><use href="#i-fit" /></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="workspace-footer">
+              <div class="board-stats">
+                <span><strong id="node-count">6</strong> Knoten</span
+                ><span><strong id="edge-count">5</strong> Leitungen</span
+                ><span
+                  ><i class="small-bolt">ϟ</i>
+                  <strong id="solve-time">–</strong> ms</span
+                >
+              </div>
+              <div class="workspace-actions">
+                <button
+                  id="undo-button"
+                  class="icon-button"
+                  aria-label="Rückgängig"
+                  title="Rückgängig"
+                >
+                  <svg><use href="#i-undo" /></svg></button
+                ><button
+                  id="export-button"
+                  class="icon-button"
+                  aria-label="Schaltung als JSON speichern"
+                  title="Schaltung speichern"
+                >
+                  <svg><use href="#i-download" /></svg></button
+                ><button
+                  id="import-button"
+                  class="icon-button"
+                  aria-label="Schaltung laden"
+                  title="JSON-Schaltung laden"
+                >
+                  <svg><use href="#i-folder" /></svg></button
+                ><button
+                  id="reset-button"
+                  class="icon-button"
+                  aria-label="Schaltung zurücksetzen"
+                  title="Beispielschaltung laden"
+                >
+                  <svg><use href="#i-reset" /></svg>
+                </button>
+              </div>
+            </div>
+            <div class="input-bar">
+              <span class="small-label">EINGÄNGE</span>
+              <div
+                id="input-switches"
+                class="input-switches"
+                aria-label="Eingangsschalter"
+              ></div>
+              <button class="text-button compact" id="clear-button">
+                <svg><use href="#i-trash" /></svg>Leeren
+              </button>
+            </div>
+            <div
+              id="diagnostics"
+              class="diagnostics hidden"
+              role="status"
+            ></div>
+          </div>
+          <aside
+            class="coach-panel"
+            id="coach-panel"
+            aria-label="AI Logic Tutor"
+          >
+            <div class="coach-header">
+              <div class="coach-icon">
+                <svg><use href="#i-spark" /></svg>
+              </div>
+              <div>
+                <h2>Logic Coach <span class="beta-tag">AI</span></h2>
+                <p>Dein Aha-Moment wartet.</p>
+              </div>
+              <button
+                class="icon-button coach-close"
+                id="coach-close"
+                aria-label="Coach schließen"
+              >
+                <svg><use href="#i-close" /></svg>
+              </button>
+            </div>
+            <div class="coach-body">
+              <div class="coach-context">
+                <span class="status-dot"></span
+                ><span id="coach-context">MIT DEINER SCHALTUNG VERBUNDEN</span>
+              </div>
+              <div class="question-kicker">
+                <span id="question-kind">GEDANKENEXPERIMENT</span
+                ><span class="question-points">+100 XP</span>
+              </div>
+              <h3 id="question-title">Was wäre, wenn …</h3>
+              <p class="question-text" id="question-text"></p>
+              <div class="answer-options" id="answer-options"></div>
+              <div
+                id="answer-feedback"
+                class="answer-feedback hidden"
+                aria-live="polite"
+              ></div>
+              <button class="next-question" id="next-question">
+                Nächste Frage<svg><use href="#i-arrow" /></svg>
+              </button>
+            </div>
+            <div class="coach-score">
+              <span class="score-icon">✧</span>
+              <div>
+                <strong id="score">0</strong><span>DEINE LOGIK-XP</span>
+              </div>
+              <span class="score-level" id="score-level">EXPLORER</span>
+            </div>
+            <div class="truth-panel">
+              <div class="section-caption">
+                <h3>Wahrheitstabelle</h3>
+                <span id="truth-gate">XOR</span>
+              </div>
+              <table id="truth-table">
+                <caption class="sr-only">
+                  Wahrheitstabelle des ausgewählten Gatters
+                </caption>
+                <thead>
+                  <tr>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>OUT</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <p class="truth-note">
+                <span class="status-dot"></span>Aktive Kombination hervorgehoben
+              </p>
+            </div>
+            <p class="local-coach-note">
+              <svg><use href="#i-shield" /></svg>Regelbasierter Coach. Lokal,
+              ohne API.
+            </p>
+          </aside>
+        </section>
+        <div class="control-bar">
+          <div class="control-cluster">
+            <button class="control-button" id="camera-switch">
+              <svg><use href="#i-camera" /></svg
+              ><span>Kamera wechseln</span></button
+            ><span class="control-divider"></span
+            ><button
+              class="control-button"
+              id="threshold-toggle"
+              aria-expanded="false"
+              aria-controls="vision-settings"
+            >
+              <svg><use href="#i-settings" /></svg
+              ><span>Erkennung</span></button
+            ><button class="control-button" id="scan-button">
+              <svg><use href="#i-flash" /></svg><span>Zeichnung erkennen</span>
+            </button>
+          </div>
+          <div class="control-cluster">
+            <button
+              class="control-button toggle-control"
+              id="manual-toggle"
+              aria-pressed="true"
+            >
+              <span class="toggle-track"><span></span></span
+              ><span>Eingänge antippen</span></button
+            ><span class="control-divider"></span
+            ><button
+              class="control-button"
+              id="coach-toggle"
+              aria-pressed="true"
+            >
+              <svg><use href="#i-spark" /></svg><span>Coach</span
+              ><span class="active-indicator"></span>
+            </button>
+          </div>
+        </div>
+        <div id="vision-settings" class="settings-panel hidden">
+          <div class="section-caption">
+            <h3>Erkennung einstellen</h3>
+            <button
+              class="icon-button"
+              id="settings-close"
+              aria-label="Erkennungseinstellungen schließen"
+            >
+              <svg><use href="#i-close" /></svg>
+            </button>
+          </div>
+          <label class="range-label" for="threshold"
+            >Schwarz-Weiß-Schwelle
+            <output id="threshold-value">150</output></label
+          ><input
+            id="threshold"
+            type="range"
+            min="40"
+            max="230"
+            value="150"
+          /><label class="checkbox-label"
+            ><input id="adaptive-threshold" type="checkbox" checked /> Adaptive
+            Schwelle (bei Schatten)</label
+          ><label class="checkbox-label"
+            ><input id="live-detection" type="checkbox" checked /> Live erkennen
+            (max. 4× pro Sekunde)</label
+          >
+          <p>
+            Für ANSI-Symbole, von links nach rechts. Gelbe Treffer bitte prüfen.
+            Eine Kreuzung ohne Brücke wird als Verbindung gelesen.
+          </p>
+          <div class="vision-readout" id="vision-status" role="status">
+            OpenCV wird bei Bedarf lokal geladen.
+          </div>
+        </div>
+        <div id="selection-panel" class="selection-panel hidden">
+          <span class="small-label" id="selection-label">AUSGEWÄHLT</span
+          ><label for="gate-type" class="sr-only">Gattertyp korrigieren</label
+          ><select id="gate-type"></select
+          ><button class="text-button compact" id="delete-node">
+            <svg><use href="#i-trash" /></svg>Entfernen
+          </button>
+        </div>
+        <footer class="site-footer">
+          <span
+            ><svg><use href="#i-shield" /></svg>Deine Kamera bleibt auf deinem
+            Gerät.</span
+          ><button class="text-button compact" id="print-button">
+            <svg><use href="#i-print" /></svg>Druckvorlage</button
+          ><span class="footer-signature"
+            >BUILT FOR CURIOUS MINDS <span>↗</span></span
+          >
+        </footer>
+      </main>
+    </div>
+    <video
+      id="camera-video"
+      autoplay
+      muted
+      playsinline
+      class="hidden"
+      aria-hidden="true"
+    ></video
+    ><input
+      type="file"
+      accept=".json,application/json"
+      id="import-file"
+      hidden
+    />
+    <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+    <dialog id="help-dialog">
+      <div class="dialog-header">
+        <span class="eyebrow">WELCOME TO YOUR LOGIC LAB</span
+        ><button
+          class="icon-button"
+          id="help-close"
+          aria-label="Anleitung schließen"
+        >
+          <svg><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <h2>Von „Was, wenn?“<br />zu „Jetzt verstehe ich’s.“</h2>
+      <div class="help-step">
+        <span>01</span>
+        <div>
+          <h3>Direkt ausprobieren</h3>
+          <p>
+            Tippe auf die Eingänge A, B und C. Grün ist 1, Rot ist 0. Wähle ein
+            Gatter, um seine Wahrheitstabelle zu sehen.
+          </p>
+        </div>
+      </div>
+      <div class="help-step">
+        <span>02</span>
+        <div>
+          <h3>Deine eigene Schaltung</h3>
+          <p>
+            Wähle links ein Gatter und tippe auf die Fläche. Im Draht-Werkzeug
+            zuerst den Ausgang rechts, dann den Eingang links antippen. Ziehe
+            Gatter im Auswahlmodus. Ein gewähltes Gatter kannst du mit Entf
+            löschen; Strg/⌘+Z macht Änderungen rückgängig.
+          </p>
+        </div>
+      </div>
+      <div class="help-step">
+        <span>03</span>
+        <div>
+          <h3>Papier trifft Pixel</h3>
+          <p>
+            Nutze die Druckvorlage oder zeichne große, geschlossene
+            ANSI-Symbole. Eingänge als Kreis mit 0/1, Ausgänge als leeren Kreis.
+            Halte das Handy ruhig und das Papier eben. Erkennung ist
+            heuristisch: prüfe Gatter und Leitungen, korrigiere sie mit den
+            Werkzeugen. Starte mit der Druckvorlage.
+          </p>
+        </div>
+      </div>
+      <div class="help-step">
+        <span>04</span>
+        <div>
+          <h3>Freihand & Coach</h3>
+          <p>
+            Zeichne helle Gattersymbole und Leitungen mit dem Stift und tippe
+            „Zeichnung erkennen“. Der lokale Coach erstellt Fragen aus der
+            aktiven Schaltung. Kein Cloud-Modell, keine Anmeldung.
+          </p>
+        </div>
+      </div>
+      <p class="help-footnote">
+        Kamera: HTTPS und deine Erlaubnis erforderlich. Keine Garantie für
+        beliebige Handschrift, gedrehte Gatter oder perspektivisch verzerrtes
+        Papier. Sandbox und Druckvorlage funktionieren vollständig offline nach
+        dem ersten Laden.
+      </p>
+      <button class="button button-primary" id="help-done">
+        Los experimentieren<svg><use href="#i-arrow" /></svg>
+      </button>
+    </dialog>
+    <noscript
+      >Logic-Cam benötigt JavaScript für die lokale Simulation. Aktiviere
+      JavaScript in deinem Browser.</noscript
+    >
+  </body>
+</html>

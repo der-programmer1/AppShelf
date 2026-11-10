@@ -30,6 +30,11 @@ jobs:
           cache: npm
       - name: Install build dependencies
         run: npm ci --ignore-scripts
+      - name: Validate Logic-Cam and its packaged demo
+        run: |
+          npm test --prefix projects/Logic-Cam
+          npm run check --prefix projects/Logic-Cam
+          python3 projects/Logic-Cam/scripts/package.py --check
       - name: Validate project manifests and build
         run: npm test
       - name: Build Pages output before merging
@@ -105,6 +110,8 @@ jobs:
         run: node scripts/build-catalog.mjs --out dist
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

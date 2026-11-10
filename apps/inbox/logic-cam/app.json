@@ -1,0 +1,20 @@
+{
+  "name": "Logic-Cam",
+  "slug": "logic-cam",
+  "projectType": "web-app",
+  "version": "1.0.0",
+  "description": "Dein Papier. Deine Logik. Experimentiere mit sechs Logikgattern, verbinde Schaltungen in der Touch-Sandbox oder erkenne klare Papier-Symbole mit der Kamera. Neon-Signale, Wahrheitstabellen und ein lokaler Logic Coach helfen beim Verstehen.",
+  "cardDescription": "Mach digitale Logik sichtbar – auf Papier und im Browser.",
+  "category": "Lernen",
+  "tags": ["Logik", "AR", "Kamera", "offline", "Lernen"],
+  "platform": ["Web/PWA"],
+  "techStack": ["JavaScript", "OpenCV.js", "Canvas"],
+  "status": "published",
+  "updatedAt": "2026-11-10",
+  "sourcePath": "projects/Logic-Cam",
+  "githubPrivate": true,
+  "demoDir": "demo",
+  "preview": "01-sandbox.png",
+  "notes": "Alle Berechnungen laufen lokal. Die Papiererkennung ist eine Heuristik für saubere, waagerechte ANSI-Symbole und benötigt Kontrolle und ggf. Korrektur. Der Coach ist regelbasiert, ohne Cloud-Modell. Kamera: HTTPS und Browser-Erlaubnis erforderlich; echte Smartphone-Aufnahmen sind noch nicht hardwareseitig validiert.",
+  "webDescription": "AND, OR, NOT, XOR, NAND und NOR, interaktive 0/1-Eingänge, Zeichen- und Drahtwerkzeuge, offene Pins und Rückkopplungen, Wahrheitstabellen, lokaler Quiz-Coach, JSON-Sicherung und eine Druckvorlage. Nach dem ersten vollständigen Laden offline nutzbar."
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="188mm" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#fff"/>
+  <g font-family="monospace" fill="#222"><text x="65" y="62" font-size="17" letter-spacing="2">LOGIC-CAM / PAPER LAB</text><text x="65" y="89" font-size="12">AND · Beide Eingaenge muessen 1 sein. Kamera ruhig und parallel zum Papier halten.</text></g>
+  <g fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <circle cx="210" cy="255" r="50"/><circle cx="210" cy="505" r="50"/>
+    <path d="M260 255H390V351.5H551M260 505H440V408.5H551"/>
+    <g transform="translate(620 380) scale(1.5)"><path d="M-46-39H0C60-39 60 39 0 39H-46Z" stroke-width="2.667"/></g>
+    <path d="M687.5 380H920"/><circle cx="970" cy="380" r="50"/>
+  </g>
+  <g font-family="monospace" text-anchor="middle" fill="#111"><text x="210" y="267" font-size="37">1</text><text x="210" y="517" font-size="37">0</text><text x="210" y="184" font-size="14">INPUT A</text><text x="210" y="581" font-size="14">INPUT B</text><text x="618" y="285" font-size="14">AND</text><text x="970" y="303" font-size="14">OUTPUT Y</text></g>
+  <g font-family="monospace" font-size="12" fill="#555"><text x="65" y="683">01 / Querformat drucken · Kamera: HTTPS + Erlaubnis</text><text x="65" y="708">02 / Unsichere Treffer pruefen · Erkennung pausieren und Typ/Leitungen korrigieren</text><text x="65" y="733">03 / Gedruckte 0/1 werden erkannt. Antippen ueberschreibt sie bis zum Reset.</text></g>
+</svg>

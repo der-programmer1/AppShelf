@@ -1,5 +1,21 @@
 # AppShelf
 
+**Meine Apps und Experimente an einem Ort – zum Anschauen, Ausprobieren und Herunterladen.**
+
+[**Live-Katalog öffnen ↗**](https://der-programmer1.github.io/AppShelf/) · [**Wie AppShelf gebaut ist**](docs/projektgeschichte.md) · [**Über Patrice**](https://der-programmer1.github.io/patrice-lab/)
+
+AppShelf bringt Projektideen aus einzelnen Repositories in eine gemeinsame Übersicht. Besucher finden Screenshots, Projektbeschreibungen, Web-Demos sowie verfügbare Android- und Quellcode-Downloads. Technisch entsteht der Katalog aus Projektmanifesten und wird als statische Website über GitHub Pages veröffentlicht.
+
+- **Für Neugierige:** [Projekte im Browser entdecken](https://der-programmer1.github.io/AppShelf/).
+- **Für Entwickler und technische Einblicke:** [Architektur, Entscheidungen und Prüfungen](docs/projektgeschichte.md).
+- **Zum Mitbauen:** Die bestehende technische Anleitung folgt unten.
+
+Veröffentlichte Projekte behalten ihren jeweiligen Reifegrad. Bananenblick ist ausdrücklich als Prototyp enthalten; sein neues Büschel-Update ist noch nicht abgenommen.
+
+---
+
+## Technical documentation
+
 AppShelf is a GitHub-Pages project library for apps, web apps, games, tools,
 APKs and source archives. GitHub Actions uses Node.js to scan `apps/inbox/`,
 render the catalogue and detail pages as static HTML, and deploy `dist/` to

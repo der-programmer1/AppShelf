@@ -17,6 +17,9 @@ const result = spawnSync(process.execPath, [path.join(root, "scripts", "build-ca
 });
 if (result.status !== 0) throw new Error(result.stderr || result.stdout);
 const catalog = JSON.parse(await readFile(path.join(root, "dist-test", "catalog.json"), "utf8"));
+if (!process.env.PAGES_BASE_URL && !process.env.CF_PAGES_URL) {
+  assert.ok(catalog.apps.every((app) => !/localhost|127\.0\.0\.1/.test(app.qrCode.target)), "CI QR codes must point to a public site.");
+}
 if (!catalog.apps.length) throw new Error("Expected at least one catalogue entry");
 if (catalog.schemaVersion !== 2) throw new Error("Catalogue schema version is not current");
 if (catalog.apps.some((app) => !["app", "web-app", "game", "tool"].includes(app.projectType))) throw new Error("Catalogue contains an invalid project type");

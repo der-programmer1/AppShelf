@@ -19,7 +19,7 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const projectTypes = new Set(["app", "web-app", "game", "tool"]);
 const repository = process.env.GITHUB_REPOSITORY || "der-programmer1/AppShelf";
 const repositoryUrl = `https://github.com/${repository}`;
-const publishReleaseAssets = process.env.CI === "true" && Boolean(process.env.GITHUB_REPOSITORY);
+const publishReleaseAssets = process.env.CI === "true";
 
 const githubPagesBaseUrl = (value) => {
   const [owner, repo] = value.split("/", 2);
@@ -29,7 +29,7 @@ const githubPagesBaseUrl = (value) => {
     : `https://${owner}.github.io/${repo}`;
 };
 
-const pagesBaseUrl = String(process.env.PAGES_BASE_URL || githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || "") || "http://localhost:8080")
+const pagesBaseUrl = String(process.env.PAGES_BASE_URL || process.env.CF_PAGES_URL || githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || (process.env.CI === "true" ? repository : "")) || "http://localhost:8080")
   .trim().replace(/\/+$/, "");
 const makeQr = (slug, name, href) => ({
   href: `media/${encodeURIComponent(slug)}/qr-${name}.svg`,

@@ -95,6 +95,10 @@ or deploying to a custom domain. Otherwise the base is derived from
 3. Push to the `main` branch.
 4. Add app packages under `apps/inbox/` and push again.
 
+The repository's additional Cloudflare Workers build can serve the same static
+`dist/` through `wrangler.jsonc`; it needs no application server. Set
+`PAGES_BASE_URL` to its public URL if QR codes should point to that host.
+
 The workflow uses the repository's built-in `GITHUB_TOKEN`; no personal token
 is embedded in the website. APKs and source archives are linked from GitHub
 Releases so the Pages output stays small.

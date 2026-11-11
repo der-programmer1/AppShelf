@@ -72,9 +72,6 @@ function cardOptions(app, webIsSecondary, qr) {
 function renderCard(app) {
   const name = html(app.name);
   const href = projectHref(app);
-  const icon = app.iconHref
-    ? `<img src="${html(app.iconHref)}" alt="" width="46" height="46" decoding="async">`
-    : `<span class="icon-letter" aria-hidden="true">${html([...app.name][0] || "?")}</span>`;
   const apk = app.files.find((file) => file.kind === "apk" && !isUnsigned(file));
   const file = apk ?? (app.demoHref ? undefined : app.files.find((entry) => entry.kind !== "readme"));
   const primaryHref = file?.href || app.demoHref || href;
@@ -82,7 +79,10 @@ function renderCard(app) {
     : app.demoHref ? "Web-App öffnen" : file ? "Datei laden" : "Projektdetails";
   const qr = file?.qrCode ? apkTarget(file) : !file && app.demoQrCode ? webTarget(app) : null;
   return `<article class="app-card" aria-labelledby="title-${app.slug}">
-    <div class="card-cover">${icon}<span class="card-category">${html(app.category)}</span></div>
+    <a class="card-cover" href="${href}" aria-label="${name}: Vorschau und Details">
+      <img src="${html(app.preview.href)}" alt="${html(app.preview.alt)}" width="640" height="400" loading="lazy" decoding="async">
+      <span class="card-category">${html(app.category)}</span>
+    </a>
     <div class="card-content">
       <h3 id="title-${app.slug}" class="card-title"><a href="${href}">${name}</a></h3>
       <p class="card-description">${html(app.cardDescription)}</p>
@@ -118,7 +118,7 @@ export function renderDetail(template, app) {
   const web = app.demoHref ? `<li class="download-row web-row">
     <div class="download-meta"><strong>Web-App</strong><span>${html(app.webDescription || "Direkt im Browser nutzen.")}</span></div>
     <div class="download-actions">
-      <a class="button primary" href="${html(detailPrefix + app.demoHref)}">Web-App öffnen ${arrow}</a>
+      <a class="button primary" href="${html(localHref(app.demoHref, detailPrefix))}">Web-App öffnen ${arrow}</a>
       ${qrDisclosure([webTarget(app)], detailPrefix)}
     </div>
   </li>` : "";

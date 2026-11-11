@@ -2,6 +2,8 @@
 
 Diese Datei beschreibt den sicheren Arbeitsrahmen für eine verbundene Codex-Cloud-Automation.
 
+**Aktuell gilt [Bananenblick zuerst fertigstellen](current-focus.md).** Neue Projekte bleiben bis zu dessen belegter Abnahme gesperrt. Ideen dürfen in [project-ideas.md](project-ideas.md) gesammelt werden. Diese Nutzerfestlegung hat Vorrang vor dem unten beschriebenen normalen Nachtablauf.
+
 Der vollständige, direkt kopierbare Produktentwickler-Command steht in
 [`automation/app-product-agent-command.md`](app-product-agent-command.md). Er übernimmt die
 Recherche echter Alltagsprobleme, die Auswahl einer begründeten Idee, Android-first-Bau,

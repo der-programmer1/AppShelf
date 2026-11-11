@@ -2,6 +2,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { publicGithubUrl } from "./github-url.mjs";
+import { publicWebUrl } from "./web-url.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const inboxDir = path.join(root, "apps", "inbox");
@@ -40,6 +41,7 @@ for (const folder of folders) {
   if (folder.name !== "_template" && slug !== folder.name) fail(`${folder.name} must use the same slug in app.json`);
   if (!slugPattern.test(slug)) fail(`${folder.name} has an invalid slug: ${slug}`);
   publicGithubUrl(manifest, slug);
+  const webUrl = publicWebUrl(manifest, slug);
   if (status !== "draft" && slugs.has(slug)) fail(`duplicate slug: ${slug}`);
   if (status !== "draft") slugs.add(slug);
   if (!String(manifest.name || "").trim()) fail(`${slug} is missing name`);
@@ -59,7 +61,7 @@ for (const folder of folders) {
   if (manifest.preview !== undefined && !screenshots.some((entry) => entry.name === manifest.preview)) fail(`${slug} has an invalid preview file`);
 
   const demoName = String(manifest.demoDir || "demo");
-  if (projectType === "web-app" || manifest.demoDir) {
+  if ((projectType === "web-app" || manifest.demoDir) && !webUrl) {
     if (manifest.demoDir && !/^[a-z0-9][a-z0-9_-]*$/i.test(manifest.demoDir)) fail(`${slug} has an invalid web-app directory`);
     const demoDir = path.join(dir, demoName);
     if (!(await exists(path.join(demoDir, "index.html")))) {

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { renderHome, renderDetail } from "./render-catalog.mjs";
 import { publicGithubUrl } from "./github-url.mjs";
+import { publicWebUrl } from "./web-url.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(root, "site");
@@ -18,7 +19,7 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const projectTypes = new Set(["app", "web-app", "game", "tool"]);
 const repository = process.env.GITHUB_REPOSITORY || "der-programmer1/AppShelf";
 const repositoryUrl = `https://github.com/${repository}`;
-const publishReleaseAssets = process.env.CI === "true" && Boolean(process.env.GITHUB_REPOSITORY);
+const publishReleaseAssets = process.env.CI === "true";
 
 const githubPagesBaseUrl = (value) => {
   const [owner, repo] = value.split("/", 2);
@@ -28,7 +29,7 @@ const githubPagesBaseUrl = (value) => {
     : `https://${owner}.github.io/${repo}`;
 };
 
-const pagesBaseUrl = String(process.env.PAGES_BASE_URL || githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || "") || "http://localhost:8080")
+const pagesBaseUrl = String(process.env.PAGES_BASE_URL || process.env.CF_PAGES_URL || githubPagesBaseUrl(process.env.GITHUB_REPOSITORY || (process.env.CI === "true" ? repository : "")) || "http://localhost:8080")
   .trim().replace(/\/+$/, "");
 const makeQr = (slug, name, href) => ({
   href: `media/${encodeURIComponent(slug)}/qr-${name}.svg`,
@@ -94,6 +95,7 @@ async function readApp(dirName) {
   const slug = String(manifest.slug || dirName).trim();
   if (!slugPattern.test(slug)) throw new Error(`Invalid slug for ${dirName}: ${slug}`);
   const githubUrl = publicGithubUrl(manifest, slug);
+  const webUrl = publicWebUrl(manifest, slug);
   const projectType = String(manifest.projectType || "app").trim();
   if (!projectTypes.has(projectType)) throw new Error(`Invalid projectType for ${dirName}: ${projectType}`);
   const description = String(manifest.description || await readDescription(dir)).trim();
@@ -106,7 +108,7 @@ async function readApp(dirName) {
   if (demoDirName && !/^[a-z0-9][a-z0-9_-]*$/i.test(demoDirName)) throw new Error(`${slug}: invalid demo directory`);
   const demoDir = demoDirName ? path.join(dir, demoDirName) : "";
   const hasDemo = Boolean(demoDir && await exists(path.join(demoDir, "index.html")));
-  const demoHref = hasDemo ? `apps/${encodeURIComponent(slug)}/demo/` : "";
+  const demoHref = hasDemo ? `apps/${encodeURIComponent(slug)}/demo/` : webUrl;
   const iconName = hasDemo && await exists(path.join(demoDir, "icon.svg")) ? "icon.svg" : "";
   const techStack = manifest.techStack ?? [];
   if (!Array.isArray(techStack) || techStack.some((tech) => typeof tech !== "string" || !tech.trim() || tech.length > 36)) {
@@ -159,7 +161,7 @@ async function readApp(dirName) {
     qrCode: makeQr(slug, "app-page", `apps/${encodeURIComponent(slug)}/`),
     demoHref,
     iconHref: iconName ? demoHref + iconName : "",
-    demoQrCode: hasDemo ? makeQr(slug, "web", demoHref) : null,
+    demoQrCode: demoHref ? makeQr(slug, "web", demoHref) : null,
     demoSourceDir: hasDemo ? demoDir : "",
     files,
     screenshots,

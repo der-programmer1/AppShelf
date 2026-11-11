@@ -7,6 +7,8 @@ import { chromium, webkit } from "playwright";
 const root = path.resolve(
   fileURLToPath(new URL("../../dist/", import.meta.url)),
 );
+const localApps = JSON.parse(await readFile(path.join(root, "catalog.json"), "utf8")).apps
+  .filter((app) => app.demoHref && !app.demoHref.startsWith("https://"));
 let disconnect = false;
 const types = {
   ".html": "text/html",
@@ -162,10 +164,10 @@ try {
       await check(
         `${engine}: every current app has a Web-App link on its detail page`,
         async () => {
-          for (const slug of ["gymdelay", "sehplus", "weiter", "origincheck"]) {
+          for (const { slug } of localApps) {
             await page.goto(base + `apps/${slug}/`);
             const link = page.getByRole("link", {
-              name: "Web-App öffnen ↗",
+              name: "Web-App öffnen",
               exact: true,
             });
             await link.waitFor();

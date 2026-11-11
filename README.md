@@ -27,7 +27,10 @@ apps/inbox/my-app/
 ```
 
 For a browser project, add a self-contained `demo/index.html` folder. The build
-publishes it below the project's detail page.
+publishes it below the project's detail page. For an already hosted web app,
+set `webUrl` to its public HTTPS URL instead. Its launch button and QR code
+open that existing site; the build does not copy or redeploy the external app.
+Use either `webUrl` or `demoDir`, not both.
 
 The minimum manifest is:
 
@@ -51,7 +54,8 @@ without this field remain compatible and are treated as `app` entries.
 
 Set `cardDescription` to a short line for the catalogue card and `techStack`
 to an array of technology labels in priority order. The card shows up to three
-labels and uses `demo/icon.svg` when available.
+labels. Catalogue cards use the selected screenshot preview, as in the earlier
+AppShelf design, and link the image to the project's details.
 Set `githubUrl` only for a public GitHub repository that should be linked.
 Omit it for projects without public source code. If `githubPrivate` is
 `true`, the build excludes the URL from the catalogue and detail pages even
@@ -90,6 +94,10 @@ or deploying to a custom domain. Otherwise the base is derived from
 2. In the repository settings, enable Pages with **GitHub Actions** as source.
 3. Push to the `main` branch.
 4. Add app packages under `apps/inbox/` and push again.
+
+The repository's additional Cloudflare Workers build can serve the same static
+`dist/` through `wrangler.jsonc`; it needs no application server. Set
+`PAGES_BASE_URL` to its public URL if QR codes should point to that host.
 
 The workflow uses the repository's built-in `GITHUB_TOKEN`; no personal token
 is embedded in the website. APKs and source archives are linked from GitHub

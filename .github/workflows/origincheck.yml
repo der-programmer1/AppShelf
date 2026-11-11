@@ -51,14 +51,18 @@ jobs:
           node --check backend/server.js
           npm test
           node --check web/app.js
-          node --check ../../apps/inbox/origincheck/demo/app.js
+      - name: Check the published client when present in the catalogue
+        if: hashFiles('apps/inbox/origincheck/app.json') != ''
+        run: node --check ../../apps/inbox/origincheck/demo/app.js
       - name: Install real browser engines
         run: npx playwright install --with-deps chromium webkit
       - name: Real file selection, six video frames, safe results and offline PWA
         run: npm run test:browser
       - name: Verify complete source handoff and matching published PWA
+        if: hashFiles('apps/inbox/origincheck/app.json') != ''
         run: python3 scripts/package.py --check
       - name: Verify OriginCheck detail demo and all copied PWA files
+        if: hashFiles('apps/inbox/origincheck/app.json') != ''
         run: |
           npm ci --ignore-scripts --prefix ../..
           npm run build --prefix ../..
@@ -104,6 +108,9 @@ jobs:
         run: |
           python3 ../scripts/verify-apk.py app/build/outputs/apk/debug/app-debug.apk
           python3 ../scripts/verify-apk.py app/build/outputs/apk/release/app-release.apk
+      - name: Verify the distributed APK when present in the catalogue
+        if: hashFiles('apps/inbox/origincheck/app.json') != ''
+        run: |
           python3 ../scripts/verify-apk.py ../../../apps/inbox/origincheck/OriginCheck-0.1.0-debug.apk
       - name: Enable ephemeral emulator acceleration
         run: sudo chmod 666 /dev/kvm

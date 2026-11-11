@@ -72,6 +72,24 @@ jobs:
     steps:
       - name: Checkout proposed changes
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect changes to the retained Android project
+        id: android-source
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 - <<'PY'
+          import os, subprocess
+          changed = subprocess.check_output([
+            'git', 'diff', '--name-only', os.environ['BASE_SHA'], os.environ['HEAD_SHA'], '--',
+            'projects/LeistenPlan/', 'apps/inbox/leistenplan/'
+          ], cwd=os.environ['GITHUB_WORKSPACE']).strip()
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write('changed=' + str(bool(changed)).lower() + '\n')
+          print('Retained LeistenPlan source changed:', bool(changed))
+          PY
       - name: Set up Java 21
         uses: actions/setup-java@v5
         with:
@@ -97,13 +115,18 @@ jobs:
           android sdk install 'platform-tools@37.0.1'
           android sdk install 'platforms/android-36@2.0.0'
           android sdk install 'build-tools/36.0.0@36.0.0'
+      - name: Install emulator for changed Android source
+        if: steps.android-source.outputs.changed == 'true'
+        run: |
           android sdk install 'emulator@37.2.13'
           android sdk install 'system-images/android-30/default/x86_64@11.0.0'
       - name: Unit tests, lint and build
         run: ./gradlew --no-daemon --max-workers=2 :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
       - name: Enable hardware acceleration on the ephemeral runner
+        if: steps.android-source.outputs.changed == 'true'
         run: sudo chmod 666 /dev/kvm
       - name: Android core flow, recreation and reset tests
+        if: steps.android-source.outputs.changed == 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30

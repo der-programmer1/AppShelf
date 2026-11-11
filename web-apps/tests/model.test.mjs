@@ -17,14 +17,7 @@ import {
   LIMITS,
   linksIn,
 } from "../weiter/model.js";
-import {
-  startCountdown,
-  secondsLeft,
-  canResume,
-  safeDuration,
-  validAudio,
-  PRESETS,
-} from "../gymdelay/model.js";
+import { emptyPlan, estimate, restorePlan, secondsLeft } from "../../apps/inbox/satzfenster/demo/model.js";
 import {
   analyzePixels,
   baseName,
@@ -216,45 +209,44 @@ test("Weiter: merging never overwrites local IDs, draft, or running focus timer"
     merge(local, data(second)),
   );
 });
-test("GymDelay: all Android presets and duration boundaries", () => {
-  assert.deepEqual(PRESETS, [5, 10, 15, 30, 60]);
-  assert.equal(safeDuration(-10), 5);
-  assert.equal(safeDuration(100), 60);
-  assert.equal(safeDuration(NaN), 30);
+const set = (id, values = {}) => ({ id, name: id, sets: 3, minutes: 3, completed: 0, core: false, blocked: false, ...values });
+
+test("Satzfenster allocates whole sets to priorities before earlier optional work", () => {
+  const entries = [set("optional", { minutes: 2 }), set("priority", { core: true })];
+  const plan = estimate(entries, 660);
+  assert.equal(plan.next.id, "priority");
+  assert.deepEqual(plan.byId.get("priority"), { fit: 3, later: 0, waiting: 0 });
+  assert.deepEqual(plan.byId.get("optional"), { fit: 1, later: 2, waiting: 0 });
+  assert.equal(plan.scheduled, 4);
+  assert.equal(plan.deferred, 2);
+  assert.equal(estimate(entries, 119).scheduled, 0);
 });
-test("GymDelay: absolute deadline survives suspension and never starts a different track", () => {
-  const timer = startCountdown("song-a", 5, now);
-  assert.equal(secondsLeft(timer, now), 5);
-  assert.equal(secondsLeft(timer, now + 4999), 1);
-  assert.equal(secondsLeft(timer, now + 5000), 0);
-  assert.equal(canResume(timer, "song-a", now + 99999), true);
-  assert.equal(canResume(timer, "song-b", now + 99999), false);
-  assert.equal(canResume(null, "song-a", now + 99999), false);
-  assert.throws(() => startCountdown("", 5, now));
+
+test("Satzfenster reallocates blocked sets and counts only incomplete sets", () => {
+  const entries = [set("main", { core: true, blocked: true, completed: 1 }), set("other")];
+  const plan = estimate(entries, 540);
+  assert.equal(plan.blocked, 2);
+  assert.equal(plan.scheduled, 3);
+  assert.deepEqual(plan.byId.get("main"), { fit: 0, later: 0, waiting: 2 });
+  entries[0].blocked = false;
+  const freed = estimate(entries, 540);
+  assert.equal(freed.next.id, "main");
+  assert.equal(freed.byId.get("other").fit, 1);
 });
-test("GymDelay: file limits and format validation", () => {
-  assert.equal(
-    validAudio({ name: "song.mp3", type: "audio/mpeg", size: 100 }),
-    true,
-  );
-  assert.equal(validAudio({ name: "song.m4a", type: "", size: 100 }), true);
-  assert.equal(
-    validAudio({ name: "page.html", type: "text/html", size: 100 }),
-    false,
-  );
-  assert.equal(
-    validAudio({
-      name: "song.mp3",
-      type: "audio/mpeg",
-      size: 100 * 1024 * 1024 + 1,
-    }),
-    false,
-  );
-  assert.equal(
-    validAudio({ name: "song.mp3", type: "audio/mpeg", size: 0 }),
-    false,
-  );
+
+test("Satzfenster restores a fixed deadline and validates incomplete saved data", () => {
+  const saved = {
+    deadline: now + 60_000, minutes: 1,
+    exercises: [set("valid", { completed: 2 }), set("bad-duration", { minutes: 0 }), null, set("valid")],
+  };
+  const restored = restorePlan(JSON.parse(JSON.stringify(saved)));
+  assert.deepEqual(restored.exercises, [set("valid", { completed: 2 })]);
+  assert.equal(secondsLeft(restored, now + 30_000), 30);
+  assert.equal(secondsLeft(restored, now + 61_000), 0);
+  assert.equal(secondsLeft(emptyPlan(), now), 1500);
+  assert.deepEqual(restorePlan({ minutes: -5, deadline: Infinity, exercises: "bad" }), emptyPlan());
 });
+
 function solid(r, g, b) {
   const pixels = new Uint8ClampedArray(64 * 64 * 4);
   for (let i = 0; i < pixels.length; i += 4) pixels.set([r, g, b, 255], i);

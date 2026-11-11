@@ -1,0 +1,17 @@
+{
+  "name": "Satzfenster",
+  "slug": "satzfenster",
+  "projectType": "web-app",
+  "version": "1.0.0",
+  "description": "Wenig Zeit im Gym? Satzfenster zeigt, welche deiner offenen Sätze bis zum Trainingsende voraussichtlich noch reinpassen.",
+  "cardDescription": "Plane deine restlichen Gym-Sätze, wenn Zeit fehlt oder ein Gerät belegt ist.",
+  "webDescription": "Übungen eintragen, Restzeit setzen und erledigte Sätze abhaken. Für iPhone, Android und Desktop. Nach dem ersten Laden offline nutzbar.",
+  "category": "Gym",
+  "tags": ["Gym", "Zeitplanung", "offline"],
+  "techStack": ["HTML", "CSS", "JavaScript"],
+  "platform": ["Web/PWA"],
+  "status": "published",
+  "updatedAt": "2026-11-11",
+  "demoDir": "demo",
+  "preview": "01-zeitfenster.png"
+}

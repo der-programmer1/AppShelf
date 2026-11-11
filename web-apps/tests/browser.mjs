@@ -655,112 +655,59 @@ try {
         },
       );
       await check(
-        `${engine}: GymDelay local audio, same-track pause/countdown/resume and real cancellation`,
+        `${engine}: Satzfenster recalculates priorities, saves progress and restores an absolute deadline`,
         async () => {
-          await open("gymdelay");
-          await page.locator("#audioFile").setInputFiles({
-            name: "Trainingssong.wav",
-            mimeType: "audio/wav",
-            buffer: wav(),
-          });
-          await page.waitForFunction(
-            () => !document.querySelector("#start").disabled,
-          );
-          await page.getByRole("button", { name: "5 s", exact: true }).click();
-          await page.locator("#start").click();
-          await page.waitForFunction(() =>
-            document
-              .querySelector("#countdownState")
-              .textContent.includes("pausiert"),
-          );
-          assert.equal(
-            await page.locator("#player").evaluate((a) => a.paused),
-            true,
-          );
-          await page.waitForFunction(
-            () =>
-              !document.querySelector("#resume").hidden ||
-              !document.querySelector("#player").paused,
-            {},
-            { timeout: 12000 },
-          );
-          if (await page.locator("#resume").isVisible())
-            await page.locator("#resume").click();
-          await page.waitForFunction(
-            () => !document.querySelector("#player").paused,
-          );
-          await page.locator("#start").click();
-          await page.locator("#cancel").click();
-          await page.waitForFunction(() =>
-            document
-              .querySelector("#status")
-              .textContent.includes("Abgebrochen"),
-          );
-          assert.equal(
-            await page.locator("#player").evaluate((a) => a.paused),
-            true,
-          );
-          assert.match(
-            await page.locator("#status").innerText(),
-            /Abgebrochen/,
-          );
+          await open("satzfenster");
+          await page.getByRole("button", { name: "Beispiel laden" }).click();
+          assert.equal(await page.locator("#fit-count").textContent(), "8 / 11 passen");
+          assert.equal(await page.locator("#next").textContent(), "Als Nächstes: Bankdrücken");
+          await page.getByRole("button", { name: "Bankdrücken als belegt markieren" }).click();
+          assert.equal(await page.locator("#total-waiting").textContent(), "3");
+          assert.equal(await page.locator("#next").textContent(), "Als Nächstes: Kurzhantelrudern");
+          assert.ok(await page.getByRole("button", { name: "Satz fertig – Bankdrücken" }).isDisabled());
+          await page.getByRole("button", { name: "Satz fertig – Kurzhantelrudern" }).click();
+          await page.locator("#minutes").fill("12");
+          await page.getByRole("button", { name: "Zeit starten" }).click();
+          const key = "appshelf.satzfenster.v1";
+          const read = () => page.evaluate((storageKey) => JSON.parse(localStorage.getItem(storageKey)), key);
+          const active = await read();
+          assert.ok(active.deadline > Date.now());
+          await page.reload();
+          assert.deepEqual(await read(), active);
+          assert.equal(await page.locator("#timer-state").textContent(), "Läuft");
+          assert.match(await page.locator("#completed").textContent(), /^1 von 11/);
+          await page.getByRole("button", { name: "Bankdrücken freigeben" }).click();
+          assert.equal(await page.locator("#total-waiting").textContent(), "0");
+          await page.getByRole("button", { name: "Letzten Satz rückgängig – Kurzhantelrudern" }).click();
+          await page.evaluate((storageKey) => {
+            const plan = JSON.parse(localStorage.getItem(storageKey));
+            plan.deadline = Date.now() - 1000;
+            localStorage.setItem(storageKey, JSON.stringify(plan));
+          }, key);
+          await page.reload();
+          assert.equal(await page.locator("#clock").textContent(), "0:00");
+          assert.equal(await page.locator("#fit-count").textContent(), "0 / 11 passen");
+          await page.getByRole("button", { name: "Zeit stoppen" }).click();
         },
       );
       await check(
-        `${engine}: GymDelay persists preset, selected audio and countdown; changing source cancels safely`,
+        `${engine}: Satzfenster adds, edits and removes a custom exercise using plain text`,
         async () => {
-          await page.getByRole("button", { name: "15 s", exact: true }).click();
-          await page.locator("#start").click();
-          await page.waitForFunction(
-            () => !document.querySelector("#cancel").disabled,
-          );
-          await page.reload();
-          await page.waitForFunction(
-            () =>
-              document.querySelector("#trackName").textContent ===
-              "Trainingssong.wav",
-          );
-          await page.waitForFunction(
-            () => !document.querySelector("#cancel").disabled,
-          );
-          await page.locator("#audioFile").setInputFiles({
-            name: "Anderer-Song.wav",
-            mimeType: "audio/wav",
-            buffer: wav(2),
-          });
-          await page.waitForFunction(
-            () =>
-              document.querySelector("#trackName").textContent ===
-              "Anderer-Song.wav",
-          );
-          assert.equal(await page.locator("#cancel").isDisabled(), true);
-          assert.equal(
-            await page.locator("#player").evaluate((a) => a.paused),
-            true,
-          );
-          await page.reload();
-          await page.waitForFunction(
-            () => document.querySelector("#countdown").textContent === "15",
-          );
-          await page
-            .locator("#deleteAudio")
-            .evaluate((e) => (e.closest("details").open = true));
-          await page.locator("#deleteAudio").click();
-          await page.waitForFunction(
-            () =>
-              document.querySelector("#trackName").textContent ===
-              "Noch keine Datei ausgewählt",
-          );
-          await page.reload();
-          await page.waitForFunction(
-            () =>
-              document.querySelector("#trackName").textContent ===
-              "Noch keine Datei ausgewählt",
-          );
-          assert.equal(await page.locator("#start").isDisabled(), true);
+          await page.getByRole("button", { name: "Übung", exact: true }).click();
+          const dialog = page.getByRole("dialog");
+          const name = '<img src=x onerror="window.injected=true">';
+          await dialog.getByRole("textbox", { name: "Übung" }).fill(name);
+          await dialog.getByRole("button", { name: "Speichern" }).click();
+          assert.equal(await page.getByRole("heading", { name, exact: true }).count(), 1);
+          await page.getByRole("button", { name: name + " bearbeiten", exact: true }).click();
+          await dialog.getByRole("textbox", { name: "Übung" }).fill("Kabelrudern");
+          await dialog.getByRole("button", { name: "Speichern" }).click();
+          await page.getByRole("button", { name: "Kabelrudern bearbeiten" }).click();
+          await dialog.getByRole("button", { name: "Übung löschen" }).click();
+          assert.equal(await page.getByRole("heading", { name: "Kabelrudern", exact: true }).count(), 0);
         },
       );
-      for (const slug of ["weiter", "sehplus", "gymdelay"])
+      for (const slug of ["weiter", "sehplus", "satzfenster"])
         await check(
           `${engine}: ${slug} isolated PWA scope, phone/tablet layout and real offline reload`,
           async () => {
@@ -837,13 +784,13 @@ try {
                     .querySelector("#statusText")
                     .textContent.includes("Offline-Testlabor"),
                 );
-              } else
-                assert.equal(
-                  await page
-                    .getByRole("heading", { name: /Bereit machen/ })
-                    .count(),
-                  1,
-                );
+              } else {
+                const bank = page.locator(".exercise").filter({ has: page.getByRole("heading", { name: "Bankdrücken" }) });
+                await bank.getByRole("button", { name: "Satz fertig – Bankdrücken" }).click();
+                assert.match(await bank.locator("[data-progress]").textContent(), /^1\/3/);
+                await page.reload();
+                assert.match(await bank.locator("[data-progress]").textContent(), /^1\/3/);
+              }
             } finally {
               disconnect = false;
               await context.setOffline(false);
@@ -859,7 +806,7 @@ try {
       );
       if (process.env.APPSHELF_WEB_SCREENSHOTS && engine === "chromium") {
         await mkdir(process.env.APPSHELF_WEB_SCREENSHOTS, { recursive: true });
-        for (const slug of ["weiter", "sehplus", "gymdelay"]) {
+        for (const slug of ["weiter", "sehplus", "satzfenster"]) {
           await open(slug);
           await page.setViewportSize({ width: 390, height: 1000 });
           if (slug === "sehplus") {

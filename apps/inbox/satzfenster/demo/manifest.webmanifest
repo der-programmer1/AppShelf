@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Satzfenster",
+  "short_name": "Satzfenster",
+  "description": "Plane deine offenen Gym-Sätze bis zum Trainingsende.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#141a17",
+  "theme_color": "#141a17",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

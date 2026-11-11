@@ -3,14 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f1e8" data-light="#f4f1e8" data-dark="#101410">
     <meta name="description" content="<!-- PROJECT_DESCRIPTION -->">
     <title><!-- PROJECT_NAME --> · AppShelf</title>
     <link rel="icon" href="../../assets/logo-mark.svg" type="image/svg+xml">
+    <script src="../../assets/theme.js"></script>
     <link rel="stylesheet" href="../../assets/style.css">
   </head>
   <body>
     <main class="detail-page shell">
-      <a class="back-link" href="../../#catalog-title">← Alle Projekte</a>
+      <div class="detail-nav">
+        <a class="back-link" href="../../#catalog-title">← Alle Projekte</a>
+        <select class="theme-select" data-theme-select aria-label="Farbschema" hidden>
+          <option value="system">System</option>
+          <option value="light">Hell</option>
+          <option value="dark">Dunkel</option>
+        </select>
+      </div>
       <!-- PROJECT_DETAIL -->
     </main>
   </body>

@@ -208,6 +208,10 @@ await mkdir(outDir, { recursive: true });
 await cp(path.join(siteDir, "assets"), path.join(outDir, "assets"), { recursive: true });
 await writeFile(path.join(outDir, "index.html"), home, "utf8");
 await copyLocalAssets(apps);
+// Allow browsers with the previous Gym Delay installation to retire its offline shell.
+const retiredWorkerDir = path.join(outDir, "apps", "gymdelay", "demo");
+await mkdir(retiredWorkerDir, { recursive: true });
+await cp(path.join(siteDir, "retired", "gymdelay-sw.js"), path.join(retiredWorkerDir, "sw.js"));
 for (const app of apps) {
   const pageDir = path.join(outDir, "apps", app.slug);
   await mkdir(pageDir, { recursive: true });

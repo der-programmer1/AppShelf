@@ -1,0 +1,30 @@
+{
+  "name": "Bananenblick",
+  "slug": "bananenblick",
+  "projectType": "web-app",
+  "version": "0.1.0",
+  "description": "Die sichtbare Schalenreife von Bananen mit der Kamera oder einem Beispielbild einschätzen. Das Modell läuft lokal im Browser. Für den Einkauf oder zu Hause gedacht; die Erkennung ist ein Forschungsprototyp und bei überlappenden Büscheln noch unzuverlässig.",
+  "cardDescription": "Bananenschalenreife per Kamera einschätzen – ein lokaler Prototyp.",
+  "category": "Alltag",
+  "tags": [
+    "Bananen",
+    "Kamera",
+    "lokale KI",
+    "Prototyp"
+  ],
+  "platform": [
+    "Web"
+  ],
+  "techStack": [
+    "TypeScript",
+    "YOLOX-Nano",
+    "ONNX Runtime"
+  ],
+  "status": "published",
+  "updatedAt": "2026-11-11",
+  "githubUrl": "https://github.com/der-programmer1/Bananenblick",
+  "webUrl": "https://der-programmer1.github.io/Bananenblick/",
+  "preview": "01-scanner.png",
+  "notes": "Öffentlich verfügbar ist Version 0.1.0 als Prototyp. Das Update mit nummerierten Einzelbananen und drei Reifebestätigungen ist noch in Arbeit: Der neue Büscheltest verfehlt die Zielwerte. Echte Android-/iPhone-Geräteprüfungen fehlen. Bewertet wird nur die sichtbare Schale, nicht die innere Qualität oder Lebensmittelsicherheit.",
+  "webDescription": "Bestehende GitHub-Pages-Version öffnen. Aktueller Chrome oder Safari, HTTPS und Kamerafreigabe sind für den Live-Scan erforderlich. Beispielbilder funktionieren ohne Kamerafreigabe. Kamerabilder werden nicht hochgeladen oder gespeichert."
+}

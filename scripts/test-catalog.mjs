@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { publicGithubUrl } from "./github-url.mjs";
+import { publicWebUrl } from "./web-url.mjs";
 import { renderHome, renderDetail } from "./render-catalog.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -50,11 +51,8 @@ for (const app of catalog.apps) {
   const githubUrl = publicGithubUrl(manifest, app.slug);
   assert.equal(app.githubUrl, githubUrl || undefined);
   assert.ok(!Object.hasOwn(app, "sourceUrl"));
-  if (app.iconHref) {
-    assert.ok(home.includes(`src="${app.iconHref}"`));
-    await access(path.join(out, app.iconHref));
-  }
-  assert.ok(!home.includes(`src="${app.preview.href}"`));
+  assert.ok(home.includes(`src="${app.preview.href}"`));
+  await access(path.join(out, app.preview.href));
   if (githubUrl) assert.ok(home.includes(`href="${githubUrl}">Quellcode auf GitHub`));
   const preferredApk = app.files.find((file) => file.kind === "apk" && !file.filename.toLowerCase().endsWith("-unsigned.apk"));
   if (preferredApk) assert.ok(home.includes(`href="${preferredApk.href}" download>APK laden`));
@@ -75,10 +73,25 @@ for (const app of catalog.apps) {
     assert.equal(svg, await QRCode.toString(code.target, { type: "svg", errorCorrectionLevel: "M", margin: 4, width: 320 }));
   }
   if (app.demoHref) {
-    assert.ok(app.demoQrCode.target.endsWith("/" + app.demoHref));
-    assert.ok(detail.includes(app.demoHref));
+    if (app.demoHref.startsWith("https://")) assert.equal(app.demoQrCode.target, app.demoHref);
+    else assert.ok(app.demoQrCode.target.endsWith("/" + app.demoHref));
+    assert.ok(detail.includes(`href="${app.demoHref.startsWith("https://") ? app.demoHref : "../../" + app.demoHref}"`));
+    assert.doesNotMatch(detail, /\.\.\/\.\.\/https:/);
   }
 }
+
+const external = "https://der-programmer1.github.io/Bananenblick/";
+assert.equal(publicWebUrl({ webUrl: external }, "bananenblick"), external);
+assert.equal(publicWebUrl({}, "local"), "");
+for (const webUrl of ["javascript:alert(1)", "http://example.org/", "https://user:password@example.org/", "/local", null, []]) {
+  assert.throws(() => publicWebUrl({ webUrl }, "invalid"), /webUrl/);
+}
+assert.throws(() => publicWebUrl({ webUrl: external, demoDir: "demo" }, "ambiguous"), /webUrl or demoDir/);
+const banana = catalog.apps.find((app) => app.slug === "bananenblick");
+assert.equal(banana?.demoHref, external);
+assert.equal(banana.demoQrCode.target, external);
+assert.equal(banana.githubUrl, "https://github.com/der-programmer1/Bananenblick");
+assert.match(banana.notes, /Prototyp/);
 
 const publicRepo = "https://github.com/example/public-project";
 const privateRepo = "https://github.com/example/private-project";

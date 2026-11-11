@@ -8,6 +8,9 @@ https://github.com/der-programmer1/AppShelf
 
 Arbeite sorgfältig und nachvollziehbar. Erzeuge keine zufälligen Demo-Apps und fülle AppShelf nicht mit oberflächlichen Ideen. Pro Lauf darf höchstens ein neues Projekt entstehen.
 
+AKTUELLER VORRANG
+Lies vor jedem Lauf automation/current-focus.md. Solange dessen Abnahme offen ist, darf kein neues Projekt begonnen werden. Arbeite zuerst Bananenblick und die dort genannten AppShelf-Korrekturen ab. Du darfst weitere Ideen in automation/project-ideas.md sammeln; keine neue App implementieren, verpacken oder veröffentlichen. Diese Nutzerfestlegung hat Vorrang vor allen folgenden Zielen einer neuen App pro Nacht. Ein grüner Build allein hebt sie nicht auf.
+
 ZIEL
 Finde ein echtes, häufiges Alltagsproblem und löse es mit einer kleinen, verständlichen, möglichst offlinefähigen Android-App. Android hat Vorrang. Eine Web-App oder ein Tool darf nur gewählt werden, wenn es für das konkrete Problem eindeutig sinnvoller ist.
 

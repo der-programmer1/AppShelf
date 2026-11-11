@@ -307,7 +307,7 @@ test("SehPlus: two-colour comparison communicates more than colour alone", () =>
     /Farbabstand: 0/,
   );
 });
-test("All published catalog apps expose real web entry points; clients have no key or external dependency", async () => {
+test("Published apps have local offline clients or explicit HTTPS web entry points", async () => {
   for (const slug of await readdir(
     new URL("../../apps/inbox/", import.meta.url),
   )) {
@@ -315,6 +315,13 @@ test("All published catalog apps expose real web entry points; clients have no k
     const dir = new URL(`../../apps/inbox/${slug}/`, import.meta.url);
     const manifest = JSON.parse(await readFile(new URL("app.json", dir)));
     if (manifest.status !== "published") continue;
+    if (manifest.webUrl !== undefined) {
+      const { publicWebUrl } = await import("../../scripts/web-url.mjs");
+      assert.equal(manifest.projectType, "web-app");
+      assert.equal(new URL(publicWebUrl(manifest, slug)).protocol, "https:");
+      assert.equal(manifest.demoDir, undefined);
+      continue;
+    }
     assert.equal(manifest.demoDir, "demo");
     assert.ok(manifest.platform.includes("Web/PWA"));
     await readFile(new URL("demo/index.html", dir));

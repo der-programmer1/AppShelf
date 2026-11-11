@@ -36,7 +36,7 @@ try {
     ? await (await fetch(url("catalog.json"), { cache: "no-store" })).json()
     : JSON.parse(await readFile(path.join(root, "catalog.json"), "utf8"));
   const { apps } = catalogue;
-  const first = apps[0];
+  const first = apps.find((app) => app.demoHref && app.files.some((file) => file.kind === "apk" && !file.filename.endsWith("-unsigned.apk")));
   assert.ok(first?.demoHref);
 
   for (const [engine, launcher] of Object.entries({ chromium, webkit })) {
@@ -59,11 +59,12 @@ try {
         const card = page.getByRole("article", { name: app.name, exact: true });
         const description = card.locator(".card-description");
         assert.equal(await description.textContent(), app.cardDescription);
-        if (app.iconHref) {
-          const image = card.locator(".card-cover img");
-          await image.evaluate((node) => node.decode());
-          assert.equal(await image.getAttribute("src"), app.iconHref);
-        }
+        const image = card.locator(".card-cover img");
+        await image.evaluate((node) => node.decode());
+        assert.equal(await image.getAttribute("src"), app.preview.href);
+        assert.equal(await card.locator(".card-cover").getAttribute("href"), `apps/${app.slug}/`);
+        const cover = await card.locator(".card-cover").boundingBox();
+        assert.ok(Math.abs(cover.width / cover.height - 1.6) < .02);
         assert.deepEqual(await card.locator(".badges li").allTextContents(), app.techStack.slice(0, 3));
         assert.equal(await card.locator(".card-actions a:visible").count(), 1);
         assert.equal(await card.locator(".card-actions .button.primary").count(), 1);
@@ -147,7 +148,7 @@ try {
       }
       assert.deepEqual(dataRequests, []);
       assert.deepEqual(errors, []);
-      for (const app of apps.filter((project) => project.demoHref)) {
+      for (const app of apps.filter((project) => project.demoHref && !project.demoHref.startsWith("https://"))) {
         await view.goto(base);
         const project = view.getByRole("article", { name: app.name, exact: true });
         const link = project.locator(`a[href="${app.demoHref}"]`);
@@ -155,6 +156,17 @@ try {
         const response = view.waitForResponse(url(app.demoHref));
         await link.click();
         assert.equal((await response).status(), 200);
+      }
+      // Check external navigation in a real browser without relying on the remote
+      // site being online during CI. The public target is separately smoke-checked.
+      const external = apps.find((app) => app.slug === "bananenblick");
+      assert.ok(external?.demoHref.startsWith("https://"));
+      await view.route(external.demoHref, (route) => route.fulfill({ contentType: "text/html", body: "<h1>External web app</h1>" }));
+      for (const relative of ["", `apps/${external.slug}/`]) {
+        await view.goto(url(relative));
+        const link = view.locator(`a.button.primary[href="${external.demoHref}"]`);
+        await link.click();
+        await view.waitForURL(external.demoHref);
       }
       await context.close();
       console.log(`PASS ${engine}: workshop layout, one primary action, opt-in GitHub, QR and static rendering at four widths`);

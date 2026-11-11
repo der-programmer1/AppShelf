@@ -34,3 +34,15 @@ for (const folder of folders) {
     console.log(`Updated release ${tag}`);
   }
 }
+
+// Remove the specific public distribution for the retired app after deploying from main.
+if (!folders.some((folder) => folder.name === "gymdelay")) {
+  const tag = "app-gymdelay-v1.0.0";
+  const existing = run(["release", "view", tag, "--json", "tagName"], true);
+  if (existing.status === 0) {
+    run(["release", "delete", tag, "--yes", "--cleanup-tag"]);
+    console.log(`Retired release ${tag}`);
+  } else if (!/release not found/i.test(existing.stderr)) {
+    throw new Error(existing.stderr.trim() || `Could not check release ${tag}`);
+  }
+}

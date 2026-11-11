@@ -45,7 +45,8 @@ if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset w
 const out = path.join(root, "dist-test");
 const home = await readFile(path.join(out, "index.html"), "utf8");
 assert.equal((home.match(/<article class="app-card"/g) || []).length, catalog.count);
-assert.doesNotMatch(home, /Katalog wird geladen|<script|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
+assert.deepEqual(home.match(/<script[^>]*>/g), ['<script src="assets/theme.js">']);
+assert.doesNotMatch(home, /Katalog wird geladen|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);
 for (const removed of ["updates", "updates.json", "assets/filters.js"]) {
   await assert.rejects(access(path.join(out, removed)), { code: "ENOENT" });
 }
@@ -62,7 +63,8 @@ for (const app of catalog.apps) {
   const detail = await readFile(path.join(out, "apps", app.slug, "index.html"), "utf8");
   assert.ok(detail.includes(`<h1>${app.name}</h1>`));
   assert.equal(detail.includes("Quellcode auf GitHub"), Boolean(githubUrl));
-  assert.doesNotMatch(detail, /<script|<!-- [A-Z_]+ -->/);
+  assert.deepEqual(detail.match(/<script[^>]*>/g), ['<script src="../../assets/theme.js">']);
+  assert.doesNotMatch(detail, /<!-- [A-Z_]+ -->/);
   for (const file of app.files.filter((file) => file.kind === "apk")) {
     const bytes = await readFile(path.join(root, "apps", "inbox", app.slug, file.relative));
     assert.equal(file.sha256, createHash("sha256").update(bytes).digest("hex"));

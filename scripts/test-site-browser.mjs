@@ -42,7 +42,7 @@ try {
   for (const [engine, launcher] of Object.entries({ chromium, webkit })) {
     const browser = await launcher.launch();
     try {
-      const plain = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 850 } });
+      const plain = await browser.newContext({ javaScriptEnabled: false, colorScheme: "dark", viewport: { width: 320, height: 850 } });
       const page = await plain.newPage();
       await page.goto(base);
       assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "catalog-section"]);
@@ -52,7 +52,11 @@ try {
       await page.getByRole("link", { name: "Apps entdecken" }).click();
       await page.waitForURL(url("#catalog-title"));
       assert.equal(await page.locator(".app-card").count(), apps.length);
-      assert.equal(await page.locator("nav, footer, script, form").count(), 0);
+      assert.equal(await page.locator("nav, footer, form").count(), 0);
+      assert.equal(await page.locator("script").count(), 1);
+      assert.equal(await page.locator("script").getAttribute("src"), "assets/theme.js");
+      assert.equal(await page.getByRole("combobox", { name: "Farbschema" }).count(), 0);
+      assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), "rgb(16, 20, 16)");
       assert.equal((await plain.request.get(url("updates/"))).status(), 404);
       assert.equal((await plain.request.get(url("updates.json"))).status(), 404);
       for (const app of apps) {
@@ -94,7 +98,9 @@ try {
       assert.equal(await options.isVisible(), false);
       await card.getByRole("link", { name: first.name, exact: true }).click();
       await page.getByRole("heading", { name: first.name, exact: true }).waitFor();
-      assert.equal(await page.locator("script").count(), 0);
+      assert.equal(await page.locator("script").getAttribute("src"), "../../assets/theme.js");
+      assert.equal((await plain.request.get(url("apps/gymdelay/"))).status(), 404);
+      assert.equal((await plain.request.get(url("apps/gymdelay/demo/"))).status(), 404);
       const source = page.getByRole("link", { name: "Quellcode auf GitHub" });
       assert.equal(await source.count(), first.githubUrl ? 1 : 0);
       if (first.githubUrl) assert.equal(await source.getAttribute("href"), first.githubUrl);
@@ -113,7 +119,7 @@ try {
       }
       await plain.close();
 
-      const context = await browser.newContext({ serviceWorkers: "block" });
+      const context = await browser.newContext({ serviceWorkers: "block", colorScheme: "light" });
       await context.addInitScript(() => {
         window.catalogLayoutShift = 0;
         if (!PerformanceObserver.supportedEntryTypes.includes("layout-shift")) return;
@@ -146,7 +152,25 @@ try {
           await view.screenshot({ path: path.join(screenshots, `catalogue-${width}.png`), fullPage: true });
         }
       }
-      assert.deepEqual(dataRequests, []);
+      assert.ok(dataRequests.length > 0);
+      assert.ok(dataRequests.every((request) => request === url("assets/theme.js")));
+      const select = view.getByRole("combobox", { name: "Farbschema" });
+      await select.selectOption("dark");
+      const dark = (page) => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
+      assert.equal(await dark(view), "rgb(16, 20, 16)");
+      const detailView = await context.newPage();
+      await detailView.goto(url("apps/satzfenster/"));
+      const detailSelect = detailView.getByRole("combobox", { name: "Farbschema" });
+      assert.equal(await detailSelect.inputValue(), "dark");
+      assert.equal(await dark(detailView), "rgb(16, 20, 16)");
+      await detailSelect.selectOption("light");
+      await view.waitForFunction(() => document.documentElement.dataset.theme === "light");
+      assert.equal(await dark(view), "rgb(244, 241, 232)");
+      await select.selectOption("system");
+      await view.emulateMedia({ colorScheme: "dark" });
+      assert.equal(await dark(view), "rgb(16, 20, 16)");
+      await noOverflow(view);
+      await detailView.close();
       assert.deepEqual(errors, []);
       for (const app of apps.filter((project) => project.demoHref && !project.demoHref.startsWith("https://"))) {
         await view.goto(base);
@@ -169,7 +193,7 @@ try {
         await view.waitForURL(external.demoHref);
       }
       await context.close();
-      console.log(`PASS ${engine}: workshop layout, one primary action, opt-in GitHub, QR and static rendering at four widths`);
+      console.log(`PASS ${engine}: catalogue layout, QR, static rendering and persistent colour scheme`);
     } finally {
       await browser.close();
     }

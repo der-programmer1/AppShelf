@@ -11,7 +11,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECK = '--check' in sys.argv
-for slug, name, color in [('weiter', 'Weiter', '#276852'), ('gymdelay', 'GymDelay', '#101c2c'), ('sehplus', 'SehPlus', '#0e1214')]:
+for slug, name, color in [('weiter', 'Weiter', '#276852'), ('sehplus', 'SehPlus', '#0e1214')]:
     source = ROOT / 'web-apps' / slug
     target = ROOT / 'apps' / 'inbox' / slug / 'demo'
     manifest = json.loads((target.parent / 'app.json').read_text())

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141a17">
+  <meta name="description" content="Plane deine verbleibenden Sätze, wenn die Zeit im Gym knapp wird. Offline und ohne Konto.">
+  <title>Satzfenster · Restzeit im Gym planen</title>
+  <link rel="icon" href="./icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="masthead shell">
+    <a class="brand" href="./"><img src="./icon-192.png" alt="" width="38" height="38"> Satzfenster</a>
+    <a class="catalogue" href="../../../">AppShelf <span aria-hidden="true">↗︎</span></a>
+  </header>
+  <main class="shell">
+    <div class="intro">
+      <h1>Was passt noch rein?</h1>
+      <p>Plane deine offenen Gym-Sätze bis zum Trainingsende.</p>
+    </div>
+
+    <div class="workspace">
+      <section class="time-panel" aria-labelledby="time-title">
+        <div class="time-head">
+          <h2 id="time-title">Zeitfenster</h2>
+          <span id="timer-state" class="timer-state">Vorschau</span>
+        </div>
+        <p id="clock" class="clock">25:00</p>
+        <p id="timer-detail" class="timer-detail">Die Zeit läuft, sobald du startest.</p>
+        <form id="time-form" class="time-form">
+          <label for="minutes">Minuten ab jetzt</label>
+          <div class="time-actions">
+            <input id="minutes" name="minutes" type="number" min="1" max="180" step="1" inputmode="numeric" value="25" required>
+            <button type="submit" id="start-timer" class="button button-primary">Zeit starten</button>
+          </div>
+        </form>
+        <button id="stop-timer" class="text-button stop-timer" type="button" hidden>Zeit stoppen</button>
+
+        <div id="summary" class="summary" hidden>
+          <div class="summary-head">
+            <h3>Offene Sätze</h3>
+            <span id="fit-count"></span>
+          </div>
+          <div class="fit-bar" aria-hidden="true">
+            <span id="bar-fit"></span><span id="bar-later"></span><span id="bar-waiting"></span>
+          </div>
+          <div class="legend">
+            <span class="legend-fit"><strong id="total-fit">0</strong> passen</span>
+            <span class="legend-later"><strong id="total-later">0</strong> später</span>
+            <span class="legend-waiting"><strong id="total-waiting">0</strong> belegt</span>
+          </div>
+          <p id="next" class="next"></p>
+        </div>
+      </section>
+
+      <section class="plan-panel" aria-labelledby="plan-title">
+        <div class="plan-heading">
+          <div>
+            <h2 id="plan-title">Dein Plan</h2>
+            <p>Wichtige Übungen bekommen zuerst Zeit.</p>
+          </div>
+          <button id="add" class="button button-outline" type="button"><span aria-hidden="true">+</span> Übung</button>
+        </div>
+
+        <div id="empty" class="empty">
+          <h3>Welche Übungen stehen noch an?</h3>
+          <p>Trage die offenen Sätze und die Zeit pro Satz inklusive Pause ein.</p>
+          <button id="example" class="button button-outline" type="button">Beispiel laden</button>
+        </div>
+        <ul id="exercises" class="exercise-list"></ul>
+        <div id="plan-footer" class="plan-footer" hidden>
+          <p id="completed"></p>
+          <button type="button" id="reset" class="text-button" hidden>Fortschritt zurücksetzen</button>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <p id="storage-info">Dein Plan bleibt in diesem Browser.</p>
+      <details>
+        <summary>App installieren</summary>
+        <p>iPhone: In Safari auf „Teilen“ und „Zum Home-Bildschirm“ tippen. Falls die Option angezeigt wird, „Als Web-App öffnen“ aktivieren.</p>
+        <p>Android: In Chrome das Menü öffnen und „Zum Startbildschirm hinzufügen“ oder „App installieren“ wählen.</p>
+        <p id="offline-ready" hidden>Die App ist offline verfügbar.</p>
+      </details>
+    </footer>
+    <p id="announcement" class="sr-only" role="status"></p>
+    <noscript><p class="noscript">Aktiviere JavaScript, um Sätze und Restzeit zu berechnen.</p></noscript>
+  </main>
+
+  <template id="exercise-template">
+    <li class="exercise">
+      <div class="exercise-head">
+        <div>
+          <h3 data-name></h3>
+          <p data-progress class="exercise-progress"></p>
+        </div>
+        <button type="button" class="text-button edit-button" data-action="edit">Bearbeiten</button>
+      </div>
+      <p data-fit class="exercise-fit"></p>
+      <div class="exercise-actions">
+        <button type="button" class="button button-set" data-action="complete">Satz fertig</button>
+        <button type="button" class="button button-outline" data-action="block">Belegt</button>
+        <button type="button" class="text-button undo-button" data-action="undo" hidden>Rückgängig</button>
+      </div>
+    </li>
+  </template>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="exercise-form">
+      <div class="editor-head">
+        <h2 id="editor-title">Übung hinzufügen</h2>
+        <button id="cancel" type="button" class="button close-button" aria-label="Schließen">×</button>
+      </div>
+      <label class="editor-field">Übung
+        <input name="name" type="text" maxlength="64" placeholder="z. B. Bankdrücken" required autofocus>
+      </label>
+      <div class="editor-numbers">
+        <label class="editor-field">Sätze gesamt
+          <input name="sets" type="number" min="1" max="12" step="1" inputmode="numeric" value="3" required>
+        </label>
+        <label class="editor-field">Min. pro Satz
+          <input name="setMinutes" type="number" min="1" max="15" step="1" inputmode="numeric" value="3" required>
+        </label>
+      </div>
+      <p class="editor-help">Rechne Pause und Wechselzeit mit ein.</p>
+      <label class="priority"><input name="core" type="checkbox"> Als wichtig markieren</label>
+      <div class="editor-actions">
+        <button id="delete" class="text-button delete-button" type="button" hidden>Übung löschen</button>
+        <button class="button button-primary" type="submit">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

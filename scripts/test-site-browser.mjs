@@ -30,6 +30,11 @@ if (server) await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve
 const base = live || `http://127.0.0.1:${server.address().port}${mount}`;
 const url = (relative) => new URL(relative, base).href;
 const noOverflow = async (page) => assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "horizontal overflow");
+const decodeImage = async (image) => {
+  // Lazy images must enter the viewport before WebKit starts their download.
+  await image.scrollIntoViewIfNeeded();
+  await image.evaluate(node => node.decode());
+};
 
 try {
   const catalogue = live
@@ -65,7 +70,7 @@ try {
         const description = card.locator(".card-description");
         assert.equal(await description.textContent(), app.cardDescription);
         const image = card.locator(".card-cover img");
-        await image.evaluate((node) => node.decode());
+        await decodeImage(image);
         assert.equal(await image.getAttribute("src"), app.preview.href);
         assert.equal(await card.locator(".card-cover").getAttribute("href"), `apps/${app.slug}/`);
         const cover = await card.locator(".card-cover").boundingBox();
@@ -92,7 +97,7 @@ try {
       const options = card.locator(".card-option-panel");
       assert.equal(await options.isVisible(), true);
       assert.deepEqual(await card.evaluate(box), cardBox);
-      for (const image of await options.locator("img").all()) await image.evaluate((node) => node.decode());
+      for (const image of await options.locator("img").all()) await decodeImage(image);
       assert.ok(await options.getByRole("link", { name: "Web-App öffnen" }).isVisible());
       await noOverflow(page);
       await toggle.press("Space");
@@ -114,7 +119,7 @@ try {
         await row.locator(".qr summary").click();
         const target = row.locator(".qr-targets a");
         assert.equal(await target.evaluate((node) => node.href), url(file.href));
-        await target.locator("img").evaluate((node) => node.decode());
+        await decodeImage(target.locator("img"));
         await noOverflow(page);
         await row.locator(".qr summary").click();
       }
@@ -145,7 +150,7 @@ try {
         await view.goto(base);
         await noOverflow(view);
         await view.locator(".app-card").last().scrollIntoViewIfNeeded();
-        for (const image of await view.locator(".card-cover img").all()) await image.evaluate((node) => node.decode());
+        for (const image of await view.locator(".card-cover img").all()) await decodeImage(image);
         assert.equal(await view.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), "rgb(244, 241, 232)");
         if (width === 1280) {
           assert.match(await view.locator(".hero").evaluate((node) => getComputedStyle(node).gridTemplateColumns), / 390px$/);

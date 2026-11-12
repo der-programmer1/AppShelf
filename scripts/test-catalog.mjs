@@ -44,6 +44,13 @@ if (!qr.includes("<svg") || !qr.includes("viewBox")) throw new Error("QR asset w
 
 const out = path.join(root, "dist-test");
 const home = await readFile(path.join(out, "index.html"), "utf8");
+for (const name of ["angebot.html", "datenschutz.html"]) {
+  assert.equal(await readFile(path.join(out, name), "utf8"), await readFile(path.join(root, "site", name), "utf8"));
+}
+const offer = await readFile(path.join(out, "angebot.html"), "utf8");
+assert.match(home, /href="\.\/angebot\.html"/);
+assert.match(offer, /data-contact-email="ich\.der\.programmer@gmail\.com"/);
+for (const name of ["service.css", "service-request.js"]) await access(path.join(out, "assets", name));
 assert.equal((home.match(/<article class="app-card"/g) || []).length, catalog.count);
 assert.deepEqual(home.match(/<script[^>]*>/g), ['<script src="assets/theme.js">']);
 assert.doesNotMatch(home, /Katalog wird geladen|<nav|<footer|updates\/|<!-- [A-Z_]+ -->/);

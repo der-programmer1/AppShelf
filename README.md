@@ -9,6 +9,7 @@ AppShelf bringt Projektideen aus einzelnen Repositories in eine gemeinsame Über
 - **Für Neugierige:** [Projekte im Browser entdecken](https://der-programmer1.github.io/AppShelf/).
 - **Für Entwickler und technische Einblicke:** [Architektur, Entscheidungen und Prüfungen](docs/projektgeschichte.md).
 - **Zum Mitbauen:** Die bestehende technische Anleitung folgt unten.
+- **Deine persönliche Website:** [Angebot für 350 € einmalig ansehen und Patrice kontaktieren](https://der-programmer1.github.io/AppShelf/angebot.html). Enthalten sind eine Seite mit bis zu fünf Inhaltsbereichen, eine Korrekturrunde, Veröffentlichung und Dateiübergabe. Domain und gegebenenfalls Hosting werden gesondert beim Anbieter bezahlt.
 
 Veröffentlichte Projekte behalten ihren jeweiligen Reifegrad. Bananenblick ist ausdrücklich als Prototyp enthalten; sein neues Büschel-Update ist noch nicht abgenommen.
 

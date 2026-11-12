@@ -30,6 +30,11 @@ if (server) await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve
 const base = live || `http://127.0.0.1:${server.address().port}${mount}`;
 const url = (relative) => new URL(relative, base).href;
 const noOverflow = async (page) => assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "horizontal overflow");
+const decodeImage = async (image) => {
+  // Lazy images must enter the viewport before WebKit starts their download.
+  await image.scrollIntoViewIfNeeded();
+  await image.evaluate(node => node.decode());
+};
 
 try {
   const catalogue = live
@@ -44,8 +49,9 @@ try {
     try {
       const plain = await browser.newContext({ javaScriptEnabled: false, colorScheme: "dark", viewport: { width: 320, height: 850 } });
       const page = await plain.newPage();
+      page.setDefaultTimeout(20000);
       await page.goto(base);
-      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "catalog-section"]);
+      assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "offer-promo", "catalog-section"]);
       assert.equal(await page.getByRole("link", { name: "AppShelf Startseite" }).count(), 1);
       assert.equal(await page.locator(".hero-orbit").getAttribute("aria-hidden"), "true");
       assert.match(await page.locator(".hero-lede").textContent(), /persönliches Archiv für eigene Android-Apps, Web-Tools und Software-Projekte/);
@@ -64,7 +70,7 @@ try {
         const description = card.locator(".card-description");
         assert.equal(await description.textContent(), app.cardDescription);
         const image = card.locator(".card-cover img");
-        await image.evaluate((node) => node.decode());
+        await decodeImage(image);
         assert.equal(await image.getAttribute("src"), app.preview.href);
         assert.equal(await card.locator(".card-cover").getAttribute("href"), `apps/${app.slug}/`);
         const cover = await card.locator(".card-cover").boundingBox();
@@ -91,7 +97,7 @@ try {
       const options = card.locator(".card-option-panel");
       assert.equal(await options.isVisible(), true);
       assert.deepEqual(await card.evaluate(box), cardBox);
-      for (const image of await options.locator("img").all()) await image.evaluate((node) => node.decode());
+      for (const image of await options.locator("img").all()) await decodeImage(image);
       assert.ok(await options.getByRole("link", { name: "Web-App öffnen" }).isVisible());
       await noOverflow(page);
       await toggle.press("Space");
@@ -113,11 +119,12 @@ try {
         await row.locator(".qr summary").click();
         const target = row.locator(".qr-targets a");
         assert.equal(await target.evaluate((node) => node.href), url(file.href));
-        await target.locator("img").evaluate((node) => node.decode());
+        await decodeImage(target.locator("img"));
         await noOverflow(page);
         await row.locator(".qr summary").click();
       }
       await plain.close();
+      console.log(`PASS ${engine}: static catalogue and project navigation`);
 
       const context = await browser.newContext({ serviceWorkers: "block", colorScheme: "light" });
       await context.addInitScript(() => {
@@ -128,6 +135,7 @@ try {
         }).observe({ type: "layout-shift", buffered: true });
       });
       const view = await context.newPage();
+      view.setDefaultTimeout(20000);
       const dataRequests = [];
       const errors = [];
       view.on("request", (request) => {
@@ -137,11 +145,12 @@ try {
       const screenshots = process.env.APPSHELF_SITE_SCREENSHOTS;
       if (screenshots && engine === "chromium") await mkdir(screenshots, { recursive: true });
       for (const width of [320, 390, 768, 1280]) {
+        console.log(`CHECK ${engine}: catalogue at ${width}px`);
         await view.setViewportSize({ width, height: 900 });
         await view.goto(base);
         await noOverflow(view);
         await view.locator(".app-card").last().scrollIntoViewIfNeeded();
-        for (const image of await view.locator(".card-cover img").all()) await image.evaluate((node) => node.decode());
+        for (const image of await view.locator(".card-cover img").all()) await decodeImage(image);
         assert.equal(await view.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), "rgb(244, 241, 232)");
         if (width === 1280) {
           assert.match(await view.locator(".hero").evaluate((node) => getComputedStyle(node).gridTemplateColumns), / 390px$/);
@@ -159,6 +168,7 @@ try {
       const dark = (page) => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
       assert.equal(await dark(view), "rgb(16, 20, 16)");
       const detailView = await context.newPage();
+      detailView.setDefaultTimeout(20000);
       await detailView.goto(url("apps/satzfenster/"));
       const detailSelect = detailView.getByRole("combobox", { name: "Farbschema" });
       assert.equal(await detailSelect.inputValue(), "dark");
@@ -171,6 +181,7 @@ try {
       assert.equal(await dark(view), "rgb(16, 20, 16)");
       await noOverflow(view);
       await detailView.close();
+      console.log(`PASS ${engine}: catalogue themes and layout`);
       assert.deepEqual(errors, []);
       for (const app of apps.filter((project) => project.demoHref && !project.demoHref.startsWith("https://"))) {
         await view.goto(base);
@@ -193,6 +204,56 @@ try {
         await view.waitForURL(external.demoHref);
       }
       await context.close();
+      console.log(`PASS ${engine}: app entry points`);
+      const inquiryContext = await browser.newContext({ colorScheme: "light" });
+      const inquiryPage = await inquiryContext.newPage();
+      inquiryPage.setDefaultTimeout(20000);
+      const inquiryErrors = [];
+      const submissions = [];
+      inquiryPage.on("pageerror", error => inquiryErrors.push(error.message));
+      inquiryPage.on("request", request => {
+        if (request.method() !== "GET" || ["fetch", "xhr"].includes(request.resourceType())) submissions.push(request.url());
+      });
+      for (const width of [320, 390, 768, 1280]) {
+        console.log(`CHECK ${engine}: website offer at ${width}px`);
+        await inquiryPage.setViewportSize({ width, height: 900 });
+        await inquiryPage.goto(url("angebot.html"));
+        await inquiryPage.getByRole("form", { name: "Website-Anfrage vorbereiten" }).waitFor();
+        for (const scheme of ["light", "dark"]) {
+          await inquiryPage.getByRole("combobox", { name: "Farbschema" }).selectOption(scheme);
+          await noOverflow(inquiryPage);
+        }
+        if (screenshots && engine === "chromium" && [390, 1280].includes(width)) {
+          await inquiryPage.screenshot({ path: path.join(screenshots, `website-offer-${width}.png`), fullPage: true });
+        }
+      }
+      await inquiryPage.getByLabel("Dein Name", { exact: true }).fill("Mia Müller");
+      await inquiryPage.getByLabel("Wofür ist deine Website?", { exact: true }).selectOption("hobby");
+      await inquiryPage.getByLabel("Was möchtest du zeigen?", { exact: true }).fill("Ich möchte meine Zeichnungen & Bilder auf einer persönlichen Website zeigen.");
+      await inquiryPage.getByRole("button", { name: "Anfrage vorbereiten" }).click();
+      console.log(`CHECK ${engine}: prepared inquiry and clipboard`);
+      const draft = inquiryPage.locator("[data-request-preview]");
+      await draft.waitFor();
+      const emailLink = new URL(await inquiryPage.locator("[data-prepared-mail]").getAttribute("href"));
+      assert.equal(emailLink.pathname, "ich.der.programmer@gmail.com");
+      assert.match(emailLink.searchParams.get("body"), /Mia Müller/);
+      assert.match(emailLink.searchParams.get("subject"), /350 € einmalig/);
+      assert.match(await inquiryPage.getByRole("status").textContent(), /Versendet wird erst/);
+      await inquiryPage.getByRole("button", { name: "Anfragetext kopieren" }).click();
+      await inquiryPage.waitForFunction(() => /kopiert|markiert/.test(document.querySelector("[data-inquiry-status]").textContent));
+      await inquiryPage.getByLabel("Dein Name", { exact: true }).fill("Neuer Name");
+      assert.equal(await draft.isVisible(), false);
+      assert.deepEqual(submissions, []);
+      assert.deepEqual(inquiryErrors, []);
+      await inquiryContext.close();
+      const plainOffer = await browser.newContext({ javaScriptEnabled: false, viewport: {width:320, height:850} });
+      const plainOfferPage = await plainOffer.newPage();
+      plainOfferPage.setDefaultTimeout(20000);
+      await plainOfferPage.goto(url("angebot.html"));
+      assert.equal(await plainOfferPage.getByRole("link", {name:"ich.der.programmer@gmail.com", exact:true}).count(), 1);
+      assert.equal(await plainOfferPage.locator(".service-form").isVisible(), false);
+      await noOverflow(plainOfferPage);
+      await plainOffer.close();
       console.log(`PASS ${engine}: catalogue layout, QR, static rendering and persistent colour scheme`);
     } finally {
       await browser.close();

@@ -44,6 +44,7 @@ try {
     try {
       const plain = await browser.newContext({ javaScriptEnabled: false, colorScheme: "dark", viewport: { width: 320, height: 850 } });
       const page = await plain.newPage();
+      page.setDefaultTimeout(20000);
       await page.goto(base);
       assert.deepEqual(await page.locator("main > *").evaluateAll((nodes) => nodes.map((node) => node.className)), ["hero", "offer-promo", "catalog-section"]);
       assert.equal(await page.getByRole("link", { name: "AppShelf Startseite" }).count(), 1);
@@ -118,6 +119,7 @@ try {
         await row.locator(".qr summary").click();
       }
       await plain.close();
+      console.log(`PASS ${engine}: static catalogue and project navigation`);
 
       const context = await browser.newContext({ serviceWorkers: "block", colorScheme: "light" });
       await context.addInitScript(() => {
@@ -128,6 +130,7 @@ try {
         }).observe({ type: "layout-shift", buffered: true });
       });
       const view = await context.newPage();
+      view.setDefaultTimeout(20000);
       const dataRequests = [];
       const errors = [];
       view.on("request", (request) => {
@@ -137,6 +140,7 @@ try {
       const screenshots = process.env.APPSHELF_SITE_SCREENSHOTS;
       if (screenshots && engine === "chromium") await mkdir(screenshots, { recursive: true });
       for (const width of [320, 390, 768, 1280]) {
+        console.log(`CHECK ${engine}: catalogue at ${width}px`);
         await view.setViewportSize({ width, height: 900 });
         await view.goto(base);
         await noOverflow(view);
@@ -159,6 +163,7 @@ try {
       const dark = (page) => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
       assert.equal(await dark(view), "rgb(16, 20, 16)");
       const detailView = await context.newPage();
+      detailView.setDefaultTimeout(20000);
       await detailView.goto(url("apps/satzfenster/"));
       const detailSelect = detailView.getByRole("combobox", { name: "Farbschema" });
       assert.equal(await detailSelect.inputValue(), "dark");
@@ -171,6 +176,7 @@ try {
       assert.equal(await dark(view), "rgb(16, 20, 16)");
       await noOverflow(view);
       await detailView.close();
+      console.log(`PASS ${engine}: catalogue themes and layout`);
       assert.deepEqual(errors, []);
       for (const app of apps.filter((project) => project.demoHref && !project.demoHref.startsWith("https://"))) {
         await view.goto(base);
@@ -193,8 +199,10 @@ try {
         await view.waitForURL(external.demoHref);
       }
       await context.close();
+      console.log(`PASS ${engine}: app entry points`);
       const inquiryContext = await browser.newContext({ colorScheme: "light" });
       const inquiryPage = await inquiryContext.newPage();
+      inquiryPage.setDefaultTimeout(20000);
       const inquiryErrors = [];
       const submissions = [];
       inquiryPage.on("pageerror", error => inquiryErrors.push(error.message));
@@ -202,6 +210,7 @@ try {
         if (request.method() !== "GET" || ["fetch", "xhr"].includes(request.resourceType())) submissions.push(request.url());
       });
       for (const width of [320, 390, 768, 1280]) {
+        console.log(`CHECK ${engine}: website offer at ${width}px`);
         await inquiryPage.setViewportSize({ width, height: 900 });
         await inquiryPage.goto(url("angebot.html"));
         await inquiryPage.getByRole("form", { name: "Website-Anfrage vorbereiten" }).waitFor();
@@ -217,6 +226,7 @@ try {
       await inquiryPage.getByLabel("Wofür ist deine Website?", { exact: true }).selectOption("hobby");
       await inquiryPage.getByLabel("Was möchtest du zeigen?", { exact: true }).fill("Ich möchte meine Zeichnungen & Bilder auf einer persönlichen Website zeigen.");
       await inquiryPage.getByRole("button", { name: "Anfrage vorbereiten" }).click();
+      console.log(`CHECK ${engine}: prepared inquiry and clipboard`);
       const draft = inquiryPage.locator("[data-request-preview]");
       await draft.waitFor();
       const emailLink = new URL(await inquiryPage.locator("[data-prepared-mail]").getAttribute("href"));
@@ -233,6 +243,7 @@ try {
       await inquiryContext.close();
       const plainOffer = await browser.newContext({ javaScriptEnabled: false, viewport: {width:320, height:850} });
       const plainOfferPage = await plainOffer.newPage();
+      plainOfferPage.setDefaultTimeout(20000);
       await plainOfferPage.goto(url("angebot.html"));
       assert.equal(await plainOfferPage.getByRole("link", {name:"ich.der.programmer@gmail.com", exact:true}).count(), 1);
       assert.equal(await plainOfferPage.locator(".service-form").isVisible(), false);

@@ -1,0 +1,27 @@
+name: Factory League – encrypted backup
+on:
+  schedule:
+    - cron: "19 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Export and encrypt the database
+        working-directory: projects/Factory-League
+        env:
+          FACTORY_LEAGUE_URL: ${{ vars.FACTORY_LEAGUE_URL }}
+          FACTORY_LEAGUE_BACKUP_TOKEN: ${{ secrets.FACTORY_LEAGUE_BACKUP_TOKEN }}
+        run: node scripts/remote-backup.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: factory-league-encrypted-backup-${{ github.run_id }}
+          path: projects/Factory-League/.runtime/encrypted-backups/*.flbackup
+          if-no-files-found: error
+          retention-days: 7

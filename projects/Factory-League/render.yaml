@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: factory-league
+    runtime: node
+    plan: 0.5c-512mb
+    region: frankfurt
+    numInstances: 1
+    rootDir: projects/Factory-League
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - projects/Factory-League/**
+    disk:
+      name: factory-league-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATABASE_PATH
+        value: /var/data/factory-league.sqlite
+      - key: BACKUP_TOKEN
+        generateValue: true

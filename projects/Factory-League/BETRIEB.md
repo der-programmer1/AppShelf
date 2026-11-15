@@ -1,91 +1,51 @@
-# Factory League – Einrichtung und Betrieb
+# Factory League – kostenloser Start und Betrieb
 
 ## Was du einrichten musst
 
-Für Accounts brauchst du **keinen zusätzlichen Anbieter**. Spielername, Passwort und persönlicher Rettungscode reichen aus. Die Spielstände und gehashten Zugangsdaten liegen auf dem dauerhaften Render-Speicher.
+Für den Start brauchst du weder Firebase noch einen kostenpflichtigen Render-Server. Die Website wird über den vorhandenen Sites-Zugang veröffentlicht. Cloudflare D1 speichert Accounts und Fabriken unabhängig von Worker-Neustarts dauerhaft. Ein Ablaufdatum wie bei einer zeitlich begrenzten Testdatenbank wurde nicht eingerichtet.
 
-Der Hosting-Blueprint ist unter `projects/Factory-League/render.yaml` im AppShelf-Repository vorbereitet. Für den Betrieb werden ein Render-Konto mit hinterlegter Zahlungsart und der ausgewählte Workspace „My Workspace“ benötigt. Die Anwendung erzeugt ihre Tabellen selbst.
+Auf der Website „Fabrik gründen“ wählen, Spielernamen und Passwort eingeben und den persönlichen Rettungscode sicher speichern. Auf Handy und Computer dieselben Zugangsdaten verwenden. Bei vergessenem Passwort: „Anmelden → Passwort vergessen?“ und den Rettungscode verwenden. Ohne Passwort und ohne Code ist keine automatische Kontowiederherstellung möglich.
 
-Falls Render `need_payment_info` meldet:
+## Kostenloser Betrieb
 
-1. [Render Dashboard](https://dashboard.render.com) öffnen und „My Workspace“ auswählen.
-2. In den Workspace-Einstellungen **Billing** öffnen und eine Zahlungsart hinterlegen. Zahlungsdaten bleiben bei Render.
-3. Den bestehenden Blueprint **Factory League** erneut planen und anwenden. Falls du das selbst erledigst: Repository `der-programmer1/AppShelf`, Branch `main`, Blueprint-Datei `projects/Factory-League/render.yaml` verwenden.
-4. Der vorgesehene Dienst kostet 7 US-Dollar pro Monat plus 0,25 US-Dollar für 1 GB Speicher, vor Steuern. Sobald der Deploy „Live“ meldet, die HTTPS-Adresse öffnen. Eine eigene Domain ist optional.
+Keine kostenpflichtigen Render-Ressourcen sind Teil dieser Version. Es gelten die Kapazitätsgrenzen des vorhandenen Sites-Angebots. Bei Erreichen dieser Grenzen kann die Erreichbarkeit begrenzt werden. Eine spätere kostenpflichtige Erweiterung wird nicht automatisch als Teil dieser Einrichtung bestellt.
 
-Der Blueprint wurde bereits angelegt. Ein fehlgeschlagener Plan erzeugt noch keinen laufenden Spielserver. Accounts benötigen nach erfolgreicher Veröffentlichung keine weiteren Schlüssel oder Freischaltungen.
+## Veröffentlichung und Updates
 
-## Dein eigener Spieleraccount
+Die Sites-Quelle enthält `.openai/hosting.json` mit der bestehenden Projektkennung und `d1: "DB"`. Diese Kennung und Datenbankbindung beibehalten, damit Updates dieselbe Datenbank verwenden. Nicht für jedes Update eine neue Site erstellen.
 
-Auf der öffentlichen Website „Fabrik gründen“ wählen, Spielernamen und Passwort eingeben und den einmal angezeigten Rettungscode herunterladen. Verwende auf deinem Handy und Computer denselben Spielernamen, um dieselbe Fabrik zu öffnen.
+Vor einem Update `npm ci`, `npm run check`, `npm run build` und `npm test` ausführen. In GitHub Actions laufen zusätzlich die Desktop- und Handy-Browserprüfungen. Dann den exakten Quellstand im Sites-Quellrepository speichern und das passende Buildpaket als neue Version veröffentlichen. Die D1-Migrationen gehören zum Paket. Keine lokalen Testdatenbanken hochladen.
 
-Bei vergessenem Passwort: „Anmelden → Passwort vergessen?“ öffnen. Spielernamen, Rettungscode und neues Passwort eingeben. Den anschließend neu angezeigten Rettungscode speichern. Der alte Rettungscode und bisherige Anmeldesitzungen werden dabei ungültig.
+Die erreichbare HTTPS-Adresse gehört in AppShelf als `webUrl`. Der Eintrag ist für Browser-Spiele ausgelegt. Die Portfolio-Karte und der Terminal-Eintrag verweisen auf das öffentliche Spiel beziehungsweise dessen AppShelf-Seite.
 
-## Tägliche Backups
+## Betrieb prüfen
 
-Die Workflow-Datei `.github/workflows/factory-league-backup.yml` im AppShelf-Repository lädt täglich eine konsistente SQLite-Sicherung. Sie wird mit einem zufälligen AES-Schlüssel verschlüsselt; dieser wiederum mit deinem öffentlichen RSA-Schlüssel. Nur verschlüsselte `.flbackup`-Dateien werden als Actions-Artefakte hochgeladen. Sie bleiben sieben Tage verfügbar.
+`/health` muss `status: ok`, `database: ok`, `authentication: local` und `storage: D1` melden. Fabrikstände werden auf dem Server berechnet. Der Browser darf keine gültigen Kontostände oder Ränge vorgeben. Bei Verbindungsproblemen bleiben bestätigte Spielstände in D1 erhalten. Erneut versuchte Kaufanfragen verwenden dieselbe Kennung, damit ein bereits verarbeiteter Kauf nicht doppelt berechnet wird.
 
-Für die einmalige Konfiguration:
+## Zusätzliche verschlüsselte Backups
 
-1. `BACKUP_TOKEN` in der Render-Umgebung des Factory-League-Dienstes auf einen zufälligen geheimen Wert setzen. Derselbe Wert gehört in **AppShelf → Settings → Secrets and variables → Actions → Secrets** als `FACTORY_LEAGUE_BACKUP_TOKEN`.
-2. Die öffentliche HTTPS-Adresse als Actions-Variable `FACTORY_LEAGUE_URL` hinterlegen.
-3. Den öffentlichen Schlüssel als `projects/Factory-League/backup-public.pem` versionieren. Den privaten Schlüssel ausschließlich bei dir sicher aufbewahren, außerhalb des Repositories.
-4. Unter **Actions → Factory League – encrypted backup → Run workflow** eine erste Sicherung starten. Ein erfolgreicher Lauf bietet ein verschlüsseltes Backup als Artefakt zum Download.
+Der geschützte Endpunkt `/api/admin/backup` exportiert Accounts, Fabriken und Kaufkennungen als konsistente JSON-Sicherung. Sitzungstokens werden nicht exportiert. `BACKUP_TOKEN` wird als Sites-Runtime-Secret gesetzt. Dieses Geheimnis nicht in Quellcode oder Chat kopieren.
 
-Der verbundene GitHub-Zugang darf keine Actions-Secrets setzen (`HTTP 403`). Deshalb musst du das Geheimnis einmal selbst in GitHub hinterlegen. Kopiere den Wert direkt von Render nach GitHub; sende ihn nicht in den Chat. Solange die URL nicht gesetzt ist, bleibt der Sicherungsjob deaktiviert. Ist die URL gesetzt, aber ein Geheimnis fehlt oder ungültig, schlägt der Lauf mit einer konkreten Meldung fehl. Er veröffentlicht keine unverschlüsselte Datenbank.
+Der optionale tägliche GitHub-Workflow benötigt unter **AppShelf → Settings → Secrets and variables → Actions**:
 
-Ein Schlüsselpaar kannst du bei Bedarf selbst erzeugen:
+1. Variable `FACTORY_LEAGUE_URL`: die tatsächliche öffentliche HTTPS-Adresse.
+2. Secret `FACTORY_LEAGUE_BACKUP_TOKEN`: denselben geheimen Wert wie `BACKUP_TOKEN` in Sites.
 
-```bash
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out factory-league-backup-private.pem
-openssl pkey -in factory-league-backup-private.pem -pubout -out backup-public.pem
-```
+Der verbundene GitHub-Zugang konnte Actions-Secrets nicht verwalten. Dieser zusätzliche tägliche Offsite-Job bleibt deshalb deaktiviert, bis die beiden Einstellungen vollständig hinterlegt sind. Der eigentliche Spielbetrieb benötigt diese GitHub-Einstellungen nicht.
 
-Ein neues Schlüsselpaar ersetzt die früheren Schlüssel nicht: Alte Backups benötigen weiterhin den damals verwendeten privaten Schlüssel.
+`scripts/remote-backup.mjs` lädt die Sicherung über HTTPS und verschlüsselt sie mit AES-256-GCM und dem öffentlichen RSA-Schlüssel aus `backup-public.pem`. Nur verschlüsselte `.flbackup`-Dateien werden als Artefakte gespeichert, sieben Tage lang. Der private Schlüssel bleibt außerhalb des Repositories bei dir.
 
-## Backup entschlüsseln
+## Backup entschlüsseln und wiederherstellen
 
-Das verschlüsselte Artefakt herunterladen und entpacken. Auf einem Rechner mit Node.js:
+Mit dem zuvor bereitgestellten privaten Schlüssel:
 
 ```bash
-node scripts/decrypt-backup.mjs backup.flbackup factory-league-backup-private.pem backup.sqlite
+node scripts/decrypt-backup.mjs backup.flbackup Factory-League-Backup-Schluessel.pem backup.json
+node scripts/backup-to-sql.mjs backup.json restored-factory.sql
 ```
 
-Der Befehl schreibt nur in einen neuen Dateinamen. Der private Schlüssel wird nicht ausgegeben und nicht an den Spielserver übertragen.
+Die Befehle überschreiben keine vorhandene Zieldatei. Der SQL-Export enthält Schema und validierte Datensätze für eine **neue, leere D1-Datenbank**. Er enthält keine Löschbefehle und keine alten Sitzungen. Erst nach Import, Prüfung der Datensätze und `/health` die wiederhergestellte Datenbank mit der Anwendung verbinden. Die bisherige Datenbank erhalten; keine ungeprüfte Sicherung in die laufende Datenbank importieren.
 
-## Spielstände wiederherstellen
+## Gestaltung und Daten
 
-Eine Wiederherstellung setzt die Spieldaten auf den Zeitpunkt der Sicherung zurück. Verwendet wird stets eine neue Datei; die laufende Datenbank wird nicht überschrieben.
-
-```bash
-npm run restore -- backup.sqlite restored-factory.sqlite
-```
-
-Der Befehl prüft die SQLite-Integrität und entfernt alle gespeicherten Sitzungen. Spieler müssen sich nach der Wiederherstellung neu anmelden.
-
-1. Die geprüfte `restored-factory.sqlite` mit dem von Render unterstützten SCP/SFTP-Zugang nach `/var/data/restored-factory.sqlite` übertragen. Die SSH-Adresse findest du im Render-Dashboard des Dienstes.
-2. In dessen Environment-Einstellungen `DATABASE_PATH=/var/data/restored-factory.sqlite` setzen und neu deployen. Die neue Instanz öffnet diese Datei.
-3. `/health`, Anmeldung, Fabrik und Rangliste prüfen. Die vorherige Datei bleibt erhalten.
-
-Verwende für SQLite keine ungeprüfte Wiederherstellung eines Dateisystem-Snapshots. Die Sicherungen dieser Anwendung entstehen über die SQLite-Backup-Funktion und werden vor dem Einsatz geprüft.
-
-## AppShelf und patrice-lab freischalten
-
-Der vorbereitete AppShelf-Eintrag liegt unter `apps/inbox/factory-league`. Er bleibt als `draft` zurückgehalten, bis ein funktionierender Spielserver erreichbar ist. Nach erfolgreichem Deploy dessen tatsächliche HTTPS-Adresse als `webUrl` in `app.json` eintragen, `status` auf `published` setzen und die Hinweise zum ausstehenden Onlinebetrieb aktualisieren. Die Katalogprüfung unterstützt extern gehostete Browser-Spiele.
-
-Die Portfolio-Karte, echte Vorschauaufnahme, Filter und Terminal-Eintrag sind im Portfolio-Entwurf vorbereitet. Erst nach Veröffentlichung des AppShelf-Eintrags freigeben und den Status auf öffentlich ändern. So entstehen keine Links auf ein noch nicht verfügbares Spiel.
-
-## Geprüfter Stand
-
-17 Server- und Spieltests sowie sechs Browserprüfungen für Desktop und Handy bestehen lokal und in GitHub Actions. Anmeldung, mehrere getrennte Spieler, gemeinsame Rangliste, Offline-Obergrenze und Passwortrettung sind geprüft. Zusätzlich wurde eine Sicherung über einen lokalen HTTPS-Endpunkt abgerufen, verschlüsselt, entschlüsselt und in eine neue SQLite-Datei wiederhergestellt. Produktionsstand und Account blieben erhalten, alte Sitzungen wurden entfernt.
-
-Ein laufender Render-Spielserver und tägliche Backups sind damit noch nicht bestätigt: Dafür fehlen die Zahlungsfreigabe und die oben genannten GitHub-Einstellungen. Physische Handyprüfungen wurden nicht durchgeführt.
-
-## Updates und Fehlersuche
-
-Änderungen unter `projects/Factory-League` werden durch den Factory-League-Workflow geprüft. Render veröffentlicht nach erfolgreichen CI-Prüfungen. Durch den dauerhaften Datenträger bleibt der Spielstand erhalten; während des Instanzwechsels kann die Website kurz nicht erreichbar sein.
-
-- `/health` muss `status: ok`, `database: ok` und `authentication: local` melden.
-- Bei Loginproblemen zuerst Spielernamen und Passwort prüfen; alternativ den persönlichen Rettungscode verwenden.
-- Bei verlorener Verbindung keine Datenbankdatei löschen. Nach Rückkehr der Verbindung wird der Fortschritt vom Server geladen.
-- Speicherbelegung, Serverauslastung und Bandbreite im Render-Dashboard beobachten. Der vorgesehene Basistarif ist eine Startkonfiguration, kein automatisches Skalierungsbudget.
+Fabrik und Maschinen sind eigene SVG-Zeichnungen. Lokale Schriften: Space Grotesk und IBM Plex Mono mit beigefügten OFL-Lizenzen. Die Vorschau vor der Anmeldung ist als solche gekennzeichnet. Die Rangliste zeigt ausschließlich tatsächliche Accounts. Keine Werbung, Analyse-Tracker, Zahlungsfunktionen oder erfundenen Spieler.

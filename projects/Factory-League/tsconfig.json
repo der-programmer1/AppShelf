@@ -3,7 +3,7 @@
     "target": "ES2023", "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext", "moduleResolution": "Bundler", "jsx": "react-jsx",
     "strict": true, "skipLibCheck": true, "esModuleInterop": true,
-    "resolveJsonModule": true, "types": ["node", "vite/client"]
+    "resolveJsonModule": true, "types": ["node", "vite/client", "@cloudflare/workers-types"]
   },
-  "include": ["client", "server", "shared", "scripts", "tests", "e2e", "*.ts"]
+  "include": ["client", "worker", "db", "shared", "scripts", "tests", "e2e", "*.ts"]
 }

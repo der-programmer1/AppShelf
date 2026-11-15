@@ -1,4 +1,4 @@
-export const VERSION = "1.0.0";
+export const VERSION = "1.1.0";
 export const ECONOMY_VERSION = 1;
 export const OFFLINE_CAP_MS = 24 * 60 * 60 * 1000;
 export const MAX_LEVEL = 100;
@@ -64,7 +64,7 @@ export type PlayerSummary = {id:string;name:string;rank:number;score:string;rate
 export type LineState = {id:LineId;levels:Levels;rateMicros:string;bottleneck:StationId;upgradeCosts:(string|null)[];unlocked:boolean};
 export type FactoryState = {
   player:PlayerSummary;coins:string;lifetimeValue:string;rateMicros:string;remainder:string;
-  serverTime:number;offlineEarned:string;offlineElapsed:number;offlineCapped:boolean;
+  serverTime:number;revision?:number;offlineEarned:string;offlineElapsed:number;offlineCapped:boolean;
   nextPlayer:PlayerSummary|null;rankGap:string|null;playerCount:number;lines:LineState[];
 };
 export type Leaderboard = {players:PlayerSummary[];aroundMe:PlayerSummary[];me:PlayerSummary|null;page:number;total:number;pageSize:number;serverTime:number};

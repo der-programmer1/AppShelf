@@ -1,26 +1,28 @@
 # Factory League
 
-Baue deine Fabrik aus und arbeite dich auf einer gemeinsamen Rangliste nach oben. Drei feste Produktionsketten – Metall, Elektronik und Robotik – belohnen den gezielten Ausbau der jeweils langsamsten Maschine. Die gesamte produzierte Menge entscheidet über den Rang; ausgegebene Credits verringern den Punktestand nicht.
+[Jetzt öffentlich spielen](https://factory-league.ich-der-programmer.chatgpt.site)
 
-## Stand der Veröffentlichung
+Baue deine Fabrik aus und arbeite dich auf einer gemeinsamen Rangliste nach oben. Metall, Elektronik und Robotik haben je drei Maschinen. Die langsamste Station begrenzt die Produktion. Alle produzierten Credits zählen dauerhaft als Ranglistenpunkte; Einkäufe verringern diese Punkte nicht.
 
-Quellcode, Oberfläche und automatische Tests sind bereit. Dieser Katalogeintrag bleibt bis zur Serverfreigabe ein Entwurf. Der öffentliche Spielserver wartet auf die Zahlungsfreigabe in Render. Einen Online-Spielen-Link ergänzen wir nach erfolgreicher Freischaltung und Prüfung. Die Screenshots zeigen die ausdrücklich gekennzeichnete Vorschau.
+## So startest du
 
-## Anmeldung und Spielstand
+„Fabrik gründen“ wählen, Spielernamen und Passwort eingeben und den persönlichen Rettungscode speichern. Das Spiel benötigt keine E-Mail-Adresse und keine Zahlung. Mit denselben Zugangsdaten kannst du auf Handy und Computer weiterspielen. Deine Fabrik produziert nach jedem Besuch bis zu 24 Stunden offline weiter. Zum Öffnen und Ausbauen ist eine Internetverbindung nötig.
 
-Spielername und Passwort genügen. Bei der Registrierung erhältst du einen persönlichen Rettungscode zum Wiederherstellen deines Kontos. Speichere ihn sicher. Firebase, eine E-Mail-Adresse oder ein zusätzlicher Kontodienst werden nicht benötigt.
+Bei vergessenem Passwort verwendest du deinen Rettungscode. Danach erhältst du einen neuen Code, und ältere Sitzungen werden beendet. Der Spielstand bleibt erhalten.
 
-Die Fabrik bleibt dauerhaft bestehen. Während deiner Abwesenheit produziert sie bis zu 24 Stunden weiter. Dieselben Zugangsdaten öffnen auf Handy und Computer dieselbe Fabrik. Internetzugang ist zum Spielen erforderlich.
+## Technik und Quellcode
 
-## Selbst starten
+Die Website läuft auf OpenAI Sites mit Cloudflare Workers und einer dauerhaften D1-Datenbank. Für diese Version wurde kein kostenpflichtiger Render-Dienst bestellt. Die bestehenden Sites-Kapazitätsgrenzen gelten weiterhin.
 
-Das Quellcode-Archiv entpacken, Node.js 24 installieren und im Projektordner ausführen:
+Das vollständige Quellcode-Archiv enthält Oberfläche, Worker, Datenbankschema, Migrationen und Tests. Mit Node.js 24:
 
 ```bash
 npm ci
-npm run dev
+npm run check
+npm run build
+npm test
 ```
 
-Danach `http://localhost:5173` öffnen. Die lokale SQLite-Datei entsteht automatisch. In der beiliegenden **BETRIEB.md** stehen Render-Einrichtung, Kosten, verschlüsselte Backups und Wiederherstellung.
+Die Screenshots zeigen die echte, gekennzeichnete Fabrik-Vorschau. Die Live-Rangliste enthält ausschließlich tatsächliche Accounts.
 
-[Quellcode im Repository](https://github.com/der-programmer1/AppShelf/tree/main/projects/Factory-League)
+[Betriebsanleitung im Repository](https://github.com/der-programmer1/AppShelf/blob/main/projects/Factory-League/BETRIEB.md) · [Quellcode](https://github.com/der-programmer1/AppShelf/tree/main/projects/Factory-League)

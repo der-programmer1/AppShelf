@@ -6,6 +6,15 @@ Für Accounts brauchst du **keinen zusätzlichen Anbieter**. Spielername, Passwo
 
 Der Hosting-Blueprint ist unter `projects/Factory-League/render.yaml` im AppShelf-Repository vorbereitet. Für den Betrieb werden ein Render-Konto mit hinterlegter Zahlungsart und der ausgewählte Workspace „My Workspace“ benötigt. Die Anwendung erzeugt ihre Tabellen selbst.
 
+Falls Render `need_payment_info` meldet:
+
+1. [Render Dashboard](https://dashboard.render.com) öffnen und „My Workspace“ auswählen.
+2. In den Workspace-Einstellungen **Billing** öffnen und eine Zahlungsart hinterlegen. Zahlungsdaten bleiben bei Render.
+3. Den bestehenden Blueprint **Factory League** erneut planen und anwenden. Falls du das selbst erledigst: Repository `der-programmer1/AppShelf`, Branch `main`, Blueprint-Datei `projects/Factory-League/render.yaml` verwenden.
+4. Der vorgesehene Dienst kostet 7 US-Dollar pro Monat plus 0,25 US-Dollar für 1 GB Speicher, vor Steuern. Sobald der Deploy „Live“ meldet, die HTTPS-Adresse öffnen. Eine eigene Domain ist optional.
+
+Der Blueprint wurde bereits angelegt. Ein fehlgeschlagener Plan erzeugt noch keinen laufenden Spielserver. Accounts benötigen nach erfolgreicher Veröffentlichung keine weiteren Schlüssel oder Freischaltungen.
+
 ## Dein eigener Spieleraccount
 
 Auf der öffentlichen Website „Fabrik gründen“ wählen, Spielernamen und Passwort eingeben und den einmal angezeigten Rettungscode herunterladen. Verwende auf deinem Handy und Computer denselben Spielernamen, um dieselbe Fabrik zu öffnen.
@@ -23,7 +32,7 @@ Für die einmalige Konfiguration:
 3. Den öffentlichen Schlüssel als `projects/Factory-League/backup-public.pem` versionieren. Den privaten Schlüssel ausschließlich bei dir sicher aufbewahren, außerhalb des Repositories.
 4. Unter **Actions → Factory League – encrypted backup → Run workflow** eine erste Sicherung starten. Ein erfolgreicher Lauf bietet ein verschlüsseltes Backup als Artefakt zum Download.
 
-Die Einrichtung wird bei der automatischen Veröffentlichung vorgenommen, soweit die verbundenen Zugänge dies erlauben. Fehlt eine Einstellung, schlägt der Sicherungslauf mit einer konkreten Meldung fehl; er veröffentlicht keine unverschlüsselte Datenbank.
+Der verbundene GitHub-Zugang darf keine Actions-Secrets setzen (`HTTP 403`). Deshalb musst du das Geheimnis einmal selbst in GitHub hinterlegen. Kopiere den Wert direkt von Render nach GitHub; sende ihn nicht in den Chat. Solange die URL nicht gesetzt ist, bleibt der Sicherungsjob deaktiviert. Ist die URL gesetzt, aber ein Geheimnis fehlt oder ungültig, schlägt der Lauf mit einer konkreten Meldung fehl. Er veröffentlicht keine unverschlüsselte Datenbank.
 
 Ein Schlüsselpaar kannst du bei Bedarf selbst erzeugen:
 
@@ -59,6 +68,18 @@ Der Befehl prüft die SQLite-Integrität und entfernt alle gespeicherten Sitzung
 3. `/health`, Anmeldung, Fabrik und Rangliste prüfen. Die vorherige Datei bleibt erhalten.
 
 Verwende für SQLite keine ungeprüfte Wiederherstellung eines Dateisystem-Snapshots. Die Sicherungen dieser Anwendung entstehen über die SQLite-Backup-Funktion und werden vor dem Einsatz geprüft.
+
+## AppShelf und patrice-lab freischalten
+
+Der vorbereitete AppShelf-Eintrag liegt unter `apps/inbox/factory-league`. Er bleibt als `draft` zurückgehalten, bis ein funktionierender Spielserver erreichbar ist. Nach erfolgreichem Deploy dessen tatsächliche HTTPS-Adresse als `webUrl` in `app.json` eintragen, `status` auf `published` setzen und die Hinweise zum ausstehenden Onlinebetrieb aktualisieren. Die Katalogprüfung unterstützt extern gehostete Browser-Spiele.
+
+Die Portfolio-Karte, echte Vorschauaufnahme, Filter und Terminal-Eintrag sind im Portfolio-Entwurf vorbereitet. Erst nach Veröffentlichung des AppShelf-Eintrags freigeben und den Status auf öffentlich ändern. So entstehen keine Links auf ein noch nicht verfügbares Spiel.
+
+## Geprüfter Stand
+
+17 Server- und Spieltests sowie sechs Browserprüfungen für Desktop und Handy bestehen lokal und in GitHub Actions. Anmeldung, mehrere getrennte Spieler, gemeinsame Rangliste, Offline-Obergrenze und Passwortrettung sind geprüft. Zusätzlich wurde eine Sicherung über einen lokalen HTTPS-Endpunkt abgerufen, verschlüsselt, entschlüsselt und in eine neue SQLite-Datei wiederhergestellt. Produktionsstand und Account blieben erhalten, alte Sitzungen wurden entfernt.
+
+Ein laufender Render-Spielserver und tägliche Backups sind damit noch nicht bestätigt: Dafür fehlen die Zahlungsfreigabe und die oben genannten GitHub-Einstellungen. Physische Handyprüfungen wurden nicht durchgeführt.
 
 ## Updates und Fehlersuche
 

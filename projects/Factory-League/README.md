@@ -2,6 +2,8 @@
 
 Eine deutschsprachige Fabrik-Liga mit echten Accounts, dauerhaften Spielständen, bis zu 24 Stunden Offline-Produktion und einer gemeinsamen, serverseitig berechneten Rangliste.
 
+**Veröffentlichungsstand:** Implementierung und GitHub-Prüfungen sind bereit. Der Render-Blueprint „Factory League“ ist angelegt; Render blockiert den ersten Plan mit `need_payment_info`. Der öffentliche Spielserver ist daher noch nicht verfügbar. AppShelf und Portfolio bleiben bis zur Serverfreigabe als Entwurf vorbereitet. Die konkreten Einrichtungsschritte stehen in [BETRIEB.md](BETRIEB.md).
+
 **Anmeldung: Spielername und Passwort, ohne Firebase und ohne E-Mail-Dienst.** Bei der Registrierung erhält jeder Spieler einen einmaligen Rettungscode. Passwörter werden mit Argon2id gehasht. Sitzungscookies sind HttpOnly, SameSite=Lax und im öffentlichen HTTPS-Betrieb Secure. In der Datenbank liegen ausschließlich Hashes der Sitzungstokens und Rettungscodes.
 
 ## Für Spieler

@@ -1,0 +1,29 @@
+{
+  "name": "Factory League",
+  "slug": "factory-league",
+  "projectType": "game",
+  "version": "1.0.0",
+  "description": "Baue eine dauerhafte Fabrik mit drei Produktionslinien. Verbessere Engpässe, verdiene bis zu 24 Stunden offline weiter und vergleiche deine gesamte Produktion auf einer gemeinsamen Rangliste. Anmeldung mit Spielername, Passwort und persönlichem Rettungscode.",
+  "cardDescription": "Fabriken ausbauen und um Rangplätze kämpfen. Quellcode bereit; Onlinefreigabe steht aus.",
+  "category": "Spiele",
+  "tags": [
+    "Fabrik",
+    "Aufbau",
+    "Leaderboard"
+  ],
+  "platform": [
+    "Web"
+  ],
+  "techStack": [
+    "TypeScript",
+    "React",
+    "Node.js",
+    "SQLite"
+  ],
+  "status": "draft",
+  "updatedAt": "2026-11-15",
+  "githubUrl": "https://github.com/der-programmer1/AppShelf",
+  "preview": "01-fabrik.png",
+  "notes": "Der Quellcode und die Vorschau sind veröffentlicht. Das Online-Spiel wartet auf die Zahlungsfreigabe des Render-Hostings. Bis dahin gibt es hier keinen Spielen-Link. Die Aufnahmen zeigen die gekennzeichnete Fabrik-Vorschau, keine erfundenen Spieler oder Ranglisten.",
+  "webDescription": "Für Desktop und Handy. Persönlicher Spielstand auf dem Server; Internetzugang erforderlich. Kein Firebase und keine E-Mail-Anmeldung."
+}

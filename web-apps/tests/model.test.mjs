@@ -309,7 +309,7 @@ test("Published apps have local offline clients or explicit HTTPS web entry poin
     if (manifest.status !== "published") continue;
     if (manifest.webUrl !== undefined) {
       const { publicWebUrl } = await import("../../scripts/web-url.mjs");
-      assert.equal(manifest.projectType, "web-app");
+      assert.ok(["web-app", "game", "tool"].includes(manifest.projectType), "An external browser entry belongs to a web app, game or tool");
       assert.equal(new URL(publicWebUrl(manifest, slug)).protocol, "https:");
       assert.equal(manifest.demoDir, undefined);
       continue;

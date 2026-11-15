@@ -12,7 +12,7 @@ for(const[table,keys]of Object.entries(columns)){
   if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).length!==keys.length||keys.some(key=>!(key in row)))throw new Error('Invalid row schema: '+table);
   for(const key of keys){const value=row[key];if(integers.has(key)){if(!Number.isSafeInteger(value)||value<0)throw new Error('Invalid integer: '+key);}else if(typeof value!=='string'||value.length>65536)throw new Error('Invalid text: '+key);if(decimals.has(key)&&!/^\d{1,100}$/.test(value))throw new Error('Invalid credit value.');}
   const id=table==='actions'?row.player_id+':'+row.request_id:row.id;if(ids[table].has(id))throw new Error('Duplicate record.');ids[table].add(id);
-  if(table==='accounts'&&(!/^[A-Za-z0-9_]{3,20}$/.test(row.name)||row.name_key!==row.name.toLowerCase()||!/^pbkdf2-sha256\$600000\$[a-f0-9]{32}\$[a-f0-9]{64}$/.test(row.password_hash)||!/^[a-f0-9]{64}$/.test(row.recovery_hash)||row.auth_version<1))throw new Error('Invalid account.');
+  if(table==='accounts'&&(!/^[A-Za-z0-9_]{3,20}$/.test(row.name)||row.name_key!==row.name.toLowerCase()||!/^pbkdf2-sha256-peppered\$100000\$[a-f0-9]{32}\$[a-f0-9]{64}$/.test(row.password_hash)||!/^[a-f0-9]{64}$/.test(row.recovery_hash)||row.auth_version<1))throw new Error('Invalid account.');
   if(table==='players'){
    if(!ids.accounts.has(row.auth_uid)||row.revision<1)throw new Error('Invalid player reference.');
    const levels=JSON.parse(row.levels_json);if(!levels||Object.keys(levels).sort().join(',')!=='electronics,metal,robotics')throw new Error('Invalid factory.');

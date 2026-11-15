@@ -1,4 +1,4 @@
-export const VERSION = "1.1.0";
+export const VERSION = "1.1.1";
 export const ECONOMY_VERSION = 1;
 export const OFFLINE_CAP_MS = 24 * 60 * 60 * 1000;
 export const MAX_LEVEL = 100;

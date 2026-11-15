@@ -11,7 +11,7 @@ test('D1 accounts store only password/recovery/session hashes and use secure coo
   const r=await testRuntime();try{
     const registered=await r.call('/api/auth/register',{name:'Patrice',password});assert.equal(registered.status,200);assert.match(registered.body.recoveryCode,/^FL-/);assert.equal(registered.body.token,undefined);
     const cookie=registered.response.headers.get('set-cookie')!;assert.match(cookie,/__Host-fl_session=/);for(const flag of ['HttpOnly','Secure','SameSite=Lax','Path=/'])assert.ok(cookie.includes(flag));
-    const account=await r.db.prepare('SELECT * FROM accounts').first<any>();assert.match(account.password_hash,/^pbkdf2-sha256\$600000\$/);assert.ok(!JSON.stringify(account).includes(password));assert.ok(!JSON.stringify(account).includes(registered.body.recoveryCode));
+    const account=await r.db.prepare('SELECT * FROM accounts').first<any>();assert.match(account.password_hash,/^pbkdf2-sha256-peppered\$100000\$/);assert.ok(!JSON.stringify(account).includes(password));assert.ok(!JSON.stringify(account).includes(registered.body.recoveryCode));
     const session=await r.db.prepare('SELECT token_hash FROM sessions').first<any>();assert.notEqual(session.token_hash,registered.cookie?.split('=')[1]);
     assert.equal((await r.call('/api/auth/login',{name:'pAtRiCe',password})).status,200);assert.equal((await r.call('/api/auth/register',{name:'patrice',password})).status,409);
     assert.equal((await r.call('/api/auth/login',{name:'Patrice',password:'wrong'})).status,401);

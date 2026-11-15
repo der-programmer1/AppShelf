@@ -12,7 +12,7 @@ Die Oberfläche ist die bestehende React-Anwendung. Die serverseitigen Spielrege
 
 Spielername und Passwort genügen. Bei der Registrierung erscheint ein persönlicher Rettungscode. Speichere ihn, um bei vergessenem Passwort wieder an deine Fabrik zu kommen. Nach einer Passwortrettung werden der Code und alle früheren Sitzungen ungültig; der Spielstand bleibt erhalten.
 
-Passwörter werden serverseitig mit PBKDF2-SHA-256, 600.000 Durchläufen und individuellem Zufallssalz gehasht. Rettungscodes und Sitzungstokens liegen ebenfalls nur als Hashes vor. HTTPS-Sitzungscookies sind HttpOnly, Secure und SameSite=Lax. Öffentliche Profile enthalten keine Accountkennungen, Geheimnisse oder privaten Creditkontostände.
+Passwörter werden serverseitig mit PBKDF2-SHA-256, 100.000 Durchläufen und einem zusätzlichen geheimen Serverschlüssel und individuellem Zufallssalz gehasht. Rettungscodes und Sitzungstokens liegen ebenfalls nur als Hashes vor. HTTPS-Sitzungscookies sind HttpOnly, Secure und SameSite=Lax. Öffentliche Profile enthalten keine Accountkennungen, Geheimnisse oder privaten Creditkontostände.
 
 ## Entwicklung und Prüfungen
 

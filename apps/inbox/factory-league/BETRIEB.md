@@ -49,3 +49,7 @@ Die Befehle überschreiben keine vorhandene Zieldatei. Der SQL-Export enthält S
 ## Gestaltung und Daten
 
 Fabrik und Maschinen sind eigene SVG-Zeichnungen. Lokale Schriften: Space Grotesk und IBM Plex Mono mit beigefügten OFL-Lizenzen. Die Vorschau vor der Anmeldung ist als solche gekennzeichnet. Die Rangliste zeigt ausschließlich tatsächliche Accounts. Keine Werbung, Analyse-Tracker, Zahlungsfunktionen oder erfundenen Spieler.
+
+## Passwortschutz ab Version 1.1.1
+
+`PASSWORD_PEPPER` ist ein dauerhaftes Sites-Runtime-Secret mit mindestens 32 zufälligen Zeichen. Es schützt Passwörter vor der PBKDF2-Berechnung durch HMAC-SHA-256. Der Hosting-Server unterstützt maximal 100.000 PBKDF2-Durchläufe; die lokale Laufzeit bildet diese Grenze nicht ab. Den Schlüssel bei Updates beibehalten und für eine Wiederherstellung vertraulich sichern. Ein Verlust verhindert die Passwortprüfung; mit dem persönlichen Rettungscode lässt sich ein neues Passwort setzen. Der Schlüssel gehört niemals in Quellcode, Datenbank oder Chat.

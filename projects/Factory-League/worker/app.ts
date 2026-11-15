@@ -4,7 +4,7 @@ import {AccountStore} from './accounts';
 import {VERSION,type GameAction} from '../shared/game';
 
 export type Assets=Record<string,{body:string;type:string}>;
-export type Env={DB:D1Database;BACKUP_TOKEN?:string};
+export type Env={DB:D1Database;PASSWORD_PEPPER:string;BACKUP_TOKEN?:string};
 type Options={now?:()=>number;secureCookies?:boolean;assets?:Assets};
 const badInput=()=>new GameError('invalid_request','Bitte überprüfe deine Eingabe.');
 function fields(body:Record<string,unknown>,allowed:string[],required=allowed){if(Object.keys(body).some(key=>!allowed.includes(key))||required.some(key=>!(key in body)))throw badInput();}
@@ -46,7 +46,7 @@ export function createWorker(options:Options={}){
     if(['POST','PUT','DELETE','PATCH'].includes(request.method)){
       if(request.headers.get('sec-fetch-site')==='cross-site'||(request.headers.has('origin')&&request.headers.get('origin')!==url.origin))throw new GameError('invalid_origin','Diese Anfrage stammt nicht von Factory League.',403);
     }
-    const game=new GameStore(env.DB),accounts=new AccountStore(env.DB,game),token=tokenOf(request);
+    const game=new GameStore(env.DB),accounts=new AccountStore(env.DB,game,env.PASSWORD_PEPPER),token=tokenOf(request);
     if(request.method==='GET'){
       if(path==='/api/config')return json({version:VERSION,authentication:'username-password',storage:'D1'});
       if(path==='/api/auth/session')return json({user:await accounts.session(token,time)});

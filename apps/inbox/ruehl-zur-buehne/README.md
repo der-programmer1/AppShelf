@@ -10,6 +10,12 @@ Messehalle und Backstage bis zur Wettkampfbühne. Proteinshakes liefern Pump,
 Kraftaktionen zerlegen Kisten und schieben Cardio-Bots aus dem Weg. Für die
 Siegerpose auf der letzten Bühne brauchst du 100 Pump.
 
+Version 1.1 bringt neue, anhand von Fotoreferenzen erstellte Rühl-Sprites mit kurzem
+hellem Haar, schwarzem Stringer und roten Shorts. Die Sammelobjekte sind deutlich
+erkennbare WHEY-Shaker mit Klappdeckel und cremiger Füllung. Nach jedem Level folgt
+eine animierte Bankdrück-Sequenz: drei Wiederholungen mit 100, 140 oder 180 kg im
+Spiel. Die Hände folgen der beweglichen Hantel; Pause und Überspringen sind möglich.
+
 ## Steuerung
 
 - **Laufen:** A/D oder Pfeiltasten; auf dem Handy LINKS/RECHTS halten.
